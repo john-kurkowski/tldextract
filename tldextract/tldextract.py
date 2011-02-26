@@ -21,6 +21,7 @@ according to [iana.org](http://www.iana.org).
     ('forums', 'bbc', 'co.uk')
 """
 
+from __future__ import with_statement
 import codecs
 import logging
 import os
@@ -39,6 +40,9 @@ EXTRACT_TLD_RE = None
 
 def _extract_domain_tld(url):
     netloc = lreplace(url, "http://", "").partition("/")[0]
+    is_local_host = netloc and '.' not in netloc
+    if is_local_host:
+        return (netloc, '')
     
     global EXTRACT_TLD_RE
     if not EXTRACT_TLD_RE:
@@ -47,7 +51,7 @@ def _extract_domain_tld(url):
     m = EXTRACT_TLD_RE.match(netloc)
     if m:
         return m.group('registered_domain'), m.group('tld')
-    elif netloc[0].isdigit():
+    elif netloc and netloc[0].isdigit():
         try:
             is_ip = socket.inet_aton(netloc)
             return (netloc, '')
@@ -71,7 +75,7 @@ def extract(url):
     domain, tld = _extract_domain_tld(url)
     is_ip = not tld
     if is_ip:
-        return ('', domain)
+        return dict(subdomain='', domain=domain, tld='')
 
     subdomain, _, domain = domain.rpartition('.')
     return dict(subdomain=subdomain, domain=domain, tld=tld)
@@ -176,6 +180,21 @@ if __name__ == "__main__":
             self.assertEquals("media.forums", subdomain)
             self.assertEquals("theregister", domain)
             self.assertEquals("co.uk", tld)
+
+        def test_local_host(self):
+            url = "http://wiki/"
+            ext = extract(url)
+            self.assertFalse(ext['subdomain'])
+            self.assertEquals('wiki', ext['domain'])
+            self.assertFalse(ext['tld'])
+
+        def test_ip(self):
+            url = "http://216.22.0.192/"
+            ext = extract(url)
+            subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
+            self.assertFalse(subdomain)
+            self.assertEquals('216.22.0.192', domain)
+            self.assertFalse(tld)
 
     doctest.testmod()
     unittest.main()

@@ -1,2 +1,4 @@
 *.pyc
 *.tld_regex
+tldextract_app/tldextract
+tldextract_app/web

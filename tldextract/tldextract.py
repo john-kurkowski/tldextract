@@ -45,8 +45,7 @@ def _extract_domain_tld(url):
         return (netloc, '')
     
     global EXTRACT_TLD_RE
-    if not EXTRACT_TLD_RE:
-        EXTRACT_TLD_RE = _build_extract_tld_re()
+    EXTRACT_TLD_RE = EXTRACT_TLD_RE or _build_extract_tld_re()
         
     m = EXTRACT_TLD_RE.match(netloc)
     if m:
@@ -73,8 +72,7 @@ def extract(url):
     ('forums', 'bbc', 'co.uk')
     """
     domain, tld = _extract_domain_tld(url)
-    is_ip = not tld
-    if is_ip:
+    if not tld:
         return dict(subdomain='', domain=domain, tld='')
 
     subdomain, _, domain = domain.rpartition('.')
@@ -97,12 +95,9 @@ def _build_extract_tld_re():
     ccTLDs = []
     gTLDs = []
     tld_finder = re.compile('<tr class="[^"]*iana-type-(?P<iana_type>\d+).*?<a.*?>\.(?P<tld>\S+?)</a>', re.UNICODE | re.DOTALL)
-    for m in tld_finder.finditer(page):
-        tld = m.group('tld').lower()
-        if m.group('iana_type') == "1":
-            ccTLDs.append(tld)
-        else:
-            gTLDs.append(tld)
+    tlds = [(m, m.group('tld').lower()) for m in tld_finder.finditer(page)]
+    ccTLDs = [tld for m, tld in tlds if m.group('iana_type') == "1"]
+    gTLDs = [tld for m, tld in tlds if m.group('iana_type') != "1"]
         
     special = ("co", "org", "ac")
     ccTLDs.sort(key=lambda tld: tld in special)

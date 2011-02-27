@@ -32,32 +32,7 @@ from urllib2 import urlopen
 LOG = logging.getLogger(__file__)
 
 def lreplace(subject, old, new):
-    if not subject.startswith(old):
-        return subject
-    return subject[len(old):] + new
-
-EXTRACT_TLD_RE = None
-
-def _extract_domain_tld(url):
-    netloc = lreplace(url, "http://", "").partition("/")[0]
-    is_local_host = netloc and '.' not in netloc
-    if is_local_host:
-        return (netloc, '')
-    
-    global EXTRACT_TLD_RE
-    EXTRACT_TLD_RE = EXTRACT_TLD_RE or _build_extract_tld_re()
-        
-    m = EXTRACT_TLD_RE.match(netloc)
-    if m:
-        return m.group('registered_domain'), m.group('tld')
-    elif netloc and netloc[0].isdigit():
-        try:
-            is_ip = socket.inet_aton(netloc)
-            return (netloc, '')
-        except socket.error:
-            pass
-            
-    raise ValueError("Cannot extract TLD, malformed url: " + netloc)
+    return subject[len(old):] + new if subject.startswith(old) else subject
 
 def extract(url):
     """
@@ -71,33 +46,43 @@ def extract(url):
     >>> ext['subdomain'], ext['domain'], ext['tld']
     ('forums', 'bbc', 'co.uk')
     """
-    domain, tld = _extract_domain_tld(url)
-    if not tld:
-        return dict(subdomain='', domain=domain, tld='')
+    netloc = lreplace(url, "http://", "").partition("/")[0]
+    registered_domain, tld = netloc, ''
+    m = _get_extract_tld_re().match(netloc)
+    if m:
+        registered_domain, tld = m.group('registered_domain'), m.group('tld')
+    elif netloc and netloc[0].isdigit():
+        try:
+            is_ip = socket.inet_aton(netloc)
+            return dict(subdomain='', domain=netloc, tld='')
+        except socket.error:
+            pass
 
-    subdomain, _, domain = domain.rpartition('.')
+    subdomain, _, domain = registered_domain.rpartition('.')
     return dict(subdomain=subdomain, domain=domain, tld=tld)
 
-def _build_extract_tld_re():
+EXTRACT_TLD_RE = None
+
+def _get_extract_tld_re():
     global EXTRACT_TLD_RE
+    if EXTRACT_TLD_RE:
+        return EXTRACT_TLD_RE
 
     regex_file = os.path.join(os.path.dirname(__file__), '.tld_regex')
     try:
-        with open(regex_file) as f:
+        with codecs.open(regex_file, encoding='utf-8') as f:
             regex = f.read().strip()
             EXTRACT_TLD_RE = re.compile(regex)
             return EXTRACT_TLD_RE
-    except IOError:
+    except IOError, file_not_found:
         pass
     
     page = unicode(urlopen('http://www.iana.org/domains/root/db/').read(), 'utf-8')
     
-    ccTLDs = []
-    gTLDs = []
     tld_finder = re.compile('<tr class="[^"]*iana-type-(?P<iana_type>\d+).*?<a.*?>\.(?P<tld>\S+?)</a>', re.UNICODE | re.DOTALL)
-    tlds = [(m, m.group('tld').lower()) for m in tld_finder.finditer(page)]
-    ccTLDs = [tld for m, tld in tlds if m.group('iana_type') == "1"]
-    gTLDs = [tld for m, tld in tlds if m.group('iana_type') != "1"]
+    tlds = [(m.group('tld').lower(), m.group('iana_type')) for m in tld_finder.finditer(page)]
+    ccTLDs = [tld for tld, iana_type in tlds if iana_type == "1"]
+    gTLDs = [tld for tld, iana_type in tlds if iana_type != "1"]
         
     special = ("co", "org", "ac")
     ccTLDs.sort(key=lambda tld: tld in special)
@@ -125,70 +110,68 @@ if __name__ == "__main__":
 
     class ExtractTest(TestCase):
         def test_american(self):
-            url = "http://www.google.com"
-
-            domain, tld = _extract_domain_tld(url)
-            self.assertEquals('www.google', domain)
-            self.assertEquals('com', tld)
-
-            ext = extract(url)
+            ext = extract("http://www.google.com")
             subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
             self.assertEquals("www", subdomain)
             self.assertEquals("google", domain)
             self.assertEquals("com", tld)
             
         def test_british(self):
-            url = "http://www.theregister.co.uk"
-
-            domain, tld = _extract_domain_tld(url)
-            self.assertEquals('www.theregister', domain)
-            self.assertEquals('co.uk', tld)
-
-            ext = extract(url)
+            ext = extract("http://www.theregister.co.uk")
             subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
             self.assertEquals("www", subdomain)
             self.assertEquals("theregister", domain)
             self.assertEquals("co.uk", tld)
             
         def test_no_subdomain(self):
-            url = "http://gmail.com"
-
-            domain, tld = _extract_domain_tld(url)
-            self.assertEquals('gmail', domain)
-            self.assertEquals('com', tld)
-
-            ext = extract(url)
+            ext = extract("http://gmail.com")
             subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
             self.assertEquals("", subdomain)
             self.assertEquals("gmail", domain)
             self.assertEquals("com", tld)
             
         def test_nested_subdomain(self):
-            url = "http://media.forums.theregister.co.uk"
-
-            domain, tld = _extract_domain_tld(url)
-            self.assertEquals('media.forums.theregister', domain)
-            self.assertEquals('co.uk', tld)
-
-            ext = extract(url)
+            ext = extract("http://media.forums.theregister.co.uk")
             subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
             self.assertEquals("media.forums", subdomain)
             self.assertEquals("theregister", domain)
             self.assertEquals("co.uk", tld)
 
         def test_local_host(self):
-            url = "http://wiki/"
-            ext = extract(url)
+            ext = extract("http://wiki/")
             self.assertFalse(ext['subdomain'])
             self.assertEquals('wiki', ext['domain'])
             self.assertFalse(ext['tld'])
 
+        def test_qualified_local_host(self):
+            ext = extract("http://wiki.info/")
+            self.assertFalse(ext['subdomain'])
+            self.assertEquals('wiki', ext['domain'])
+            self.assertEquals('info', ext['tld'])
+
+            ext = extract("http://wiki.information/")
+            self.assertEquals('wiki', ext['subdomain'])
+            self.assertEquals('information', ext['domain'])
+            self.assertFalse(ext['tld'])
+
         def test_ip(self):
-            url = "http://216.22.0.192/"
-            ext = extract(url)
+            ext = extract("http://216.22.0.192/")
             subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
             self.assertFalse(subdomain)
             self.assertEquals('216.22.0.192', domain)
+            self.assertFalse(tld)
+
+            ext = extract("http://216.22.project.coop/")
+            subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
+            self.assertEquals('216.22', subdomain)
+            self.assertEquals('project', domain)
+            self.assertEquals('coop', tld)
+
+        def test_empty(self):
+            ext = extract("http://")
+            subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
+            self.assertFalse(subdomain)
+            self.assertFalse(domain)
             self.assertFalse(tld)
 
     doctest.testmod()

@@ -23,12 +23,16 @@ according to [iana.org](http://www.iana.org).
 This module is based on the chosen answer from [this StackOverflow question on
 the matter](http://stackoverflow.com/questions/569137/how-to-get-domain-name-from-url/569219#569219).
 
+## Installation
+
+    $ pip install tldextract
+
 # Public API
 
 I know it's just one method, but I've needed this functionality in a few
 projects and programming languages, so I've uploaded
-[`tldextract` to App Engine](http://tldextract.appspot.com/). Just pass in the
-URL you want parsed like so:
+[`tldextract` to App Engine](http://tldextract.appspot.com/). Just hit it with
+your favorite HTTP client with the URL you want parsed like so:
 
     $ curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar/baz.html"
     {"domain": "bbc", "subdomain": "www", "tld": "co.uk"}

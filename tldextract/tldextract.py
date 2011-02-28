@@ -109,70 +109,37 @@ if __name__ == "__main__":
     from unittest import TestCase
 
     class ExtractTest(TestCase):
+        def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url):
+            ext = extract(url)
+            self.assertEquals(expected_subdomain, ext['subdomain'])
+            self.assertEquals(expected_domain, ext['domain'])
+            self.assertEquals(expected_tld, ext['tld'])
+            
         def test_american(self):
-            ext = extract("http://www.google.com")
-            subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
-            self.assertEquals("www", subdomain)
-            self.assertEquals("google", domain)
-            self.assertEquals("com", tld)
+            self.assertExtract('www', 'google', 'com', 'http://www.google.com')
             
         def test_british(self):
-            ext = extract("http://www.theregister.co.uk")
-            subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
-            self.assertEquals("www", subdomain)
-            self.assertEquals("theregister", domain)
-            self.assertEquals("co.uk", tld)
+            self.assertExtract("www", "theregister", "co.uk", "http://www.theregister.co.uk")
             
         def test_no_subdomain(self):
-            ext = extract("http://gmail.com")
-            subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
-            self.assertEquals("", subdomain)
-            self.assertEquals("gmail", domain)
-            self.assertEquals("com", tld)
+            self.assertExtract("", "gmail", "com", "http://gmail.com")
             
         def test_nested_subdomain(self):
-            ext = extract("http://media.forums.theregister.co.uk")
-            subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
-            self.assertEquals("media.forums", subdomain)
-            self.assertEquals("theregister", domain)
-            self.assertEquals("co.uk", tld)
+            self.assertExtract("media.forums", "theregister", "co.uk", "http://media.forums.theregister.co.uk")
 
         def test_local_host(self):
-            ext = extract("http://wiki/")
-            self.assertFalse(ext['subdomain'])
-            self.assertEquals('wiki', ext['domain'])
-            self.assertFalse(ext['tld'])
+            self.assertExtract('', 'wiki', '', 'http://wiki/')
 
         def test_qualified_local_host(self):
-            ext = extract("http://wiki.info/")
-            self.assertFalse(ext['subdomain'])
-            self.assertEquals('wiki', ext['domain'])
-            self.assertEquals('info', ext['tld'])
-
-            ext = extract("http://wiki.information/")
-            self.assertEquals('wiki', ext['subdomain'])
-            self.assertEquals('information', ext['domain'])
-            self.assertFalse(ext['tld'])
+            self.assertExtract('', 'wiki', 'info', 'http://wiki.info/')
+            self.assertExtract('wiki', 'information', '', 'http://wiki.information/')
 
         def test_ip(self):
-            ext = extract("http://216.22.0.192/")
-            subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
-            self.assertFalse(subdomain)
-            self.assertEquals('216.22.0.192', domain)
-            self.assertFalse(tld)
-
-            ext = extract("http://216.22.project.coop/")
-            subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
-            self.assertEquals('216.22', subdomain)
-            self.assertEquals('project', domain)
-            self.assertEquals('coop', tld)
+            self.assertExtract('', '216.22.0.192', '', 'http://216.22.0.192/')
+            self.assertExtract('216.22', 'project', 'coop', 'http://216.22.project.coop/')
 
         def test_empty(self):
-            ext = extract("http://")
-            subdomain, domain, tld = ext['subdomain'], ext['domain'], ext['tld']
-            self.assertFalse(subdomain)
-            self.assertFalse(domain)
-            self.assertFalse(tld)
+            self.assertExtract('', '', '', 'http://')
 
     doctest.testmod()
     unittest.main()

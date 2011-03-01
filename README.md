@@ -13,12 +13,10 @@ a URL, because it looks up--and caches locally--the currently living TLDs
 according to [iana.org](http://www.iana.org).
 
     >>> import tldextract
-    >>> ext = tldextract.extract('http://forums.news.cnn.com/')
-    >>> ext['subdomain'], ext['domain'], ext['tld']
-    ('forums.news', 'cnn', 'com')
-    >>> ext = tldextract.extract('http://forums.bbc.co.uk/')
-    >>> ext['subdomain'], ext['domain'], ext['tld']
-    ('forums', 'bbc', 'co.uk')
+    >>> tldextract.extract('http://forums.news.cnn.com/')
+    ExtractResult(subdomain='forums.news', domain='cnn', tld='com')
+    >>> tldextract.extract('http://forums.bbc.co.uk/')
+    ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
 
 This module is based on the chosen answer from [this StackOverflow question on
 the matter](http://stackoverflow.com/questions/569137/how-to-get-domain-name-from-url/569219#569219).

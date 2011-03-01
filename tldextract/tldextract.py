@@ -26,12 +26,14 @@ from operator import itemgetter
 import os
 import re
 import socket
+import sys
 from urllib2 import urlopen
 import urlparse
 
 LOG = logging.getLogger(__file__)
 
 SCHEME_RE = re.compile(r'^([' + urlparse.scheme_chars + ']+:)?//')
+IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
 
 class ExtractResult(tuple):
     'ExtractResult(subdomain, domain, tld)' 
@@ -72,6 +74,9 @@ def extract(url):
         try:
             is_ip = socket.inet_aton(netloc)
             return ExtractResult('', netloc, '')
+        except AttributeError:
+            if IP_RE.match(netloc):
+                return ExtractResult('', netloc, '')
         except socket.error:
             pass
 

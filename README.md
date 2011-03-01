@@ -25,7 +25,13 @@ the matter](http://stackoverflow.com/questions/569137/how-to-get-domain-name-fro
 
 ## Installation
 
-    $ pip install tldextract
+Latest release on PyPI:
+
+    $ pip install tldextract 
+
+Or the latest dev version:
+
+    $ pip install -e git://github.com/john-kurkowski/tldextract.git#egg=tldextract
 
 # Public API
 

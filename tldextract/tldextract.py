@@ -31,8 +31,7 @@ from urllib2 import urlopen
 
 LOG = logging.getLogger(__file__)
 
-def lreplace(subject, old, new):
-    return subject[len(old):] + new if subject.startswith(old) else subject
+SCHEME_RE = re.compile(r'^(\w+:)?//')
 
 def extract(url):
     """
@@ -46,7 +45,7 @@ def extract(url):
     >>> ext['subdomain'], ext['domain'], ext['tld']
     ('forums', 'bbc', 'co.uk')
     """
-    netloc = lreplace(url, "http://", "").partition("/")[0]
+    netloc = SCHEME_RE.sub("", url).partition("/")[0]
     registered_domain, tld = netloc, ''
     m = _get_extract_tld_re().match(netloc)
     if m:
@@ -140,6 +139,12 @@ if __name__ == "__main__":
 
         def test_empty(self):
             self.assertExtract('', '', '', 'http://')
+
+        def test_scheme(self):
+            self.assertExtract('mail', 'google', 'com', 'https://mail.google.com/mail')
+            self.assertExtract('mail', 'google', 'com', 'ssh://mail.google.com/mail')
+            self.assertExtract('mail', 'google', 'com', '//mail.google.com/mail')
+            self.assertExtract('mail', 'google', 'com', 'mail.google.com/mail')
 
     doctest.testmod()
     unittest.main()

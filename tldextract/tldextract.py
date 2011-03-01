@@ -28,10 +28,11 @@ import os
 import re
 import socket
 from urllib2 import urlopen
+import urlparse
 
 LOG = logging.getLogger(__file__)
 
-SCHEME_RE = re.compile(r'^(\w+:)?//')
+SCHEME_RE = re.compile(r'^([' + urlparse.scheme_chars + ']+:)?//')
 
 def extract(url):
     """
@@ -45,7 +46,7 @@ def extract(url):
     >>> ext['subdomain'], ext['domain'], ext['tld']
     ('forums', 'bbc', 'co.uk')
     """
-    netloc = SCHEME_RE.sub("", url).partition("/")[0]
+    netloc = SCHEME_RE.sub("", url).partition("/")[0].split("@")[-1].partition(':')[0]
     registered_domain, tld = netloc, ''
     m = _get_extract_tld_re().match(netloc)
     if m:
@@ -145,6 +146,12 @@ if __name__ == "__main__":
             self.assertExtract('mail', 'google', 'com', 'ssh://mail.google.com/mail')
             self.assertExtract('mail', 'google', 'com', '//mail.google.com/mail')
             self.assertExtract('mail', 'google', 'com', 'mail.google.com/mail')
+
+        def test_port(self):
+            self.assertExtract('www', 'github', 'com', 'git+ssh://www.github.com:8443/')
+
+        def test_username(self):
+            self.assertExtract('1337', 'warez', 'com', 'ftp://johndoe:5cr1p7k1dd13@1337.warez.com:2501')
 
     doctest.testmod()
     unittest.main()

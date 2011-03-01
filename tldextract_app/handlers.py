@@ -1,3 +1,4 @@
+from cStringIO import StringIO
 import tldextract
 import web
 
@@ -8,6 +9,7 @@ except ImportError:
 
 urls = (
         '/api/extract', 'Extract',
+        '/test', 'Test',
     )
 
 class Extract:
@@ -19,6 +21,12 @@ class Extract:
         ext = tldextract.extract(url)._asdict()
         web.header('Content-Type', 'application/json')
         return json.dumps(ext) + '\n'
+
+class Test:
+    def GET(self):
+        stream = StringIO()
+        tldextract.tldextract.run_tests(stream)
+        return stream.getvalue()
 
 app = web.application(urls, globals())
 main = app.cgirun()

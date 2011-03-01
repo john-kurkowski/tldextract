@@ -27,5 +27,6 @@ setup(
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
     ],
+    test_suite = 'tldextract.tldextract.test_suite',
 )
 

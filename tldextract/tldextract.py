@@ -125,12 +125,11 @@ def _get_extract_tld_re():
     EXTRACT_TLD_RE = re.compile(regex)
     return EXTRACT_TLD_RE
 
-if __name__ == "__main__":
+def test_suite():
     import doctest
     import unittest
-    from unittest import TestCase
 
-    class ExtractTest(TestCase):
+    class ExtractTest(unittest.TestCase):
         def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url):
             ext = extract(url)
             self.assertEquals(expected_subdomain, ext.subdomain)
@@ -175,6 +174,16 @@ if __name__ == "__main__":
         def test_username(self):
             self.assertExtract('1337', 'warez', 'com', 'ftp://johndoe:5cr1p7k1dd13@1337.warez.com:2501')
 
-    doctest.testmod()
-    unittest.main()
+    return unittest.TestSuite([
+        doctest.DocTestSuite(__name__),
+        unittest.TestLoader().loadTestsFromTestCase(ExtractTest),
+    ])
+
+def run_tests(stream=sys.stderr):
+    import unittest
+    suite = test_suite()
+    unittest.TextTestRunner(stream).run(suite)
+
+if __name__ == "__main__":
+    run_tests()
 

@@ -13,17 +13,16 @@ a URL, because it looks up--and caches locally--the currently living TLDs
 according to [iana.org](http://www.iana.org).
 
     >>> import tldextract
-    >>> ext = tldextract.extract('http://forums.news.cnn.com/')
-    >>> ext['subdomain'], ext['domain'], ext['tld']
-    ('forums.news', 'cnn', 'com')
-    >>> ext = tldextract.extract('http://forums.bbc.co.uk/')
-    >>> ext['subdomain'], ext['domain'], ext['tld']
-    ('forums', 'bbc', 'co.uk')
+    >>> tldextract.extract('http://forums.news.cnn.com/')
+    ExtractResult(subdomain='forums.news', domain='cnn', tld='com')
+    >>> tldextract.extract('http://forums.bbc.co.uk/')
+    ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
 """
 
 from __future__ import with_statement
 import codecs
 import logging
+from operator import itemgetter
 import os
 import re
 import socket
@@ -34,17 +33,35 @@ LOG = logging.getLogger(__file__)
 
 SCHEME_RE = re.compile(r'^([' + urlparse.scheme_chars + ']+:)?//')
 
+class ExtractResult(tuple):
+    'ExtractResult(subdomain, domain, tld)' 
+    __slots__ = () 
+    _fields = ('subdomain', 'domain', 'tld') 
+
+    def __new__(_cls, subdomain, domain, tld):
+        return tuple.__new__(_cls, (subdomain, domain, tld)) 
+
+    def __repr__(self):
+        'Return a nicely formatted representation string'
+        return 'ExtractResult(subdomain=%r, domain=%r, tld=%r)' % self 
+
+    def _asdict(self):
+        'Return a new dict which maps field names to their values'
+        return dict(zip(self._fields, self)) 
+
+    subdomain = property(itemgetter(0), doc='Alias for field number 0')
+    domain = property(itemgetter(1), doc='Alias for field number 1')
+    tld = property(itemgetter(2), doc='Alias for field number 2')
+
 def extract(url):
     """
     Takes a string URL and splits it into its subdomain, domain, and
     gTLD/ccTLD component.
 
-    >>> ext = extract('http://forums.news.cnn.com/')
-    >>> ext['subdomain'], ext['domain'], ext['tld']
-    ('forums.news', 'cnn', 'com')
-    >>> ext = extract('http://forums.bbc.co.uk/')
-    >>> ext['subdomain'], ext['domain'], ext['tld']
-    ('forums', 'bbc', 'co.uk')
+    >>> extract('http://forums.news.cnn.com/')
+    ExtractResult(subdomain='forums.news', domain='cnn', tld='com')
+    >>> extract('http://forums.bbc.co.uk/')
+    ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
     """
     netloc = SCHEME_RE.sub("", url).partition("/")[0].split("@")[-1].partition(':')[0]
     registered_domain, tld = netloc, ''
@@ -54,12 +71,12 @@ def extract(url):
     elif netloc and netloc[0].isdigit():
         try:
             is_ip = socket.inet_aton(netloc)
-            return dict(subdomain='', domain=netloc, tld='')
+            return ExtractResult('', netloc, '')
         except socket.error:
             pass
 
     subdomain, _, domain = registered_domain.rpartition('.')
-    return dict(subdomain=subdomain, domain=domain, tld=tld)
+    return ExtractResult(subdomain, domain, tld)
 
 EXTRACT_TLD_RE = None
 
@@ -111,9 +128,9 @@ if __name__ == "__main__":
     class ExtractTest(TestCase):
         def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url):
             ext = extract(url)
-            self.assertEquals(expected_subdomain, ext['subdomain'])
-            self.assertEquals(expected_domain, ext['domain'])
-            self.assertEquals(expected_tld, ext['tld'])
+            self.assertEquals(expected_subdomain, ext.subdomain)
+            self.assertEquals(expected_domain, ext.domain)
+            self.assertEquals(expected_tld, ext.tld)
             
         def test_american(self):
             self.assertExtract('www', 'google', 'com', 'http://www.google.com')

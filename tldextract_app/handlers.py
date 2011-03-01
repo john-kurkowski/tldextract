@@ -16,7 +16,7 @@ class Extract:
         if not url:
             return web.webapi.badrequest()
 
-        ext = tldextract.extract(url)
+        ext = tldextract.extract(url)._asdict()
         web.header('Content-Type', 'application/json')
         return json.dumps(ext) + '\n'
 

@@ -58,14 +58,32 @@ class ExtractResult(tuple):
 def extract(url):
     """
     Takes a string URL and splits it into its subdomain, domain, and
-    gTLD/ccTLD component.
+    gTLD/ccTLD component. Ignores scheme, username, and path components.
 
     >>> extract('http://forums.news.cnn.com/')
     ExtractResult(subdomain='forums.news', domain='cnn', tld='com')
     >>> extract('http://forums.bbc.co.uk/')
     ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
     """
-    netloc = SCHEME_RE.sub("", url).partition("/")[0].split("@")[-1].partition(':')[0]
+    netloc = SCHEME_RE.sub("", url).partition("/")[0]
+    return _extract(netloc)
+
+def urlsplit(url):
+    """Same as `extract` but calls urlparse.urlsplit to further 'validate' the
+    input URL. This function will therefore raise the same errors as 
+    urlparse.urlsplit and handle some inputs differently than extract, such as
+    URLs missing a scheme.
+
+    >>> urlsplit('http://forums.news.cnn.com/')
+    ExtractResult(subdomain='forums.news', domain='cnn', tld='com')
+    >>> urlsplit('forums.bbc.co.uk/') # urlsplit won't see a netloc
+    ExtractResult(subdomain='', domain='', tld='')
+    """
+    netloc = urlparse.urlsplit(url).netloc
+    return _extract(netloc)
+
+def _extract(netloc):
+    netloc = netloc.split("@")[-1].partition(':')[0]
     registered_domain, tld = netloc, ''
     m = _get_extract_tld_re().match(netloc)
     if m:
@@ -131,11 +149,12 @@ def test_suite():
     import unittest
 
     class ExtractTest(unittest.TestCase):
-        def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url):
-            ext = extract(url)
-            self.assertEquals(expected_subdomain, ext.subdomain)
-            self.assertEquals(expected_domain, ext.domain)
-            self.assertEquals(expected_tld, ext.tld)
+        def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url, fns=(extract, urlsplit)):
+            for fn in fns:
+              ext = fn(url)
+              self.assertEquals(expected_subdomain, ext.subdomain)
+              self.assertEquals(expected_domain, ext.domain)
+              self.assertEquals(expected_tld, ext.tld)
             
         def test_american(self):
             self.assertExtract('www', 'google', 'com', 'http://www.google.com')
@@ -167,7 +186,7 @@ def test_suite():
             self.assertExtract('mail', 'google', 'com', 'https://mail.google.com/mail')
             self.assertExtract('mail', 'google', 'com', 'ssh://mail.google.com/mail')
             self.assertExtract('mail', 'google', 'com', '//mail.google.com/mail')
-            self.assertExtract('mail', 'google', 'com', 'mail.google.com/mail')
+            self.assertExtract('mail', 'google', 'com', 'mail.google.com/mail', fns=(extract,))
 
         def test_port(self):
             self.assertExtract('www', 'github', 'com', 'git+ssh://www.github.com:8443/')

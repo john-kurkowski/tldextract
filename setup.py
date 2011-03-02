@@ -12,7 +12,7 @@ setup(
     version = tldextract.__version__,
     author = "John Kurkowski",
     author_email = "john.kurkowski@gmail.com",
-    description = ("Accurately separate the gTLD/ccTLD component from the "
+    description = ("Accurately separate the TLD from the "
         "registered domain and subdomains of a URL."),
     license = "BSD License",
     keywords = "tld domain subdomain url parse extract urlparse",

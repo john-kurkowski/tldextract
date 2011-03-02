@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
-"""
-The `tldextract` module accurately separates the gTLD and ccTLDs from the
-registered domain and subdomains of a URL. For example, you may want the
-'www.google' part of [http://www.google.com](http://www.google.com). This is
-simple to do by splitting on the '.' and using all but the last split element,
-however that will not work for URLs with arbitrary numbers of subdomains and
-country codes, unless you know what all country codes look like. Think
-[http://forums.bbc.co.uk](http://forums.bbc.co.uk) for example.
-
-`tldextract` can give you the subdomains, domain, and gTLD/ccTLD component of
-a URL, because it looks up--and caches locally--the currently living TLDs
-according to [iana.org](http://www.iana.org).
+"""The `tldextract` package accurately separates the gTLD or ccTLD (generic or
+country code top-level domain) from the registered domain and subdomains of a
+URL.
 
     >>> import tldextract
     >>> tldextract.extract('http://forums.news.cnn.com/')
     ExtractResult(subdomain='forums.news', domain='cnn', tld='com')
-    >>> tldextract.extract('http://forums.bbc.co.uk/')
+    >>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
     ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
+    >>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
+    ExtractResult(subdomain='www', domain='worldbank', tld='org.kg')
+
+`ExtractResult` is a namedtuple, so it's simple to access the parts you want.
+
+    >>> ext = tldextract.extract('http://forums.bbc.co.uk')
+    >>> ext.domain
+    'bbc'
+    >>> '.'.join(ext[:2]) # rejoin subdomain and domain
+    'forums.bbc'
 """
 
 from __future__ import with_statement

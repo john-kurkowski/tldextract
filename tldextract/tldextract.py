@@ -83,10 +83,11 @@ def extract(url):
     subdomain, _, domain = registered_domain.rpartition('.')
     return ExtractResult(subdomain, domain, tld)
 
+EXTRACT_TLD_RE_RAW = ''
 EXTRACT_TLD_RE = None
 
 def _get_extract_tld_re():
-    global EXTRACT_TLD_RE
+    global EXTRACT_TLD_RE, EXTRACT_TLD_RE_RAW
     if EXTRACT_TLD_RE:
         return EXTRACT_TLD_RE
 
@@ -112,7 +113,7 @@ def _get_extract_tld_re():
         '|'.join("%s\.%s" % (s, ccTLD) for s in special) + '|' + ccTLD
         for ccTLD in ccTLDs
     ]
-    regex = r"^(?P<registered_domain>.+?)\.(?P<tld>%s)$" % ('|'.join(gTLDs + ccTLDs))
+    EXTRACT_TLD_RE_RAW = regex = r"^(?P<registered_domain>.+?)\.(?P<tld>%s)$" % ('|'.join(gTLDs + ccTLDs))
 
     LOG.info("computed TLD regex: %s", regex)
     

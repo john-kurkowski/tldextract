@@ -41,7 +41,16 @@ class ExtractResult(tuple):
     _fields = ('subdomain', 'domain', 'tld') 
 
     def __new__(_cls, subdomain, domain, tld):
+        'Create new instance of ExtractResult(subdomain, domain, tld)'
         return tuple.__new__(_cls, (subdomain, domain, tld)) 
+
+    @classmethod
+    def _make(cls, iterable, new=tuple.__new__, len=len):
+        'Make a new ExtractResult object from a sequence or iterable'
+        result = new(cls, iterable)
+        if len(result) != 3:
+            raise TypeError('Expected 3 arguments, got %d' % len(result))
+        return result 
 
     def __repr__(self):
         'Return a nicely formatted representation string'
@@ -50,6 +59,17 @@ class ExtractResult(tuple):
     def _asdict(self):
         'Return a new dict which maps field names to their values'
         return dict(zip(self._fields, self)) 
+
+    def _replace(_self, **kwds):
+        'Return a new ExtractResult object replacing specified fields with new values'
+        result = _self._make(map(kwds.pop, ('subdomain', 'domain', 'tld'), _self))
+        if kwds:
+            raise ValueError('Got unexpected field names: %r' % kwds.keys())
+        return result 
+
+    def __getnewargs__(self):
+        'Return self as a plain tuple.  Used by copy and pickle.'
+        return tuple(self) 
 
     subdomain = property(itemgetter(0), doc='Alias for field number 0')
     domain = property(itemgetter(1), doc='Alias for field number 1')

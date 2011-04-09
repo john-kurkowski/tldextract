@@ -1,21 +1,21 @@
 # Python Module
 
-The `tldextract` package accurately separates the gTLD or ccTLD (generic or
-country code top-level domain) from the registered domain and subdomains of a
-URL. For example, you may want the 'www.google' part of
-[http://www.google.com](http://www.google.com). This appears simple to do by
-simply splitting on the '.' and using all but the last split element.
+`tldextract` accurately separates the gTLD or ccTLD (generic or country code
+top-level domain) from the registered domain and subdomains of a URL. For
+example, say you want just the 'google' part of 'http://www.google.com'.
 
-    >>> 'http://www.google.com'.split('.')[-1]
-    'com'
+*Everybody gets this wrong.* Splitting on the '.' and taking the last 2
+elements goes a long way, yes, but only if you're thinking of simple e.g. .com
+domains. As soon as your web crawler hits a subdomain or different country
+code, that method is sunk. Think parsing
+[http://forums.bbc.co.uk](http://forums.bbc.co.uk) for example: the naive
+splitting method above will give you 'co' as the domain and 'uk' as the TLD,
+instead of 'bbc' and 'co.uk' respectively.
 
-However that will not work for URLs with arbitrary numbers of subdomains and
-country codes, unless you know what all country codes look like. Think
-[http://forums.bbc.co.uk](http://forums.bbc.co.uk) for example. The above
-method gives you 'uk' instead of the correct TLD, 'co.uk'.
-
-`tldextract` _does_ know what all gTLDs and ccTLDs look like because it looks up
-the currently living ones on [iana.org](http://www.iana.org).
+`tldextract` on the other hand knows what all gTLDs and ccTLDs look like by
+looking up the currently living ones on [iana.org](http://www.iana.org), so
+given a URL it knows its subdomain from its domain, and its domain from its
+country code.
 
     >>> import tldextract
     >>> tldextract.extract('http://forums.news.cnn.com/')

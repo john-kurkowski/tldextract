@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-"""The `tldextract` package accurately separates the gTLD or ccTLD (generic or
-country code top-level domain) from the registered domain and subdomains of a
-URL.
+"""`tldextract` accurately separates the gTLD or ccTLD (generic or country code
+top-level domain) from the registered domain and subdomains of a URL.
 
     >>> import tldextract
     >>> tldextract.extract('http://forums.news.cnn.com/')

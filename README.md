@@ -46,6 +46,10 @@ Or the latest dev version:
 
     $ pip install -e git://github.com/john-kurkowski/tldextract.git#egg=tldextract
 
+Run tests:
+
+    $ python -m tldextract.tests.all
+
 ## How It Works
 
 The magic splitting method is very simple. The TLDs retrived from iana.org are

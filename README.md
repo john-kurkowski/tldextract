@@ -46,6 +46,11 @@ Or the latest dev version:
 
     $ pip install -e git://github.com/john-kurkowski/tldextract.git#egg=tldextract
 
+Command-line usage, splits the url components by space:
+
+    $ python -m tldextract.tldextract http://forums.bbc.co.uk
+    forums bbc co.uk
+
 Run tests:
 
     $ python -m tldextract.tests.all

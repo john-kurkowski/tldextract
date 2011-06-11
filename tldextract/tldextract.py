@@ -163,3 +163,7 @@ def _get_extract_tld_re():
     EXTRACT_TLD_RE = re.compile(regex)
     return EXTRACT_TLD_RE
 
+if __name__ == "__main__":
+    import sys
+    url = sys.argv[1]
+    print ' '.join(extract(url))

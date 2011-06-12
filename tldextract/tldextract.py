@@ -128,7 +128,8 @@ def _get_extract_tld_re():
     if EXTRACT_TLD_RE:
         return EXTRACT_TLD_RE
 
-    regex_file = os.path.join(os.path.dirname(__file__), '.tld_regex')
+    moddir = os.path.dirname(__file__)
+    regex_file = os.path.join(moddir, '.tld_regex')
     try:
         with codecs.open(regex_file, encoding='utf-8') as f:
             regex = f.read().strip()
@@ -137,22 +138,29 @@ def _get_extract_tld_re():
     except IOError, file_not_found:
         pass
     
-    page = unicode(urlopen('http://www.iana.org/domains/root/db/').read(), 'utf-8')
-    
-    tld_finder = re.compile('<tr class="[^"]*iana-type-(?P<iana_type>\d+).*?<a.*?>\.(?P<tld>\S+?)</a>', re.UNICODE | re.DOTALL)
-    tlds = [(m.group('tld').lower(), m.group('iana_type')) for m in tld_finder.finditer(page)]
-    ccTLDs = [tld for tld, iana_type in tlds if iana_type == "1"]
-    gTLDs = [tld for tld, iana_type in tlds if iana_type != "1"]
-        
-    special = ("co", "org", "ac")
-    ccTLDs.sort(key=lambda tld: tld in special)
-    ccTLDs = [
-        '|'.join("%s\.%s" % (s, ccTLD) for s in special) + '|' + ccTLD
-        for ccTLD in ccTLDs
-    ]
-    EXTRACT_TLD_RE_RAW = regex = r"^(?P<registered_domain>.+?)\.(?P<tld>%s)$" % ('|'.join(gTLDs + ccTLDs))
+    tld_sources = (_IANASource,)
+    tlds = list(set(tld for tld_source in tld_sources for tld in tld_source()))
+    maxlevels = max(tld.count('.') for tld in tlds) + 1
+    def tldkey(tld):
+        """Sort so highest-level domains are grouped together, ahead of
+        lowest-level domains. Solves e.g. the TLD uk matching before ac.uk."""
+        spl = tld.split('.')
+        level = len(spl)
+        spl = [-level] + (spl + ([''] * (maxlevels - level)))[::-1]
+        return tuple(spl)
+    tlds.sort(key=tldkey)
+
+    EXTRACT_TLD_RE_RAW = regex = r"^(?P<registered_domain>.+?)\.(?P<tld>%s)$" % ('|'.join(re.escape(tld) for tld in tlds))
 
     LOG.info("computed TLD regex: %s", regex)
+    if LOG.isEnabledFor(logging.DEBUG):
+      import difflib
+      split_snapshot_regex = []
+      with codecs.open(os.path.join(moddir, '.tld_regex_snapshot'), encoding='utf-8') as snapshot:
+        split_snapshot_regex = snapshot.read().strip().split('|')
+      split_new_regex = regex.split('|')
+      for line in difflib.unified_diff(split_snapshot_regex, split_new_regex, fromfile=".tld_regex_snapshot", tofile=".tld_regex"):
+        print >> sys.stderr, line
     
     try:
         with codecs.open(regex_file, 'w', 'utf-8') as f:
@@ -162,6 +170,17 @@ def _get_extract_tld_re():
         
     EXTRACT_TLD_RE = re.compile(regex)
     return EXTRACT_TLD_RE
+
+def _IANASource():
+    page = unicode(urlopen('http://www.iana.org/domains/root/db/').read(), 'utf-8')
+
+    tld_finder = re.compile('<tr class="[^"]*iana-type-(?P<iana_type>\d+).*?<a.*?>\.(?P<tld>\S+?)</a>', re.UNICODE | re.DOTALL)
+    tlds = [(m.group('tld').lower(), m.group('iana_type')) for m in tld_finder.finditer(page)]
+    ccTLDs = [tld for tld, iana_type in tlds if iana_type == "1"]
+    gTLDs = [tld for tld, iana_type in tlds if iana_type != "1"]
+
+    specials = ["%s.%s" % (s, ccTLD) for ccTLD in ccTLDs for s in ("co", "org", "ac")]
+    return gTLDs + ccTLDs + specials
 
 if __name__ == "__main__":
     import sys

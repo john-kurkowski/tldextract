@@ -25,6 +25,10 @@ class ExtractTest(unittest.TestCase):
     def test_nested_subdomain(self):
         self.assertExtract("media.forums", "theregister", "co.uk", "http://media.forums.theregister.co.uk")
 
+    def test_odd_but_possible(self):
+        self.assertExtract('www', 'www', 'com', 'http://www.www.com')
+        self.assertExtract('', 'www', 'com', 'http://www.com')
+
     def test_local_host(self):
         self.assertExtract('', 'wiki', '', 'http://wiki/')
         self.assertExtract('wiki', 'bizarre', '', 'http://wiki.bizarre')
@@ -55,6 +59,16 @@ class ExtractTest(unittest.TestCase):
     def test_regex_order(self):
         self.assertExtract('www', 'parliament', 'uk', 'http://www.parliament.uk')
         self.assertExtract('www', 'parliament', 'co.uk', 'http://www.parliament.co.uk')
+
+    def test_unhandled_by_iana(self):
+        self.assertExtract('www', 'cgs', 'act.edu.au', 'http://www.cgs.act.edu.au/')
+
+    def test_unhandled_by_publicsuffixlist(self):
+        pass # self.assertExtract('www', 'google', 'com.au', 'http://www.google.com.au/')
+
+    def test_tld_is_a_website_too(self):
+        self.assertExtract('www', 'metp', 'net.cn', 'http://www.metp.net.cn')
+        self.assertExtract('www', 'net', 'cn', 'http://www.net.cn')
 
 def test_suite():
     return unittest.TestSuite([

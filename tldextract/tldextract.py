@@ -136,7 +136,7 @@ def _get_tld_extractor():
     except IOError, file_not_found:
         pass
     
-    tld_sources = (_IANASource,)
+    tld_sources = (_IANASource, _PublicSuffixListSource,)
     tlds = frozenset(tld for tld_source in tld_sources for tld in tld_source())
 
     LOG.info("computed TLDs: %s", tlds)
@@ -157,8 +157,11 @@ def _get_tld_extractor():
     TLD_EXTRACTOR = _TLDExtractor(tlds)
     return TLD_EXTRACTOR
 
+def _fetch_page(url):
+    return unicode(urlopen(url).read(), 'utf-8')
+
 def _IANASource():
-    page = unicode(urlopen('http://www.iana.org/domains/root/db/').read(), 'utf-8')
+    page = _fetch_page('http://www.iana.org/domains/root/db/')
 
     tld_finder = re.compile('<tr class="[^"]*iana-type-(?P<iana_type>\d+).*?<a.*?>\.(?P<tld>\S+?)</a>', re.UNICODE | re.DOTALL)
     tlds = [(m.group('tld').lower(), m.group('iana_type')) for m in tld_finder.finditer(page)]
@@ -168,13 +171,23 @@ def _IANASource():
     specials = ["%s.%s" % (s, ccTLD) for ccTLD in ccTLDs for s in ("co", "org", "ac")]
     return gTLDs + ccTLDs + specials
 
+def _PublicSuffixListSource():
+    page = _fetch_page('http://mxr.mozilla.org/mozilla/source/netwerk/dns/src/effective_tld_names.dat?raw=1')
+
+    tld_finder = re.compile(r'^[.*!]*(?P<tld>\w[\S]*)', re.UNICODE | re.MULTILINE)
+    tlds = [m.group('tld') for m in tld_finder.finditer(page)]
+    return tlds
+
 class _TLDExtractor(object):
     def __init__(self, tlds):
         self.tlds = tlds
 
     def extract(self, netloc):
         spl = netloc.split('.')
-        for i in range(1, len(spl)):
+        start = 1
+        if len(spl) > 2 and spl[0] == 'www':
+            start = 2
+        for i in range(start, len(spl)):
             maybe_tld = '.'.join(spl[i:])
             if maybe_tld in self.tlds:
                 return '.'.join(spl[:i]), maybe_tld

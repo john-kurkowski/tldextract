@@ -70,6 +70,8 @@ regex is cached indefinitely in `/path/to/tldextract/.tld_regex`. If you want
 to stay fresh with the TLD definitions--though they don't change often--delete
 this file occasionally.
 
+It is also recommended to delete this file after upgrading this lib.
+
 # Public API
 
 I know it's just one method, but I've needed this functionality in a few

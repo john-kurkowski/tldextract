@@ -20,7 +20,10 @@ top-level domain) from the registered domain and subdomains of a URL.
 """
 
 from __future__ import with_statement
-import codecs
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 import logging
 from operator import itemgetter
 import os
@@ -103,11 +106,8 @@ def urlsplit(url):
 
 def _extract(netloc):
     netloc = netloc.split("@")[-1].partition(':')[0]
-    registered_domain, tld = netloc, ''
-    m = _get_extract_tld_re().match(netloc)
-    if m:
-        registered_domain, tld = m.group('registered_domain'), m.group('tld')
-    elif netloc and netloc[0].isdigit():
+    registered_domain, tld = _get_tld_extractor().extract(netloc)
+    if not tld and netloc and netloc[0].isdigit():
         try:
             is_ip = socket.inet_aton(netloc)
             return ExtractResult('', netloc, '')
@@ -120,56 +120,42 @@ def _extract(netloc):
     subdomain, _, domain = registered_domain.rpartition('.')
     return ExtractResult(subdomain, domain, tld)
 
-EXTRACT_TLD_RE_RAW = ''
-EXTRACT_TLD_RE = None
+TLD_EXTRACTOR = None
 
-def _get_extract_tld_re():
-    global EXTRACT_TLD_RE, EXTRACT_TLD_RE_RAW
-    if EXTRACT_TLD_RE:
-        return EXTRACT_TLD_RE
+def _get_tld_extractor():
+    global TLD_EXTRACTOR
+    if TLD_EXTRACTOR:
+        return TLD_EXTRACTOR
 
     moddir = os.path.dirname(__file__)
-    regex_file = os.path.join(moddir, '.tld_regex')
+    cached_file = os.path.join(moddir, '.tld_set')
     try:
-        with codecs.open(regex_file, encoding='utf-8') as f:
-            regex = f.read().strip()
-            EXTRACT_TLD_RE = re.compile(regex)
-            return EXTRACT_TLD_RE
+        with open(cached_file) as f:
+            TLD_EXTRACTOR = _TLDExtractor(pickle.load(f))
+            return TLD_EXTRACTOR
     except IOError, file_not_found:
         pass
     
     tld_sources = (_IANASource,)
-    tlds = list(set(tld for tld_source in tld_sources for tld in tld_source()))
-    maxlevels = max(tld.count('.') for tld in tlds) + 1
-    def tldkey(tld):
-        """Sort so highest-level domains are grouped together, ahead of
-        lowest-level domains. Solves e.g. the TLD uk matching before ac.uk."""
-        spl = tld.split('.')
-        level = len(spl)
-        spl = [-level] + (spl + ([''] * (maxlevels - level)))[::-1]
-        return tuple(spl)
-    tlds.sort(key=tldkey)
+    tlds = frozenset(tld for tld_source in tld_sources for tld in tld_source())
 
-    EXTRACT_TLD_RE_RAW = regex = r"^(?P<registered_domain>.+?)\.(?P<tld>%s)$" % ('|'.join(re.escape(tld) for tld in tlds))
-
-    LOG.info("computed TLD regex: %s", regex)
+    LOG.info("computed TLDs: %s", tlds)
     if LOG.isEnabledFor(logging.DEBUG):
       import difflib
-      split_snapshot_regex = []
-      with codecs.open(os.path.join(moddir, '.tld_regex_snapshot'), encoding='utf-8') as snapshot:
-        split_snapshot_regex = snapshot.read().strip().split('|')
-      split_new_regex = regex.split('|')
-      for line in difflib.unified_diff(split_snapshot_regex, split_new_regex, fromfile=".tld_regex_snapshot", tofile=".tld_regex"):
+      with open(os.path.join(moddir, '.tld_set_snapshot')) as f:
+        snapshot = sorted(pickle.load(f))
+      new = sorted(tlds)
+      for line in difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=".tld_set"):
         print >> sys.stderr, line
     
     try:
-        with codecs.open(regex_file, 'w', 'utf-8') as f:
-            f.write(regex + '\n')
+        with open(cached_file, 'w') as f:
+            pickle.dump(tlds, f)
     except IOError, e:
-        LOG.warn("unable to save TLD regex file %s: %s", regex_file, e)
+        LOG.warn("unable to cache TLDs in file %s: %s", cached_file, e)
         
-    EXTRACT_TLD_RE = re.compile(regex)
-    return EXTRACT_TLD_RE
+    TLD_EXTRACTOR = _TLDExtractor(tlds)
+    return TLD_EXTRACTOR
 
 def _IANASource():
     page = unicode(urlopen('http://www.iana.org/domains/root/db/').read(), 'utf-8')
@@ -181,6 +167,19 @@ def _IANASource():
 
     specials = ["%s.%s" % (s, ccTLD) for ccTLD in ccTLDs for s in ("co", "org", "ac")]
     return gTLDs + ccTLDs + specials
+
+class _TLDExtractor(object):
+    def __init__(self, tlds):
+        self.tlds = tlds
+
+    def extract(self, netloc):
+        spl = netloc.split('.')
+        for i in range(1, len(spl)):
+            maybe_tld = '.'.join(spl[i:])
+            if maybe_tld in self.tlds:
+                return '.'.join(spl[:i]), maybe_tld
+
+        return netloc, ''
 
 if __name__ == "__main__":
     import sys

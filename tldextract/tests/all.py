@@ -27,6 +27,7 @@ class ExtractTest(unittest.TestCase):
 
     def test_local_host(self):
         self.assertExtract('', 'wiki', '', 'http://wiki/')
+        self.assertExtract('wiki', 'bizarre', '', 'http://wiki.bizarre')
 
     def test_qualified_local_host(self):
         self.assertExtract('', 'wiki', 'info', 'http://wiki.info/')

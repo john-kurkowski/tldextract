@@ -25,9 +25,9 @@ class Extract:
 
 class TheRegex:
     def GET(self):
-        tldextract.tldextract._get_extract_tld_re()
+        extractor = tldextract.tldextract._get_extract_tld_re()
         web.header('Content-Type', 'text/html; charset=utf-8')
-        return tldextract.tldextract.EXTRACT_TLD_RE_RAW
+        return '<br/>'.join(extractor.tlds)
 
 class Test:
     def GET(self):

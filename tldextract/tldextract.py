@@ -131,12 +131,12 @@ def _get_tld_extractor():
     cached_file = os.path.join(moddir, '.tld_set')
     try:
         with open(cached_file) as f:
-            TLD_EXTRACTOR = _TLDExtractor(pickle.load(f))
+            TLD_EXTRACTOR = _PublicSuffixListTLDExtractor(pickle.load(f))
             return TLD_EXTRACTOR
     except IOError, file_not_found:
         pass
     
-    tld_sources = (_IANASource, _PublicSuffixListSource,)
+    tld_sources = (_PublicSuffixListSource,)
     tlds = frozenset(tld for tld_source in tld_sources for tld in tld_source())
 
     LOG.info("computed TLDs: %s", tlds)
@@ -154,42 +154,33 @@ def _get_tld_extractor():
     except IOError, e:
         LOG.warn("unable to cache TLDs in file %s: %s", cached_file, e)
         
-    TLD_EXTRACTOR = _TLDExtractor(tlds)
+    TLD_EXTRACTOR = _PublicSuffixListTLDExtractor(tlds)
     return TLD_EXTRACTOR
 
 def _fetch_page(url):
     return unicode(urlopen(url).read(), 'utf-8')
 
-def _IANASource():
-    page = _fetch_page('http://www.iana.org/domains/root/db/')
-
-    tld_finder = re.compile('<tr class="[^"]*iana-type-(?P<iana_type>\d+).*?<a.*?>\.(?P<tld>\S+?)</a>', re.UNICODE | re.DOTALL)
-    tlds = [(m.group('tld').lower(), m.group('iana_type')) for m in tld_finder.finditer(page)]
-    ccTLDs = [tld for tld, iana_type in tlds if iana_type == "1"]
-    gTLDs = [tld for tld, iana_type in tlds if iana_type != "1"]
-
-    specials = ["%s.%s" % (s, ccTLD) for ccTLD in ccTLDs for s in ("co", "org", "ac")]
-    return gTLDs + ccTLDs + specials
-
 def _PublicSuffixListSource():
     page = _fetch_page('http://mxr.mozilla.org/mozilla/source/netwerk/dns/src/effective_tld_names.dat?raw=1')
 
-    tld_finder = re.compile(r'^[.*!]*(?P<tld>\w[\S]*)', re.UNICODE | re.MULTILINE)
+    tld_finder = re.compile(r'^(?P<tld>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
     tlds = [m.group('tld') for m in tld_finder.finditer(page)]
     return tlds
 
-class _TLDExtractor(object):
+class _PublicSuffixListTLDExtractor(object):
     def __init__(self, tlds):
         self.tlds = tlds
 
     def extract(self, netloc):
         spl = netloc.split('.')
-        start = 1
-        if len(spl) > 2 and spl[0] == 'www':
-            start = 2
-        for i in range(start, len(spl)):
+        for i in range(len(spl)):
             maybe_tld = '.'.join(spl[i:])
-            if maybe_tld in self.tlds:
+            exception_tld = '!' + maybe_tld
+            if exception_tld in self.tlds:
+                return '.'.join(spl[:i+1]), '.'.join(spl[i+1:])
+
+            wildcard_tld = '*.' + '.'.join(spl[i+1:])
+            if wildcard_tld in self.tlds or maybe_tld in self.tlds:
                 return '.'.join(spl[:i]), maybe_tld
 
         return netloc, ''

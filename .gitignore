@@ -1,5 +1,4 @@
 *.pyc
-*.tld_regex
 *.tld_set
 tldextract_app/tldextract
 tldextract_app/web

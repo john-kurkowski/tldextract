@@ -29,7 +29,7 @@ from operator import itemgetter
 import os
 import re
 import socket
-from urllib2 import urlopen
+import urllib2
 import urlparse
 
 LOG = logging.getLogger(__file__)
@@ -77,10 +77,15 @@ class ExtractResult(tuple):
     domain = property(itemgetter(1), doc='Alias for field number 1')
     tld = property(itemgetter(2), doc='Alias for field number 2')
 
-def extract(url):
+def extract(url, fetch=True):
     """
     Takes a string URL and splits it into its subdomain, domain, and
     gTLD/ccTLD component. Ignores scheme, username, and path components.
+
+    If fetch is True (the default) and no cached TLD set is found, this module
+    will fetch TLD sources live over HTTP on first use. Set to False to
+    not make HTTP requests. Either way, if the TLD set can't be read, the
+    module will fall back to the included TLD set snapshot.
 
     >>> extract('http://forums.news.cnn.com/')
     ExtractResult(subdomain='forums.news', domain='cnn', tld='com')
@@ -88,9 +93,9 @@ def extract(url):
     ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
     """
     netloc = SCHEME_RE.sub("", url).partition("/")[0]
-    return _extract(netloc)
+    return _extract(netloc, fetch)
 
-def urlsplit(url):
+def urlsplit(url, fetch=True):
     """Same as `extract` but calls urlparse.urlsplit to further 'validate' the
     input URL. This function will therefore raise the same errors as 
     urlparse.urlsplit and handle some inputs differently than extract, such as
@@ -102,11 +107,11 @@ def urlsplit(url):
     ExtractResult(subdomain='', domain='', tld='')
     """
     netloc = urlparse.urlsplit(url).netloc
-    return _extract(netloc)
+    return _extract(netloc, fetch)
 
-def _extract(netloc):
+def _extract(netloc, fetch=True):
     netloc = netloc.split("@")[-1].partition(':')[0]
-    registered_domain, tld = _get_tld_extractor().extract(netloc)
+    registered_domain, tld = _get_tld_extractor(fetch).extract(netloc)
     if not tld and netloc and netloc[0].isdigit():
         try:
             is_ip = socket.inet_aton(netloc)
@@ -122,13 +127,14 @@ def _extract(netloc):
 
 TLD_EXTRACTOR = None
 
-def _get_tld_extractor():
+def _get_tld_extractor(fetch=True):
     global TLD_EXTRACTOR
     if TLD_EXTRACTOR:
         return TLD_EXTRACTOR
 
     moddir = os.path.dirname(__file__)
     cached_file = os.path.join(moddir, '.tld_set')
+    snapshot_file = os.path.join(moddir, '.tld_set_snapshot')
     try:
         with open(cached_file) as f:
             TLD_EXTRACTOR = _PublicSuffixListTLDExtractor(pickle.load(f))
@@ -136,13 +142,20 @@ def _get_tld_extractor():
     except IOError, file_not_found:
         pass
     
-    tld_sources = (_PublicSuffixListSource,)
-    tlds = frozenset(tld for tld_source in tld_sources for tld in tld_source())
+    tlds = frozenset()
+    if fetch:
+        tld_sources = (_PublicSuffixListSource,)
+        tlds = frozenset(tld for tld_source in tld_sources for tld in tld_source())
+
+    if not tlds:
+        with open(snapshot_file) as f:
+            TLD_EXTRACTOR = _PublicSuffixListTLDExtractor(pickle.load(f))
+            return TLD_EXTRACTOR
 
     LOG.info("computed TLDs: %s", tlds)
     if LOG.isEnabledFor(logging.DEBUG):
       import difflib
-      with open(os.path.join(moddir, '.tld_set_snapshot')) as f:
+      with open(snapshot_file) as f:
         snapshot = sorted(pickle.load(f))
       new = sorted(tlds)
       for line in difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=".tld_set"):
@@ -158,7 +171,11 @@ def _get_tld_extractor():
     return TLD_EXTRACTOR
 
 def _fetch_page(url):
-    return unicode(urlopen(url).read(), 'utf-8')
+    try:
+        return unicode(urllib2.urlopen(url).read(), 'utf-8')
+    except urllib2.URLError, e:
+        LOG.error(e)
+        return u''
 
 def _PublicSuffixListSource():
     page = _fetch_page('http://mxr.mozilla.org/mozilla/source/netwerk/dns/src/effective_tld_names.dat?raw=1')

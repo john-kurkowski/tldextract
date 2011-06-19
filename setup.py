@@ -12,12 +12,11 @@ setup(
     version = tldextract.__version__,
     author = "John Kurkowski",
     author_email = "john.kurkowski@gmail.com",
-    description = ("Accurately separate the TLD from the "
-        "registered domain and subdomains of a URL."),
+    description = ("Accurately separate the TLD from the registered domain and subdomains of a URL, using the Public Suffix List."),
     license = "BSD License",
-    keywords = "tld domain subdomain url parse extract urlparse",
+    keywords = "tld domain subdomain url parse extract urlparse urlsplit public suffix list",
     url = "https://github.com/john-kurkowski/tldextract",
-    packages = ['tldextract'],
+    packages = ['tldextract', 'tldextract.tests'],
     long_description = long_description,
     classifiers = [
         "Development Status :: 5 - Production/Stable",

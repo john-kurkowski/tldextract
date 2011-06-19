@@ -5,16 +5,16 @@ top-level domain) from the registered domain and subdomains of a URL. For
 example, say you want just the 'google' part of 'http://www.google.com'.
 
 *Everybody gets this wrong.* Splitting on the '.' and taking the last 2
-elements goes a long way, yes, but only if you're thinking of simple e.g. .com
-domains. As soon as your web crawler hits a subdomain or different country
-code, that method is sunk. Think parsing
+elements goes a long way only if you're thinking of simple e.g. .com
+domains. Think parsing
 [http://forums.bbc.co.uk](http://forums.bbc.co.uk) for example: the naive
 splitting method above will give you 'co' as the domain and 'uk' as the TLD,
 instead of 'bbc' and 'co.uk' respectively.
 
 `tldextract` on the other hand knows what all gTLDs and ccTLDs look like by
-looking up the currently living ones on [iana.org](http://www.iana.org), so
-given a URL it knows its subdomain from its domain, and its domain from its
+looking up the currently living ones according to
+[the Public Suffix List](http://www.publicsuffix.org). So,
+given a URL, it knows its subdomain from its domain, and its domain from its
 country code.
 
     >>> import tldextract
@@ -33,8 +33,11 @@ country code.
     >>> '.'.join(ext[:2]) # rejoin subdomain and domain
     'forums.bbc'
 
-This module is based on the chosen answer from [this StackOverflow question on
-the matter](http://stackoverflow.com/questions/569137/how-to-get-domain-name-from-url/569219#569219).
+This module started by implementing the chosen answer from [this StackOverflow question on
+getting the "domain name" from a URL](http://stackoverflow.com/questions/569137/how-to-get-domain-name-from-url/569219#569219).
+However, the proposed regex solution doesn't address many country codes like
+com.au, or the exceptions to country codes like the registered domain
+parliament.uk. The Public Suffix List does.
 
 ## Installation
 
@@ -55,18 +58,17 @@ Run tests:
 
     $ python -m tldextract.tests.all
 
-## How It Works
+## Version History
 
-The magic splitting method is very simple. The TLDs retrived from iana.org are
-combined into a very long regex you would rather not maintain yourself. That's
-it.
-
-See a sample snapshot of the regex [here](https://github.com/john-kurkowski/tldextract/blob/master/tldextract/.tld_regex_snapshot).
+* 0.3
+    * Added support for a huge class of missing TLDs (Issue #1). No more need for [IANA](http://www.iana.org).
+    * If you pass `fetch=False` to `tldextract.extract`, or the connection to the Public Suffix List fails, the module will fall back on the included [snapshot](https://github.com/john-kurkowski/tldextract/blob/master/tldextract/.tld_set_snapshot).
+    * Internally, to support more TLDs, switched from a very long regex to set-based lookup. Cursory `timeit` runs suggest performance is the same as v0.2, even with the 1000s of new TLDs. (Note however that module init time has gone up into the tens of milliseconds as it must unpickle the set. This could add up if you're calling the script externally.)
 
 ## Note About Caching
 
-In order to not slam iana.org for every single extraction and app startup, the
-regex is cached indefinitely in `/path/to/tldextract/.tld_regex`. If you want
+In order to not slam TLD sources for every single extraction and app startup, the
+TLD set is cached indefinitely in `/path/to/tldextract/.tld_set`. If you want
 to stay fresh with the TLD definitions--though they don't change often--delete
 this file occasionally.
 
@@ -81,7 +83,4 @@ your favorite HTTP client with the URL you want parsed like so:
 
     $ curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar/baz.html"
     {"domain": "bbc", "subdomain": "www", "tld": "co.uk"}
-
-You can also
-[check the live regex on App Engine](http://tldextract.appspot.com/api/re).
 

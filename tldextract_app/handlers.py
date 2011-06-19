@@ -9,7 +9,7 @@ except ImportError:
 
 urls = (
         '/api/extract', 'Extract',
-        '/api/re', 'TheRegex',
+        '/api/re', 'TLDSet',
         '/test', 'Test',
     )
 
@@ -23,11 +23,11 @@ class Extract:
         web.header('Content-Type', 'application/json')
         return json.dumps(ext) + '\n'
 
-class TheRegex:
+class TLDSet:
     def GET(self):
-        extractor = tldextract.tldextract._get_extract_tld_re()
+        extractor = tldextract.tldextract._get_tld_extractor()
         web.header('Content-Type', 'text/html; charset=utf-8')
-        return '<br/>'.join(extractor.tlds)
+        return '<br/>'.join(sorted(extractor.tlds))
 
 class Test:
     def GET(self):

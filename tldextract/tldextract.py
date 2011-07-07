@@ -27,6 +27,7 @@ except ImportError:
 import logging
 from operator import itemgetter
 import os
+import pkg_resources
 import re
 import socket
 import urllib2
@@ -134,7 +135,6 @@ def _get_tld_extractor(fetch=True):
 
     moddir = os.path.dirname(__file__)
     cached_file = os.path.join(moddir, '.tld_set')
-    snapshot_file = os.path.join(moddir, '.tld_set_snapshot')
     try:
         with open(cached_file) as f:
             TLD_EXTRACTOR = _PublicSuffixListTLDExtractor(pickle.load(f))
@@ -148,15 +148,15 @@ def _get_tld_extractor(fetch=True):
         tlds = frozenset(tld for tld_source in tld_sources for tld in tld_source())
 
     if not tlds:
-        with open(snapshot_file) as f:
-            TLD_EXTRACTOR = _PublicSuffixListTLDExtractor(pickle.load(f))
+        with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
+            TLD_EXTRACTOR = _PublicSuffixListTLDExtractor(pickle.load(snapshot_file))
             return TLD_EXTRACTOR
 
     LOG.info("computed TLDs: %s", tlds)
     if LOG.isEnabledFor(logging.DEBUG):
       import difflib
-      with open(snapshot_file) as f:
-        snapshot = sorted(pickle.load(f))
+      with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
+        snapshot = sorted(pickle.load(snapshot_file))
       new = sorted(tlds)
       for line in difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=".tld_set"):
         print >> sys.stderr, line

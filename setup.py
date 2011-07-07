@@ -17,6 +17,7 @@ setup(
     keywords = "tld domain subdomain url parse extract urlparse urlsplit public suffix list",
     url = "https://github.com/john-kurkowski/tldextract",
     packages = ['tldextract', 'tldextract.tests'],
+    include_package_data = True,
     long_description = long_description,
     classifiers = [
         "Development Status :: 5 - Production/Stable",

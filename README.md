@@ -68,9 +68,10 @@ Run tests:
 ## Note About Caching
 
 In order to not slam TLD sources for every single extraction and app startup, the
-TLD set is cached indefinitely in `/path/to/tldextract/.tld_set`. If you want
-to stay fresh with the TLD definitions--though they don't change often--delete
-this file occasionally.
+TLD set is cached indefinitely in `/path/to/tldextract/.tld_set`. This location
+can be overridden by specifying `cache_file` in the call to
+`tldextract.extract`. If you want to stay fresh with the TLD
+definitions--though they don't change often--delete this file occasionally.
 
 It is also recommended to delete this file after upgrading this lib.
 

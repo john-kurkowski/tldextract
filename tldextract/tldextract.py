@@ -24,6 +24,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
+from functools import wraps
 import logging
 from operator import itemgetter
 import os
@@ -45,6 +46,7 @@ import re
 import socket
 import urllib2
 import urlparse
+import warnings
 
 LOG = logging.getLogger(__file__)
 
@@ -52,13 +54,13 @@ SCHEME_RE = re.compile(r'^([' + urlparse.scheme_chars + ']+:)?//')
 IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
 
 class ExtractResult(tuple):
-    'ExtractResult(subdomain, domain, tld)' 
-    __slots__ = () 
-    _fields = ('subdomain', 'domain', 'tld') 
+    'ExtractResult(subdomain, domain, tld)'
+    __slots__ = ()
+    _fields = ('subdomain', 'domain', 'tld')
 
     def __new__(_cls, subdomain, domain, tld):
         'Create new instance of ExtractResult(subdomain, domain, tld)'
-        return tuple.__new__(_cls, (subdomain, domain, tld)) 
+        return tuple.__new__(_cls, (subdomain, domain, tld))
 
     @classmethod
     def _make(cls, iterable, new=tuple.__new__, len=len):
@@ -66,125 +68,131 @@ class ExtractResult(tuple):
         result = new(cls, iterable)
         if len(result) != 3:
             raise TypeError('Expected 3 arguments, got %d' % len(result))
-        return result 
+        return result
 
     def __repr__(self):
         'Return a nicely formatted representation string'
-        return 'ExtractResult(subdomain=%r, domain=%r, tld=%r)' % self 
+        return 'ExtractResult(subdomain=%r, domain=%r, tld=%r)' % self
 
     def _asdict(self):
         'Return a new dict which maps field names to their values'
-        return dict(zip(self._fields, self)) 
+        return dict(zip(self._fields, self))
 
     def _replace(_self, **kwds):
         'Return a new ExtractResult object replacing specified fields with new values'
         result = _self._make(map(kwds.pop, ('subdomain', 'domain', 'tld'), _self))
         if kwds:
             raise ValueError('Got unexpected field names: %r' % kwds.keys())
-        return result 
+        return result
 
     def __getnewargs__(self):
         'Return self as a plain tuple.  Used by copy and pickle.'
-        return tuple(self) 
+        return tuple(self)
 
     subdomain = property(itemgetter(0), doc='Alias for field number 0')
     domain = property(itemgetter(1), doc='Alias for field number 1')
     tld = property(itemgetter(2), doc='Alias for field number 2')
 
-def extract(url, fetch=True, cache_file=''):
-    """
-    Takes a string URL and splits it into its subdomain, domain, and
-    gTLD/ccTLD component. Ignores scheme, username, and path components.
+class TLDExtract(object):
+    def __init__(self, fetch=True, cache_file=''):
+        """
+        Constructs a callable for extracting subdomain, domain, and TLD
+        components from a URL.
 
-    If fetch is True (the default) and no cached TLD set is found, this module
-    will fetch TLD sources live over HTTP on first use. Set to False to
-    not make HTTP requests. Either way, if the TLD set can't be read, the
-    module will fall back to the included TLD set snapshot.
+        If fetch is True (the default) and no cached TLD set is found, this
+        extractor will fetch TLD sources live over HTTP on first use. Set to
+        False to not make HTTP requests. Either way, if the TLD set can't be
+        read, the module will fall back to the included TLD set snapshot.
 
-    Specifying cache_file will override the location of the TLD set. Defaults
-    to /path/to/tldextract/.tld_set.
+        Specifying cache_file will override the location of the TLD set.
+        Defaults to /path/to/tldextract/.tld_set.
 
-    >>> extract('http://forums.news.cnn.com/')
-    ExtractResult(subdomain='forums.news', domain='cnn', tld='com')
-    >>> extract('http://forums.bbc.co.uk/')
-    ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
-    """
-    netloc = SCHEME_RE.sub("", url).partition("/")[0]
-    return _extract(netloc, fetch, cache_file)
+        """
+        self.fetch = fetch
+        self.cache_file = cache_file
+        self._extractor = None
 
-def urlsplit(url, fetch=True, cache_file=''):
-    """Same as `extract` but calls urlparse.urlsplit to further 'validate' the
-    input URL. This function will therefore raise the same errors as 
-    urlparse.urlsplit and handle some inputs differently than extract, such as
-    URLs missing a scheme.
+    def __call__(self, url):
+        """
+        Takes a string URL and splits it into its subdomain, domain, and
+        gTLD/ccTLD component.
 
-    >>> urlsplit('http://forums.news.cnn.com/')
-    ExtractResult(subdomain='forums.news', domain='cnn', tld='com')
-    >>> urlsplit('forums.bbc.co.uk/') # urlsplit won't see a netloc
-    ExtractResult(subdomain='', domain='', tld='')
-    """
-    netloc = urlparse.urlsplit(url).netloc
-    return _extract(netloc, fetch, cache_file)
+        >>> extract = TLDExtract()
+        >>> extract('http://forums.news.cnn.com/')
+        ExtractResult(subdomain='forums.news', domain='cnn', tld='com')
+        >>> extract('http://forums.bbc.co.uk/')
+        ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
+        """
+        netloc = SCHEME_RE.sub("", url).partition("/")[0]
+        return self._extract(netloc)
 
-def _extract(netloc, fetch=True, cache_file=''):
-    netloc = netloc.split("@")[-1].partition(':')[0]
-    registered_domain, tld = _get_tld_extractor(fetch, cache_file).extract(netloc)
-    if not tld and netloc and netloc[0].isdigit():
-        try:
-            is_ip = socket.inet_aton(netloc)
-            return ExtractResult('', netloc, '')
-        except AttributeError:
-            if IP_RE.match(netloc):
+    def _extract(self, netloc):
+        netloc = netloc.split("@")[-1].partition(':')[0]
+        registered_domain, tld = self._get_tld_extractor().extract(netloc)
+        if not tld and netloc and netloc[0].isdigit():
+            try:
+                is_ip = socket.inet_aton(netloc)
                 return ExtractResult('', netloc, '')
-        except socket.error:
+            except AttributeError:
+                if IP_RE.match(netloc):
+                    return ExtractResult('', netloc, '')
+            except socket.error:
+                pass
+
+        subdomain, _, domain = registered_domain.rpartition('.')
+        return ExtractResult(subdomain, domain, tld)
+
+    def _get_tld_extractor(self):
+        if self._extractor:
+            return self._extractor
+
+        moddir = os.path.dirname(__file__)
+        cached_file = self.cache_file or os.path.join(moddir, '.tld_set')
+        try:
+            with open(cached_file) as f:
+                self._extractor = _PublicSuffixListTLDExtractor(pickle.load(f))
+                return self._extractor
+        except IOError, file_not_found:
             pass
 
-    subdomain, _, domain = registered_domain.rpartition('.')
-    return ExtractResult(subdomain, domain, tld)
+        tlds = frozenset()
+        if self.fetch:
+            tld_sources = (_PublicSuffixListSource,)
+            tlds = frozenset(tld for tld_source in tld_sources for tld in tld_source())
 
-TLD_EXTRACTOR = None
+        if not tlds:
+            with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
+                self._extractor = _PublicSuffixListTLDExtractor(pickle.load(snapshot_file))
+                return self._extractor
 
-def _get_tld_extractor(fetch=True, cache_file=''):
-    global TLD_EXTRACTOR
-    if TLD_EXTRACTOR:
-        return TLD_EXTRACTOR
+        LOG.info("computed TLDs: %s", tlds)
+        if LOG.isEnabledFor(logging.DEBUG):
+            import difflib
+            with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
+                snapshot = sorted(pickle.load(snapshot_file))
+            new = sorted(tlds)
+            for line in difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=cached_file):
+                print >> sys.stderr, line
 
-    moddir = os.path.dirname(__file__)
-    cached_file = cache_file or os.path.join(moddir, '.tld_set')
-    try:
-        with open(cached_file) as f:
-            TLD_EXTRACTOR = _PublicSuffixListTLDExtractor(pickle.load(f))
-            return TLD_EXTRACTOR
-    except IOError, file_not_found:
-        pass
-    
-    tlds = frozenset()
-    if fetch:
-        tld_sources = (_PublicSuffixListSource,)
-        tlds = frozenset(tld for tld_source in tld_sources for tld in tld_source())
+        try:
+            with open(cached_file, 'w') as f:
+                pickle.dump(tlds, f)
+        except IOError, e:
+            LOG.warn("unable to cache TLDs in file %s: %s", cached_file, e)
 
-    if not tlds:
-        with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
-            TLD_EXTRACTOR = _PublicSuffixListTLDExtractor(pickle.load(snapshot_file))
-            return TLD_EXTRACTOR
+        self._extractor = _PublicSuffixListTLDExtractor(tlds)
+        return self._extractor
 
-    LOG.info("computed TLDs: %s", tlds)
-    if LOG.isEnabledFor(logging.DEBUG):
-      import difflib
-      with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
-        snapshot = sorted(pickle.load(snapshot_file))
-      new = sorted(tlds)
-      for line in difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=cached_file):
-        print >> sys.stderr, line
-    
-    try:
-        with open(cached_file, 'w') as f:
-            pickle.dump(tlds, f)
-    except IOError, e:
-        LOG.warn("unable to cache TLDs in file %s: %s", cached_file, e)
-        
-    TLD_EXTRACTOR = _PublicSuffixListTLDExtractor(tlds)
-    return TLD_EXTRACTOR
+TLD_EXTRACTOR = TLDExtract()
+
+@wraps(TLD_EXTRACTOR.__call__)
+def extract(url):
+    return TLD_EXTRACTOR(url)
+
+@wraps(TLD_EXTRACTOR.__call__)
+def urlsplit(url):
+    warnings.warn("Global tldextract.urlsplit function will be removed in 1.0. Call urlparse.urlsplit before calling tldextract.", DeprecationWarning)
+    return TLD_EXTRACTOR(urlparse.urlsplit(url).netloc)
 
 def _fetch_page(url):
     try:

@@ -1,4 +1,4 @@
-from tldextract import extract, urlsplit
+from tldextract import extract, urlsplit, TLDExtract
 
-__version__ = "0.3.2"
+__version__ = "0.4"
 

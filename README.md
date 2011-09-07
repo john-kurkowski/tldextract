@@ -60,6 +60,8 @@ Run tests:
 
 ## Version History
 
+* 0.4
+    * Towards 1.0: simplified the global convenience function `tldextract.extract` to take only the `url` param. Need more control over the fetching and caching of the Public Suffix List? Construct your own extract callable: `extract = tldextract.TLDExtract(fetch=True, cache_file='/path/to/your/cache/file')`. As before, the first arg controls whether live HTTP requests will be made to get the Public Suffix List, otherwise falling back on the included [snapshot](https://github.com/john-kurkowski/tldextract/blob/master/tldextract/.tld_set_snapshot). The second arg is handy if you have limited permissions where temp files can go.
 * 0.3
     * Added support for a huge class of missing TLDs (Issue #1). No more need for [IANA](http://www.iana.org).
     * If you pass `fetch=False` to `tldextract.extract`, or the connection to the Public Suffix List fails, the module will fall back on the included [snapshot](https://github.com/john-kurkowski/tldextract/blob/master/tldextract/.tld_set_snapshot).
@@ -79,7 +81,8 @@ It is also recommended to delete this file after upgrading this lib.
 
 I know it's just one method, but I've needed this functionality in a few
 projects and programming languages, so I've uploaded
-[`tldextract` to App Engine](http://tldextract.appspot.com/). Just hit it with
+[`tldextract` to App Engine](http://tldextract.appspot.com/). It's there on
+GAE's free pricing plan until Google cuts it off. Just hit it with
 your favorite HTTP client with the URL you want parsed like so:
 
     $ curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar/baz.html"

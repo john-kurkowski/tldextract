@@ -152,8 +152,8 @@ class TLDExtract(object):
             with open(cached_file) as f:
                 self._extractor = _PublicSuffixListTLDExtractor(pickle.load(f))
                 return self._extractor
-        except IOError, file_not_found:
-            pass
+        except Exception, ioe:
+            LOG.error("error reading TLD cache file %s: %s", cached_file, ioe)
 
         tlds = frozenset()
         if self.fetch:

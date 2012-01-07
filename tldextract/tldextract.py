@@ -27,7 +27,20 @@ except ImportError:
 import logging
 from operator import itemgetter
 import os
-import pkg_resources
+
+try:
+    import pkg_resources
+except ImportError:
+    class pkg_resources(object):
+        """Fake pkg_resources interface which falls back to getting resources
+        inside `tldextract`'s directory.
+        """
+        @classmethod
+        def resource_stream(cls, package, resource_name):
+            moddir = os.path.dirname(__file__)
+            f = os.path.join(moddir, resource_name)
+            return open(f)
+
 import re
 import socket
 import urllib2

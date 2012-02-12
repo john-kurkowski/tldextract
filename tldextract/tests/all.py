@@ -3,25 +3,25 @@ import sys
 import unittest
 
 import tldextract
-from tldextract import extract, urlsplit
+from tldextract import extract
 
 class ExtractTest(unittest.TestCase):
-    def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url, fns=(extract, urlsplit)):
+    def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url, fns=(extract,)):
         for fn in fns:
           ext = fn(url)
           self.assertEquals(expected_subdomain, ext.subdomain)
           self.assertEquals(expected_domain, ext.domain)
           self.assertEquals(expected_tld, ext.tld)
-        
+
     def test_american(self):
         self.assertExtract('www', 'google', 'com', 'http://www.google.com')
-        
+
     def test_british(self):
         self.assertExtract("www", "theregister", "co.uk", "http://www.theregister.co.uk")
-        
+
     def test_no_subdomain(self):
         self.assertExtract("", "gmail", "com", "http://gmail.com")
-        
+
     def test_nested_subdomain(self):
         self.assertExtract("media.forums", "theregister", "co.uk", "http://media.forums.theregister.co.uk")
 

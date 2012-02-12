@@ -37,13 +37,13 @@ This module started by implementing the chosen answer from [this StackOverflow q
 getting the "domain name" from a URL](http://stackoverflow.com/questions/569137/how-to-get-domain-name-from-url/569219#569219).
 However, the proposed regex solution doesn't address many country codes like
 com.au, or the exceptions to country codes like the registered domain
-parliament.uk. The Public Suffix List does.
+parliament.uk. The Public Suffix List does, and so does this module.
 
 ## Installation
 
 Latest release on PyPI:
 
-    $ pip install tldextract 
+    $ pip install tldextract
 
 Or the latest dev version:
 
@@ -58,24 +58,31 @@ Run tests:
 
     $ python -m tldextract.tests.all
 
-## Version History
+## Note About Caching & Advanced Usage
 
-* 0.4
-    * Towards 1.0: simplified the global convenience function `tldextract.extract` to take only the `url` param. Need more control over the fetching and caching of the Public Suffix List? Construct your own extract callable: `extract = tldextract.TLDExtract(fetch=True, cache_file='/path/to/your/cache/file')`. As before, the first arg controls whether live HTTP requests will be made to get the Public Suffix List, otherwise falling back on the included [snapshot](https://github.com/john-kurkowski/tldextract/blob/master/tldextract/.tld_set_snapshot). The second arg is handy if you have limited permissions where temp files can go.
-* 0.3
-    * Added support for a huge class of missing TLDs (Issue #1). No more need for [IANA](http://www.iana.org).
-    * If you pass `fetch=False` to `tldextract.extract`, or the connection to the Public Suffix List fails, the module will fall back on the included [snapshot](https://github.com/john-kurkowski/tldextract/blob/master/tldextract/.tld_set_snapshot).
-    * Internally, to support more TLDs, switched from a very long regex to set-based lookup. Cursory `timeit` runs suggest performance is the same as v0.2, even with the 1000s of new TLDs. (Note however that module init time has gone up into the tens of milliseconds as it must unpickle the set. This could add up if you're calling the script externally.)
+Beware when first running the module, it updates its TLD list with a live HTTP
+request. This updated TLD set is cached indefinitely in
+`/path/to/tldextract/.tld_set`.
 
-## Note About Caching
+(Arguably runtime bootstrapping like that shouldn't be the default behavior,
+like for production systems. But I want you to have the latest TLDs, especially
+when I haven't kept this code up to date.)
 
-In order to not slam TLD sources for every single extraction and app startup, the
-TLD set is cached indefinitely in `/path/to/tldextract/.tld_set`. This location
-can be overridden by specifying `cache_file` in the call to
-`tldextract.extract`. If you want to stay fresh with the TLD
-definitions--though they don't change often--delete this file occasionally.
+To avoid this fetch or control the cache's location, use your own extract
+callable:
 
-It is also recommended to delete this file after upgrading this lib.
+    # extract callable that falls back to the included TLD snapshot, no live HTTP fetching
+    no_fetch_extract = tldextract.TLDExtract(fetch=False)
+    no_fetch_extract('http://www.google.com')
+
+    # extract callable that reads/writes the updated TLD set to a different path
+    custom_cache_extract = tldextract.TLDExtract(cache_file='/path/to/your/cache/file')
+    custom_cache_extract('http://www.google.com')
+
+If you want to stay fresh with the TLD definitions--though they don't change
+often--delete the cache file occasionally.
+
+It is also recommended to delete the file after upgrading this lib.
 
 # Public API
 

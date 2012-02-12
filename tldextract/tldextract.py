@@ -46,7 +46,6 @@ import re
 import socket
 import urllib2
 import urlparse
-import warnings
 
 LOG = logging.getLogger(__file__)
 
@@ -188,11 +187,6 @@ TLD_EXTRACTOR = TLDExtract()
 @wraps(TLD_EXTRACTOR.__call__)
 def extract(url):
     return TLD_EXTRACTOR(url)
-
-@wraps(TLD_EXTRACTOR.__call__)
-def urlsplit(url):
-    warnings.warn("Global tldextract.urlsplit function will be removed in 1.0. Call urlparse.urlsplit before calling tldextract.", DeprecationWarning)
-    return TLD_EXTRACTOR(urlparse.urlsplit(url).netloc)
 
 def _fetch_page(url):
     try:

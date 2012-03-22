@@ -1,9 +1,24 @@
 import doctest
+import logging
+import os
 import sys
 import unittest
 
 import tldextract
 from tldextract import extract
+
+class IntegrationTest(unittest.TestCase):
+    def test_log_snapshot_diff(self):
+        logging.basicConfig(level=logging.DEBUG)
+
+        extractor = tldextract.TLDExtract()
+        try:
+            os.remove(extractor.cache_file)
+        except IOError:
+            pass
+
+        # TODO: if .tld_set_snapshot is up to date, this won't trigger a diff
+        extractor('ignore.com')
 
 class ExtractTest(unittest.TestCase):
     def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url, fns=(extract,)):
@@ -71,6 +86,7 @@ class ExtractTest(unittest.TestCase):
 def test_suite():
     return unittest.TestSuite([
         doctest.DocTestSuite(tldextract.tldextract),
+        unittest.TestLoader().loadTestsFromTestCase(IntegrationTest),
         unittest.TestLoader().loadTestsFromTestCase(ExtractTest),
     ])
 

@@ -109,7 +109,7 @@ class TLDExtract(object):
 
         """
         self.fetch = fetch
-        self.cache_file = cache_file
+        self.cache_file = cache_file or os.path.join(os.path.dirname(__file__), '.tld_set')
         self._extractor = None
 
     def __call__(self, url):
@@ -146,8 +146,7 @@ class TLDExtract(object):
         if self._extractor:
             return self._extractor
 
-        moddir = os.path.dirname(__file__)
-        cached_file = self.cache_file or os.path.join(moddir, '.tld_set')
+        cached_file = self.cache_file
         try:
             with open(cached_file) as f:
                 self._extractor = _PublicSuffixListTLDExtractor(pickle.load(f))
@@ -165,7 +164,7 @@ class TLDExtract(object):
                 self._extractor = _PublicSuffixListTLDExtractor(pickle.load(snapshot_file))
                 return self._extractor
 
-        LOG.info("computed TLDs: %s", tlds)
+        LOG.info("computed TLDs: [%s, ...]", ', '.join(list(tlds)[:10]))
         if LOG.isEnabledFor(logging.DEBUG):
             import difflib
             with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
@@ -222,6 +221,5 @@ class _PublicSuffixListTLDExtractor(object):
         return netloc, ''
 
 if __name__ == "__main__":
-    import sys
     url = sys.argv[1]
     print ' '.join(extract(url))

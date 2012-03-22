@@ -48,7 +48,7 @@ import socket
 import urllib2
 import urlparse
 
-LOG = logging.getLogger(__file__)
+LOG = logging.getLogger("tldextract")
 
 SCHEME_RE = re.compile(r'^([' + urlparse.scheme_chars + ']+:)?//')
 IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')

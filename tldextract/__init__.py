@@ -1,4 +1,4 @@
 from tldextract import extract, TLDExtract
 
-__version__ = "1.0"
+__version__ = "1.1"
 

@@ -24,6 +24,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
+import errno
 from functools import wraps
 import logging
 from operator import itemgetter
@@ -151,8 +152,12 @@ class TLDExtract(object):
             with open(cached_file) as f:
                 self._extractor = _PublicSuffixListTLDExtractor(pickle.load(f))
                 return self._extractor
-        except Exception, ioe:
-            LOG.error("error reading TLD cache file %s: %s", cached_file, ioe)
+        except IOError, ioe:
+            file_not_found = ioe.errno == errno.ENOENT
+            if not file_not_found:
+              LOG.error("error reading TLD cache file %s: %s", cached_file, ioe)
+        except Exception, ex:
+            LOG.error("error reading TLD cache file %s: %s", cached_file, ex)
 
         tlds = frozenset()
         if self.fetch:

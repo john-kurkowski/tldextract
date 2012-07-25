@@ -179,7 +179,7 @@ class TLDExtract(object):
                 print >> sys.stderr, line.encode('utf-8')
 
         try:
-            with open(cached_file, 'w') as f:
+            with open(cached_file, 'wb') as f:
                 pickle.dump(tlds, f)
         except IOError, e:
             LOG.warn("unable to cache TLDs in file %s: %s", cached_file, e)

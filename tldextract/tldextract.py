@@ -176,7 +176,7 @@ class TLDExtract(object):
                 snapshot = sorted(pickle.load(snapshot_file))
             new = sorted(tlds)
             for line in difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=cached_file):
-                print >> sys.stderr, line
+                print >> sys.stderr, line.encode('utf-8')
 
         try:
             with open(cached_file, 'w') as f:

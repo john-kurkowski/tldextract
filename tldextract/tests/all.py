@@ -71,6 +71,9 @@ class ExtractTest(unittest.TestCase):
     def test_username(self):
         self.assertExtract('1337', 'warez', 'com', 'ftp://johndoe:5cr1p7k1dd13@1337.warez.com:2501')
 
+    def test_query(self):
+        self.assertExtract('', 'google', 'com', 'http://google.com?q=cats')
+
     def test_regex_order(self):
         self.assertExtract('www', 'parliament', 'uk', 'http://www.parliament.uk')
         self.assertExtract('www', 'parliament', 'co.uk', 'http://www.parliament.co.uk')

@@ -124,7 +124,7 @@ class TLDExtract(object):
         >>> extract('http://forums.bbc.co.uk/')
         ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
         """
-        netloc = SCHEME_RE.sub("", url).partition("/")[0]
+        netloc = SCHEME_RE.sub("", url).partition("/")[0].partition("?")[0]
         return self._extract(netloc)
 
     def _extract(self, netloc):

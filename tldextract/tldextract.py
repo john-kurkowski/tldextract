@@ -141,6 +141,7 @@ class TLDExtract(object):
                 pass
 
         subdomain, _, domain = registered_domain.rpartition('.')
+        subdomain = subdomain.split('.')
         return ExtractResult(subdomain, domain, tld)
 
     def _get_tld_extractor(self):

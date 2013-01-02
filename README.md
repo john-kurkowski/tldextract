@@ -49,6 +49,9 @@ Or the latest dev version:
 
     $ pip install -e git://github.com/john-kurkowski/tldextract.git#egg=tldextract
 
+Install FAUP:
+    https://github.com/stricaud/faup
+
 Command-line usage, splits the url components by space:
 
     $ python -m tldextract.tldextract http://forums.bbc.co.uk
@@ -58,7 +61,7 @@ Run tests:
 
     $ python -m tldextract.tests.all
 
-## Note About Caching & Advanced Usage
+## Note About Caching & Advanced Usage and 
 
 Beware when first running the module, it updates its TLD list with a live HTTP
 request. This updated TLD set is cached indefinitely in

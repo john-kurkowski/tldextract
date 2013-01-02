@@ -224,4 +224,5 @@ class _PublicSuffixListTLDExtractor(object):
 
 if __name__ == "__main__":
     url = sys.argv[1]
-    print extract(url)
+    fast=sys.argv[2]
+    print extract(url,eval(fast))

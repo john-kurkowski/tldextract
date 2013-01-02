@@ -20,16 +20,23 @@ top-level domain) from the registered domain and subdomains of a URL.
 """
 
 from __future__ import with_statement
+from functools import wraps
+from operator import itemgetter
+from pyfaup.furl import Faup
+import errno
+import logging
+import os
+import re
+import socket
+import sys
+import urllib2
+import urlparse
+from pyfaup import furl
+
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
-import errno
-from functools import wraps
-import logging
-from operator import itemgetter
-import os
-import sys
 
 try:
     import pkg_resources
@@ -44,11 +51,6 @@ except ImportError:
             f = os.path.join(moddir, resource_name)
             return open(f)
 
-import re
-import socket
-import urllib2
-import urlparse
-
 LOG = logging.getLogger("tldextract")
 
 SCHEME_RE = re.compile(r'^([' + urlparse.scheme_chars + ']+:)?//')
@@ -59,9 +61,9 @@ class ExtractResult(tuple):
     __slots__ = ()
     _fields = ('subdomain', 'domain', 'tld')
 
-    def __new__(_cls, subdomain, domain, tld):
+    def __new__(cls, subdomain, domain, tld):
         'Create new instance of ExtractResult(subdomain, domain, tld)'
-        return tuple.__new__(_cls, (subdomain, domain, tld))
+        return tuple.__new__(cls, (subdomain, domain, tld))
 
     @classmethod
     def _make(cls, iterable, new=tuple.__new__, len=len):
@@ -79,9 +81,9 @@ class ExtractResult(tuple):
         'Return a new dict which maps field names to their values'
         return dict(zip(self._fields, self))
 
-    def _replace(_self, **kwds):
+    def _replace(self, **kwds):
         'Return a new ExtractResult object replacing specified fields with new values'
-        result = _self._make(map(kwds.pop, ('subdomain', 'domain', 'tld'), _self))
+        result = self._make(map(kwds.pop, ('subdomain', 'domain', 'tld'), self))
         if kwds:
             raise ValueError('Got unexpected field names: %r' % kwds.keys())
         return result
@@ -113,7 +115,7 @@ class TLDExtract(object):
         self.cache_file = cache_file or os.path.join(os.path.dirname(__file__), '.tld_set')
         self._extractor = None
 
-    def __call__(self, url):
+    def __call__(self, host):
         """
         Takes a string URL and splits it into its subdomain, domain, and
         gTLD/ccTLD component.
@@ -124,22 +126,11 @@ class TLDExtract(object):
         >>> extract('http://forums.bbc.co.uk/')
         ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
         """
-        netloc = SCHEME_RE.sub("", url).partition("/")[0].partition("?")[0]
-        return self._extract(netloc)
+        return self._extract(host)
 
-    def _extract(self, netloc):
-        netloc = netloc.split("@")[-1].partition(':')[0]
-        registered_domain, tld = self._get_tld_extractor().extract(netloc)
-        if not tld and netloc and netloc[0].isdigit():
-            try:
-                is_ip = socket.inet_aton(netloc)
-                return ExtractResult('', netloc, '')
-            except AttributeError:
-                if IP_RE.match(netloc):
-                    return ExtractResult('', netloc, '')
-            except socket.error:
-                pass
-
+    def _extract(self, host):        
+        registered_domain, tld = self._get_tld_extractor().extract(host)
+    
         subdomain, _, domain = registered_domain.rpartition('.')
         subdomain = subdomain.split('.')
         return ExtractResult(subdomain, domain, tld)
@@ -191,8 +182,13 @@ class TLDExtract(object):
 TLD_EXTRACTOR = TLDExtract()
 
 @wraps(TLD_EXTRACTOR.__call__)
-def extract(url):
-    return TLD_EXTRACTOR(url)
+def extract(url,fast=True):
+    fex=Faup()
+    fex.decode(url)
+    if fast:
+        return ExtractResult(fex.get_subdomain().split('.'),fex.get_domain(),fex.get_tld())
+    else:
+        return TLD_EXTRACTOR(fex.get_host())
 
 def _fetch_page(url):
     try:
@@ -228,4 +224,4 @@ class _PublicSuffixListTLDExtractor(object):
 
 if __name__ == "__main__":
     url = sys.argv[1]
-    print ' '.join(extract(url))
+    print extract('http://www.google.co.jp/')

@@ -224,4 +224,4 @@ class _PublicSuffixListTLDExtractor(object):
 
 if __name__ == "__main__":
     url = sys.argv[1]
-    print extract('http://www.google.co.jp/')
+    print extract(url)

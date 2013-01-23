@@ -124,11 +124,13 @@ class TLDExtract(object):
         >>> extract('http://forums.bbc.co.uk/')
         ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
         """
-        netloc = SCHEME_RE.sub("", url).partition("/")[0].partition("?")[0]
-        return self._extract(netloc)
+        netloc = SCHEME_RE.sub("", url) \
+          .partition("/")[0] \
+          .partition("?")[0] \
+          .partition("#")[0] \
+          .split("@")[-1] \
+          .partition(":")[0]
 
-    def _extract(self, netloc):
-        netloc = netloc.split("@")[-1].partition(':')[0]
         registered_domain, tld = self._get_tld_extractor().extract(netloc)
         if not tld and netloc and netloc[0].isdigit():
             try:

@@ -27,6 +27,10 @@ setup(
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
     ],
+    entry_points = {
+        'console_scripts':[
+            'tldextract = tldextract.tldextract:main', ]
+    },
     test_suite = 'tldextract.tests.all.test_suite',
 )
 

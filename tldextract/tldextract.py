@@ -227,6 +227,10 @@ class _PublicSuffixListTLDExtractor(object):
 
         return netloc, ''
 
-if __name__ == "__main__":
+def main():
+    """docstring for main"""
     url = sys.argv[1]
     print ' '.join(extract(url))
+
+if __name__ == "__main__":
+    main()

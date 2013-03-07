@@ -145,6 +145,13 @@ class TLDExtract(object):
         subdomain, _, domain = registered_domain.rpartition('.')
         return ExtractResult(subdomain, domain, tld)
 
+    def update(self, fetch_now=False):
+        if os.path.exists(self.cache_file):
+            os.unlink(self.cache_file)
+        self._extractor = None
+        if fetch_now:
+            self._get_tld_extractor()
+
     def _get_tld_extractor(self):
         if self._extractor:
             return self._extractor
@@ -229,6 +236,10 @@ class _PublicSuffixListTLDExtractor(object):
 
 def main():
     """docstring for main"""
+    if sys.argv[1] == "-u" or sys.argv[1] == "--update":
+        TLD_EXTRACTOR.update(True)
+        return
+
     url = sys.argv[1]
     print ' '.join(extract(url))
 

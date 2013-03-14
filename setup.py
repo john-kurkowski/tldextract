@@ -1,4 +1,5 @@
 import re
+import sys
 from setuptools import setup
 import tldextract
 
@@ -7,9 +8,13 @@ import tldextract
 long_description_markdown = tldextract.tldextract.__doc__
 long_description = re.sub(r'(?s)\[(.*?)\]\((http.*?)\)', r'\1', long_description_markdown)
 
+install_requires = []
+if (2,7) > sys.version_info:
+    install_requires.append("argparse>=1.2.1")
+
 setup(
     name = "tldextract",
-    version = tldextract.__version__,
+    version = '1.1.3',
     author = "John Kurkowski",
     author_email = "john.kurkowski@gmail.com",
     description = ("Accurately separate the TLD from the registered domain and subdomains of a URL, using the Public Suffix List."),
@@ -32,5 +37,6 @@ setup(
             'tldextract = tldextract.tldextract:main', ]
     },
     test_suite = 'tldextract.tests.all.test_suite',
+    install_requires=install_requires,
 )
 

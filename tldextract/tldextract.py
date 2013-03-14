@@ -202,6 +202,10 @@ TLD_EXTRACTOR = TLDExtract()
 def extract(url):
     return TLD_EXTRACTOR(url)
 
+@wraps(TLD_EXTRACTOR.update)
+def update(*args, **kwargs):
+    return TLD_EXTRACTOR.update(*args, **kwargs)
+
 def _fetch_page(url):
     try:
         return unicode(urllib2.urlopen(url).read(), 'utf-8')
@@ -234,14 +238,36 @@ class _PublicSuffixListTLDExtractor(object):
 
         return netloc, ''
 
+
 def main():
     """docstring for main"""
-    if sys.argv[1] == "-u" or sys.argv[1] == "--update":
-        TLD_EXTRACTOR.update(True)
-        return
+    import argparse
 
-    url = sys.argv[1]
-    print ' '.join(extract(url))
+    distribution = pkg_resources.get_distribution('tldextract')
+    
+    parser = argparse.ArgumentParser(
+        version='%(prog)s ' + distribution.version,
+        description='Parse hostname from a url or fqdn')
 
+    parser.add_argument('input', metavar='fqdn|url', 
+                        type=unicode, nargs='*', help='fqdn or url')
+
+    parser.add_argument('-u', '--update', default=False, action='store_true')
+
+    args = parser.parse_args()
+
+    if args.update:
+        try:
+            TLD_EXTRACTOR.update(True)
+        except Exception, exc:
+            print >> sys.stderr, exc
+            exit(2)
+    elif len(args.input) is 0:
+        parser.print_usage()
+        exit(1)
+
+    for i in args.input:
+        print ' '.join(extract(i))
+        
 if __name__ == "__main__":
     main()

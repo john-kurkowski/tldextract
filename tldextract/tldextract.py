@@ -253,8 +253,12 @@ def main():
                         type=unicode, nargs='*', help='fqdn or url')
 
     parser.add_argument('-u', '--update', default=False, action='store_true')
+    parser.add_argument('-c', '--cache_file')
 
     args = parser.parse_args()
+
+    if args.cache_file:
+        TLD_EXTRACTOR.cache_file = args.cache_file
 
     if args.update:
         try:

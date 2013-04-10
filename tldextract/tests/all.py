@@ -90,6 +90,9 @@ class ExtractTest(unittest.TestCase):
         self.assertExtract('www', 'metp', 'net.cn', 'http://www.metp.net.cn')
         #self.assertExtract('www', 'net', 'cn', 'http://www.net.cn') # This is unhandled by the PSL. Or is it?
 
+    def test_dns_root_label(self):
+        self.assertExtract('www', 'example', 'com', 'http://www.example.com./')
+
 def test_suite():
     return unittest.TestSuite([
         doctest.DocTestSuite(tldextract.tldextract),

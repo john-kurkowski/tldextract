@@ -129,7 +129,8 @@ class TLDExtract(object):
           .partition("?")[0] \
           .partition("#")[0] \
           .split("@")[-1] \
-          .partition(":")[0]
+          .partition(":")[0] \
+          .rstrip(".")
 
         registered_domain, tld = self._get_tld_extractor().extract(netloc)
         if not tld and netloc and netloc[0].isdigit():

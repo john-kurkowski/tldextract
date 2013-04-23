@@ -215,7 +215,6 @@ class _PublicSuffixListTLDExtractor(object):
         self.tlds = tlds
 
     def extract(self, netloc):
-        netloc = netloc.rstrip('.')
         spl = netloc.split('.')
         for i in range(len(spl)):
             maybe_tld = '.'.join(spl[i:])

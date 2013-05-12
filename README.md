@@ -80,7 +80,9 @@ callable:
     custom_cache_extract('http://www.google.com')
 
 If you want to stay fresh with the TLD definitions--though they don't change
-often--delete the cache file occasionally.
+often--delete the cache file occasionally, or run
+
+    tldextract --update
 
 It is also recommended to delete the file after upgrading this lib.
 

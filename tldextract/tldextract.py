@@ -263,16 +263,16 @@ def main():
     import argparse
 
     distribution = pkg_resources.get_distribution('tldextract')
-    
+
     parser = argparse.ArgumentParser(
         version='%(prog)s ' + distribution.version,
         description='Parse hostname from a url or fqdn')
 
-    parser.add_argument('input', metavar='fqdn|url', 
+    parser.add_argument('input', metavar='fqdn|url',
                         type=unicode, nargs='*', help='fqdn or url')
 
-    parser.add_argument('-u', '--update', default=False, action='store_true')
-    parser.add_argument('-c', '--cache_file')
+    parser.add_argument('-u', '--update', default=False, action='store_true', help='force fetch the latest TLD definitions')
+    parser.add_argument('-c', '--cache_file', help='use an alternate TLD definition file')
 
     args = parser.parse_args()
 
@@ -291,6 +291,6 @@ def main():
 
     for i in args.input:
         print ' '.join(extract(i))
-        
+
 if __name__ == "__main__":
     main()

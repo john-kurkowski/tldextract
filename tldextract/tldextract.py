@@ -230,15 +230,16 @@ class _PublicSuffixListTLDExtractor(object):
 
     def extract(self, netloc):
         spl = netloc.split('.')
+        lower_spl = tuple(el.lower() for el in spl)
         for i in range(len(spl)):
-            maybe_tld = '.'.join(spl[i:])
+            maybe_tld = '.'.join(lower_spl[i:])
             exception_tld = '!' + maybe_tld
             if exception_tld in self.tlds:
                 return '.'.join(spl[:i+1]), '.'.join(spl[i+1:])
 
-            wildcard_tld = '*.' + '.'.join(spl[i+1:])
+            wildcard_tld = '*.' + '.'.join(lower_spl[i+1:])
             if wildcard_tld in self.tlds or maybe_tld in self.tlds:
-                return '.'.join(spl[:i]), maybe_tld
+                return '.'.join(spl[:i]), '.'.join(spl[i:])
 
         return netloc, ''
 

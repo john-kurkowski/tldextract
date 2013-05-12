@@ -237,8 +237,11 @@ class _PublicSuffixListTLDExtractor(object):
             if exception_tld in self.tlds:
                 return '.'.join(spl[:i+1]), '.'.join(spl[i+1:])
 
+            if maybe_tld in self.tlds:
+                return '.'.join(spl[:i]), '.'.join(spl[i:])
+
             wildcard_tld = '*.' + '.'.join(lower_spl[i+1:])
-            if wildcard_tld in self.tlds or maybe_tld in self.tlds:
+            if wildcard_tld in self.tlds:
                 return '.'.join(spl[:i]), '.'.join(spl[i:])
 
         return netloc, ''

@@ -94,6 +94,20 @@ class ExtractResult(tuple):
     domain = property(itemgetter(1), doc='Alias for field number 1')
     tld = property(itemgetter(2), doc='Alias for field number 2')
 
+    @property
+    def registered_domain(self):
+      """
+      Joins the domain and tld fields with a dot, if they're both set.
+
+      >>> extract('http://forums.bbc.co.uk').registered_domain
+      'bbc.co.uk'
+      >>> extract('http://localhost:8080').registered_domain
+      ''
+      """
+      if self.domain and self.tld:
+          return self.domain + '.' + self.tld
+      return ''
+
 class TLDExtract(object):
     def __init__(self, fetch=True, cache_file=''):
         """

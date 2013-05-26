@@ -160,6 +160,13 @@ class TLDExtract(object):
         subdomain, _, domain = registered_domain.rpartition('.')
         return ExtractResult(subdomain, domain, tld)
 
+    def update(self, fetch_now=False):
+        if os.path.exists(self.cache_file):
+            os.unlink(self.cache_file)
+        self._extractor = None
+        if fetch_now:
+            self._get_tld_extractor()
+
     def _get_tld_extractor(self):
         if self._extractor:
             return self._extractor
@@ -210,6 +217,10 @@ TLD_EXTRACTOR = TLDExtract()
 def extract(url):
     return TLD_EXTRACTOR(url)
 
+@wraps(TLD_EXTRACTOR.update)
+def update(*args, **kwargs):
+    return TLD_EXTRACTOR.update(*args, **kwargs)
+
 def _fetch_page(url):
     try:
         return unicode(urllib2.urlopen(url).read(), 'utf-8')
@@ -246,6 +257,40 @@ class _PublicSuffixListTLDExtractor(object):
 
         return netloc, ''
 
+
+def main():
+    """docstring for main"""
+    import argparse
+
+    distribution = pkg_resources.get_distribution('tldextract')
+    
+    parser = argparse.ArgumentParser(
+        version='%(prog)s ' + distribution.version,
+        description='Parse hostname from a url or fqdn')
+
+    parser.add_argument('input', metavar='fqdn|url', 
+                        type=unicode, nargs='*', help='fqdn or url')
+
+    parser.add_argument('-u', '--update', default=False, action='store_true')
+    parser.add_argument('-c', '--cache_file')
+
+    args = parser.parse_args()
+
+    if args.cache_file:
+        TLD_EXTRACTOR.cache_file = args.cache_file
+
+    if args.update:
+        try:
+            TLD_EXTRACTOR.update(True)
+        except Exception, exc:
+            print >> sys.stderr, exc
+            exit(2)
+    elif len(args.input) is 0:
+        parser.print_usage()
+        exit(1)
+
+    for i in args.input:
+        print ' '.join(extract(i))
+        
 if __name__ == "__main__":
-    url = sys.argv[1]
-    print ' '.join(extract(url))
+    main()

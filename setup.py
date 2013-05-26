@@ -1,4 +1,5 @@
 import re
+import sys
 from setuptools import setup
 import tldextract
 
@@ -6,6 +7,10 @@ import tldextract
 # that make pip barf.
 long_description_markdown = tldextract.tldextract.__doc__
 long_description = re.sub(r'(?s)\[(.*?)\]\((http.*?)\)', r'\1', long_description_markdown)
+
+install_requires = []
+if (2,7) > sys.version_info:
+    install_requires.append("argparse>=1.2.1")
 
 setup(
     name = "tldextract",
@@ -27,6 +32,11 @@ setup(
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
     ],
+    entry_points = {
+        'console_scripts':[
+            'tldextract = tldextract.tldextract:main', ]
+    },
     test_suite = 'tldextract.tests.all.test_suite',
+    install_requires=install_requires,
 )
 

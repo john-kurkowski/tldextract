@@ -51,7 +51,7 @@ Or the latest dev version:
 
 Command-line usage, splits the url components by space:
 
-    $ python -m tldextract.tldextract http://forums.bbc.co.uk
+    $ tldextract http://forums.bbc.co.uk
     forums bbc co.uk
 
 Run tests:

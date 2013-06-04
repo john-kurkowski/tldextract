@@ -69,7 +69,8 @@ like for production systems. But I want you to have the latest TLDs, especially
 when I haven't kept this code up to date.)
 
 To avoid this fetch or control the cache's location, use your own extract
-callable:
+callable by setting TLDEXTRACT_CACHE environment variable or by setting the
+cache_file path in TLDExtract initialization.
 
     # extract callable that falls back to the included TLD snapshot, no live HTTP fetching
     no_fetch_extract = tldextract.TLDExtract(fetch=False)
@@ -83,6 +84,10 @@ If you want to stay fresh with the TLD definitions--though they don't change
 often--delete the cache file occasionally, or run
 
     tldextract --update
+
+or:
+
+    env TLDEXTRACT_CACHE="~/tldextract.cache" tldextract --update
 
 It is also recommended to delete the file after upgrading this lib.
 

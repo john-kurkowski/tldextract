@@ -124,7 +124,9 @@ class TLDExtract(object):
 
         """
         self.fetch = fetch
-        self.cache_file = cache_file or os.path.join(os.path.dirname(__file__), '.tld_set')
+        self.cache_file = os.path.expanduser(cache_file or
+            os.environ.get("TLDEXTRACT_CACHE",
+                os.path.join(os.path.dirname(__file__), '.tld_set')))
         self._extractor = None
 
     def __call__(self, url):

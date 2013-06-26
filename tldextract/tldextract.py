@@ -176,11 +176,11 @@ class TLDExtract(object):
             with open(cached_file) as f:
                 self._extractor = _PublicSuffixListTLDExtractor(pickle.load(f))
                 return self._extractor
-        except IOError, ioe:
+        except IOError as ioe:
             file_not_found = ioe.errno == errno.ENOENT
             if not file_not_found:
               LOG.error("error reading TLD cache file %s: %s", cached_file, ioe)
-        except Exception, ex:
+        except Exception as ex:
             LOG.error("error reading TLD cache file %s: %s", cached_file, ex)
 
         tlds = frozenset()
@@ -205,7 +205,7 @@ class TLDExtract(object):
         try:
             with open(cached_file, 'wb') as f:
                 pickle.dump(tlds, f)
-        except IOError, e:
+        except IOError as e:
             LOG.warn("unable to cache TLDs in file %s: %s", cached_file, e)
 
         self._extractor = _PublicSuffixListTLDExtractor(tlds)
@@ -224,7 +224,7 @@ def update(*args, **kwargs):
 def _fetch_page(url):
     try:
         return unicode(urllib2.urlopen(url).read(), 'utf-8')
-    except urllib2.URLError, e:
+    except urllib2.URLError as e:
         LOG.error(e)
         return u''
 
@@ -282,7 +282,7 @@ def main():
     if args.update:
         try:
             TLD_EXTRACTOR.update(True)
-        except Exception, exc:
+        except Exception as exc:
             print >> sys.stderr, exc
             exit(2)
     elif len(args.input) is 0:

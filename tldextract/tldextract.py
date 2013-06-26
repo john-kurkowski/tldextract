@@ -46,12 +46,20 @@ except ImportError:
 
 import re
 import socket
-import urllib2
-import urlparse
+try: # pragma: no cover
+    # Python 2
+    from urllib2 import urlopen, URLError
+    from urlparse import scheme_chars
+except ImportError: # pragma: no cover
+    # Python 3
+    from urllib.request import urlopen
+    from urllib.error import URLError
+    from urllib.parse import scheme_chars
+    unicode = str
 
 LOG = logging.getLogger("tldextract")
 
-SCHEME_RE = re.compile(r'^([' + urlparse.scheme_chars + ']+:)?//')
+SCHEME_RE = re.compile(r'^([' + scheme_chars + ']+:)?//')
 IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
 
 class ExtractResult(tuple):
@@ -200,7 +208,10 @@ class TLDExtract(object):
                 snapshot = sorted(pickle.load(snapshot_file))
             new = sorted(tlds)
             for line in difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=cached_file):
-                print >> sys.stderr, line.encode('utf-8')
+                if sys.version_info < (3,):
+                    sys.stderr.write(line.encode('utf-8') + "\n")
+                else:
+                    sys.stderr.write(line + "\n")
 
         try:
             with open(cached_file, 'wb') as f:
@@ -223,8 +234,8 @@ def update(*args, **kwargs):
 
 def _fetch_page(url):
     try:
-        return unicode(urllib2.urlopen(url).read(), 'utf-8')
-    except urllib2.URLError as e:
+        return unicode(urlopen(url).read(), 'utf-8')
+    except URLError as e:
         LOG.error(e)
         return u''
 
@@ -283,14 +294,14 @@ def main():
         try:
             TLD_EXTRACTOR.update(True)
         except Exception as exc:
-            print >> sys.stderr, exc
+            sys.stderr.write(exc + "\n")
             exit(2)
     elif len(args.input) is 0:
         parser.print_usage()
         exit(1)
 
     for i in args.input:
-        print ' '.join(extract(i))
+        print(' '.join(extract(i)))
 
 if __name__ == "__main__":
     main()

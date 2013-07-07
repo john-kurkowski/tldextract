@@ -5,3 +5,4 @@ dist
 tldextract_app/tldextract
 tldextract_app/web
 tldextract.egg-info
+.tox

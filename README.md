@@ -19,11 +19,11 @@ country code.
 
     >>> import tldextract
     >>> tldextract.extract('http://forums.news.cnn.com/')
-    ExtractResult(subdomain='forums.news', domain='cnn', tld='com')
+    ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
     >>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
-    ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
+    ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
     >>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
-    ExtractResult(subdomain='www', domain='worldbank', tld='org.kg')
+    ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
 
 `ExtractResult` is a namedtuple, so it's simple to access the parts you want.
 
@@ -100,5 +100,5 @@ GAE's free pricing plan until Google cuts it off. Just hit it with
 your favorite HTTP client with the URL you want parsed like so:
 
     $ curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar/baz.html"
-    {"domain": "bbc", "subdomain": "www", "tld": "co.uk"}
+    {"domain": "bbc", "subdomain": "www", "suffix": "co.uk"}
 

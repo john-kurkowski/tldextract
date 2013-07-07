@@ -4,11 +4,11 @@ top-level domain) from the registered domain and subdomains of a URL.
 
     >>> import tldextract
     >>> tldextract.extract('http://forums.news.cnn.com/')
-    ExtractResult(subdomain='forums.news', domain='cnn', tld='com')
+    ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
     >>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
-    ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
+    ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
     >>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
-    ExtractResult(subdomain='www', domain='worldbank', tld='org.kg')
+    ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
 
 `ExtractResult` is a namedtuple, so it's simple to access the parts you want.
 
@@ -30,6 +30,7 @@ import logging
 from operator import itemgetter
 import os
 import sys
+import warnings
 
 try:
     import pkg_resources
@@ -63,13 +64,13 @@ SCHEME_RE = re.compile(r'^([' + scheme_chars + ']+:)?//')
 IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
 
 class ExtractResult(tuple):
-    'ExtractResult(subdomain, domain, tld)'
+    'ExtractResult(subdomain, domain, suffix)'
     __slots__ = ()
-    _fields = ('subdomain', 'domain', 'tld')
+    _fields = ('subdomain', 'domain', 'suffix')
 
-    def __new__(_cls, subdomain, domain, tld):
-        'Create new instance of ExtractResult(subdomain, domain, tld)'
-        return tuple.__new__(_cls, (subdomain, domain, tld))
+    def __new__(_cls, subdomain, domain, suffix):
+        'Create new instance of ExtractResult(subdomain, domain, suffix)'
+        return tuple.__new__(_cls, (subdomain, domain, suffix))
 
     @classmethod
     def _make(cls, iterable, new=tuple.__new__, len=len):
@@ -81,15 +82,17 @@ class ExtractResult(tuple):
 
     def __repr__(self):
         'Return a nicely formatted representation string'
-        return 'ExtractResult(subdomain=%r, domain=%r, tld=%r)' % self
+        return 'ExtractResult(subdomain=%r, domain=%r, suffix=%r)' % self
 
     def _asdict(self):
         'Return a new dict which maps field names to their values'
-        return dict(zip(self._fields, self))
+        base_zip = zip(self._fields, self)
+        zipped = base_zip + [('tld', self.tld)]
+        return dict(zipped)
 
     def _replace(_self, **kwds):
         'Return a new ExtractResult object replacing specified fields with new values'
-        result = _self._make(map(kwds.pop, ('subdomain', 'domain', 'tld'), _self))
+        result = _self._make(map(kwds.pop, ('subdomain', 'domain', 'suffix'), _self))
         if kwds:
             raise ValueError('Got unexpected field names: %r' % kwds.keys())
         return result
@@ -100,20 +103,25 @@ class ExtractResult(tuple):
 
     subdomain = property(itemgetter(0), doc='Alias for field number 0')
     domain = property(itemgetter(1), doc='Alias for field number 1')
-    tld = property(itemgetter(2), doc='Alias for field number 2')
+    suffix = property(itemgetter(2), doc='Alias for field number 2')
+
+    @property
+    def tld(self):
+      warnings.warn('This use of tld is misleading. Use `suffix` instead.', DeprecationWarning)
+      return self.suffix
 
     @property
     def registered_domain(self):
       """
-      Joins the domain and tld fields with a dot, if they're both set.
+      Joins the domain and suffix fields with a dot, if they're both set.
 
       >>> extract('http://forums.bbc.co.uk').registered_domain
       'bbc.co.uk'
       >>> extract('http://localhost:8080').registered_domain
       ''
       """
-      if self.domain and self.tld:
-          return self.domain + '.' + self.tld
+      if self.domain and self.suffix:
+          return self.domain + '.' + self.suffix
       return ''
 
 class TLDExtract(object):
@@ -144,9 +152,9 @@ class TLDExtract(object):
 
         >>> extract = TLDExtract()
         >>> extract('http://forums.news.cnn.com/')
-        ExtractResult(subdomain='forums.news', domain='cnn', tld='com')
+        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
         >>> extract('http://forums.bbc.co.uk/')
-        ExtractResult(subdomain='forums', domain='bbc', tld='co.uk')
+        ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
         """
         netloc = SCHEME_RE.sub("", url) \
           .partition("/")[0] \

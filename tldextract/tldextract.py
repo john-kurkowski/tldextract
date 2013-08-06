@@ -50,7 +50,7 @@ import re
 import socket
 try: # pragma: no cover
     # Python 2
-    from urllib2 import urlopen, URLError
+    from urllib2 import urlopen, URLError, Request
     from urlparse import scheme_chars
 except ImportError: # pragma: no cover
     # Python 3
@@ -61,13 +61,14 @@ except ImportError: # pragma: no cover
 
 LOG = logging.getLogger("tldextract")
 
-PUBLIC_SUFFIX_LIST_URL = 'http://mxr.mozilla.org/mozilla-central/source/netwerk/dns/effective_tld_names.dat?raw=1'
+CACHE_FILE_DEFAULT = os.path.join(os.path.dirname(__file__), '.tld_cache_file.pickle')
+CACHE_FILE = os.path.expanduser(os.environ.get("TLDEXTRACT_CACHE", CACHE_FILE_DEFAULT))
+
+PUBLIC_SUFFIX_LIST_URL = \
+    'http://mxr.mozilla.org/mozilla-central/source/netwerk/dns/effective_tld_names.dat?raw=1'
 
 SCHEME_RE = re.compile(r'^([' + scheme_chars + ']+:)?//')
 IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
-
-INCOMPATIBLE_OPTIONS_MESSAGE = \
-    "Incompatible options/kwargs! (fetch and suffix_list_file are incompatible)"
 
 class ExtractResult(tuple):
     'ExtractResult(subdomain, domain, suffix)'
@@ -131,50 +132,49 @@ class ExtractResult(tuple):
       return ''
 
 class TLDExtract(object):
-    def __init__(self, fetch=True, cache_enabled=True, cache_file='',
-                 suffix_list_file=None,
+    def __init__(self, cache_file=CACHE_FILE, suffix_list_url=PUBLIC_SUFFIX_LIST_URL, fetch=True,
                  fallback_to_snapshot=True):
         """
-        Constructs a callable for extracting subdomain, domain, and TLD
+        Constructs a callable for extracting subdomain, domain, and suffix
         components from a URL.
 
-        If fetch is True (the default) and no cached TLD set is found, this
-        extractor will fetch TLD sources live over HTTP on first use. Set to
-        False to not make HTTP requests. Either way, if the TLD set can't be
-        read, the module will fall back to the included TLD set snapshot.
+        Upon calling it, it first checks for a Python-pickled `cache_file`.
+        By default, the `cache_file` will live in the tldextract directory.
 
-        Specifying cache_file will override the location of the TLD set.
-        Defaults to /path/to/tldextract/.tld_set.
+        You can disable the caching functionality of this module  by setting `cache_file` to False.
 
-        Specifying suffix_list_file allows you to specify the location of
-        the Public Suffix List file, as opposed to using one obtained from
-        the internet. (This is a literal Public Suffix List file, not a pickled
-        representation thereof.) This option is INCOMPATIBLE with `fetch=True`.
+        If the `cache_file` does not exist (such as on the first run), a live HTTP request
+        will be made to obtain the data at the `suffix_list_url` -- unless `suffix_list_url`
+        evaluates to `False`. Therefore you can deactivate the HTTP request functionality
+        by setting this argument to `False` or `None`, like `suffix_list_url=None`.
 
-        By setting fallback_to_snapshot to `False`, you can be sure that
-        tldextract will never fallback to a snapshot file. It will raise an
-        exception if it hits that code path, in this case.
+        The default URL points to the latest version of the Mozilla Public Suffix List, but any
+        similar document could be specified.
+
+        Local files can be specified by using the `file://` protocol. (See `urllib2` documentation.)
+
+        If there is no `cache_file` loaded and no data is found from the `suffix_list_url`,
+        the module will fall back to the included TLD set snapshot. If you do not want
+        this behavior, you may set `fallback_to_snapshot` to False, and an exception will be
+        raised instead.
         """
-        if suffix_list_file and fetch:
-            raise Exception("Incompatible keyword arguments: if you specify "
-                            "a Public Suffix List input file, "
-                            "`fetch` must not be true.")
-        self.fetch = fetch
-        self.suffix_list_file = suffix_list_file
-        if cache_enabled and cache_file:
-            LOG.warn("You specified a cache_file argument, but caching "
-                     "is not enabled. cache_file will not be used.")
-        self.cache_enabled = cache_enabled
-        self.cache_file = os.path.expanduser(cache_file or
-            os.environ.get("TLDEXTRACT_CACHE",
-                os.path.join(os.path.dirname(__file__), '.tld_set')))
+        if not fetch:
+            LOG.warning("The 'fetch' argument is deprecated. Instead of specifying fetch, "
+                        "you should specify suffix_list_url. The equivalent of fetch=False would "
+                        "be suffix_list_url=None.")
+        self.suffix_list_url = suffix_list_url if suffix_list_url and fetch else None
+        self.cache_file = os.path.expanduser(cache_file or '')
         self.fallback_to_snapshot = fallback_to_snapshot
+        if not (self.suffix_list_url or self.cache_file or self.fallback_to_snapshot):
+            raise ValueError("The arguments you have provided disable all ways for tldextract "
+                             "to obtain data. Please provide a suffix list data, a cache_file, "
+                             "or set `fallback_to_snapshot` to `True`.")
         self._extractor = None
 
     def __call__(self, url):
         """
         Takes a string URL and splits it into its subdomain, domain, and
-        gTLD/ccTLD component.
+        suffix (effective TLD, gTLD, ccTLD, etc.) component.
 
         >>> extract = TLDExtract()
         >>> extract('http://forums.news.cnn.com/')
@@ -212,9 +212,11 @@ class TLDExtract(object):
             self._get_tld_extractor()
 
     def _get_tld_extractor(self):
+
         if self._extractor:
             return self._extractor
-        if self.cache_enabled:
+
+        if self.cache_file:
             try:
                 with open(self.cache_file) as f:
                     self._extractor = _PublicSuffixListTLDExtractor(pickle.load(f))
@@ -226,15 +228,11 @@ class TLDExtract(object):
             except Exception as ex:
                 LOG.error("error reading TLD cache file %s: %s", self.cache_file, ex)
 
-        if self.fetch:
-            assert not self.suffix_list_file, INCOMPATIBLE_OPTIONS_MESSAGE
-            suffix_list_source = fetch_page(PUBLIC_SUFFIX_LIST_URL)
+        tlds = frozenset()
+        if self.suffix_list_url:
+            raw_suffix_list_data = fetch_file(self.suffix_list_url)
+            tlds = get_tlds_from_raw_suffix_list_data(raw_suffix_list_data)
 
-        if self.suffix_list_file:
-            assert not self.fetch, INCOMPATIBLE_OPTIONS_MESSAGE
-            suffix_list_source = read_suffix_list_file(self.suffix_list_file)
-
-        tlds = get_tlds_from_suffix_list_source(suffix_list_source)
         if not tlds:
             if self.fallback_to_snapshot:
                 with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
@@ -256,7 +254,7 @@ class TLDExtract(object):
                 else:
                     sys.stderr.write(line + "\n")
 
-        if self.cache_enabled:
+        if self.cache_file:
             try:
                 with open(self.cache_file, 'wb') as f:
                     pickle.dump(tlds, f)
@@ -264,7 +262,6 @@ class TLDExtract(object):
                 LOG.warn("unable to cache TLDs in file %s: %s", self.cache_file, e)
 
         self._extractor = _PublicSuffixListTLDExtractor(tlds)
-        #raise Exception
         return self._extractor
 
 TLD_EXTRACTOR = TLDExtract()
@@ -277,21 +274,22 @@ def extract(url):
 def update(*args, **kwargs):
     return TLD_EXTRACTOR.update(*args, **kwargs)
 
-def get_tlds_from_suffix_list_source(suffix_list_source):
+def get_tlds_from_raw_suffix_list_data(suffix_list_source):
     tld_finder = re.compile(r'^(?P<tld>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
     tld_iter = (m.group('tld') for m in tld_finder.finditer(suffix_list_source))
     return frozenset(tld_iter)
 
-def read_suffix_list_file(suffix_list_file):
-    with open(suffix_list_file) as f:
-        return _decode_utf8(f.read())
 
-def fetch_page(url):
+def fetch_file(url):
+    """ Fetch the file and decode it from UTF-8 encoding to Python unicode.
+    """
+    conn = urlopen(url)
     try:
-        return _decode_utf8(urlopen(url).read())
+        s = conn.read()
     except URLError as e:
         LOG.error(e)
-        return u''
+        s = ''
+    return _decode_utf8(s)
 
 def _decode_utf8(s):
     """ Decode from utf8 to Python unicode string.

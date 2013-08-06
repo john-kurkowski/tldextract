@@ -1,5 +1,6 @@
 *.pyc
 *.tld_set
+*.tld_cache_file.pickle
 build
 dist
 tldextract_app/tldextract

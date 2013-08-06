@@ -19,11 +19,7 @@ class IntegrationTest(unittest.TestCase):
 
         # TODO: if .tld_set_snapshot is up to date, this won't trigger a diff
         extractor('ignore.com')
-
-# In order to test the suffix_list_file option, but keep the input data
-# we're testing against in sync with the `.tld_set_snapshot`, gonna do this
-# slightly hacky thing...
-# TODO(hangtwenty): unpickle .tld_set_snapshot and load that in...
+        
 
 class ExtractTest(unittest.TestCase):
     def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url, fns=(extract,)):

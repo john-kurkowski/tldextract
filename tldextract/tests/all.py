@@ -1,4 +1,3 @@
-from StringIO import StringIO
 import doctest
 import logging
 import os
@@ -6,7 +5,20 @@ import sys
 import unittest
 
 import tldextract
-from tldextract import extract
+
+normal_extract = tldextract.TLDExtract(cache_enabled=False)
+extract_using_real_suffix_list = tldextract.TLDExtract(
+    cache_enabled=False,
+    fetch=True,
+)
+extract_using_fake_suffix_list = tldextract.TLDExtract(
+    cache_enabled=False,
+    suffix_list_url="file://" +
+                    os.path.join(
+                        os.path.dirname(os.path.abspath(__file__)),
+                        'fixtures/mock_suffix_list_fixture.dat'
+                    )
+)
 
 
 class IntegrationTest(unittest.TestCase):
@@ -24,13 +36,13 @@ class IntegrationTest(unittest.TestCase):
 
 
 class ExtractTest(unittest.TestCase):
-    def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url, fns=(extract,)):
-        #TODO(hangtwenty): Add test for extract functions made using suffix_list_file and other new kwargs
+    def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url,
+                      fns=(extract_using_real_suffix_list, normal_extract)):
         for fn in fns:
-          ext = fn(url)
-          self.assertEquals(expected_subdomain, ext.subdomain)
-          self.assertEquals(expected_domain, ext.domain)
-          self.assertEquals(expected_tld, ext.tld)
+            ext = fn(url)
+            self.assertEquals(expected_subdomain, ext.subdomain)
+            self.assertEquals(expected_domain, ext.domain)
+            self.assertEquals(expected_tld, ext.tld)
 
     def test_american(self):
         self.assertExtract('www', 'google', 'com', 'http://www.google.com')
@@ -42,7 +54,8 @@ class ExtractTest(unittest.TestCase):
         self.assertExtract("", "gmail", "com", "http://gmail.com")
 
     def test_nested_subdomain(self):
-        self.assertExtract("media.forums", "theregister", "co.uk", "http://media.forums.theregister.co.uk")
+        self.assertExtract("media.forums", "theregister", "co.uk",
+            "http://media.forums.theregister.co.uk")
 
     def test_odd_but_possible(self):
         self.assertExtract('www', 'www', 'com', 'http://www.www.com')
@@ -67,7 +80,7 @@ class ExtractTest(unittest.TestCase):
         self.assertExtract('mail', 'google', 'com', 'https://mail.google.com/mail')
         self.assertExtract('mail', 'google', 'com', 'ssh://mail.google.com/mail')
         self.assertExtract('mail', 'google', 'com', '//mail.google.com/mail')
-        self.assertExtract('mail', 'google', 'com', 'mail.google.com/mail', fns=(extract,))
+        self.assertExtract('mail', 'google', 'com', 'mail.google.com/mail', fns=(normal_extract,))
 
     def test_port(self):
         self.assertExtract('www', 'github', 'com', 'git+ssh://www.github.com:8443/')
@@ -92,21 +105,36 @@ class ExtractTest(unittest.TestCase):
 
     def test_tld_is_a_website_too(self):
         self.assertExtract('www', 'metp', 'net.cn', 'http://www.metp.net.cn')
-        #self.assertExtract('www', 'net', 'cn', 'http://www.net.cn') # This is unhandled by the PSL. Or is it?
+        #self.assertExtract('www', 'net', 'cn', 'http://www.net.cn') # This is unhandled by the
+        # PSL. Or is it?
 
     def test_dns_root_label(self):
         self.assertExtract('www', 'example', 'com', 'http://www.example.com./')
+
+
+class ExtractTestUsingCustomSuffixListFile(unittest.TestCase):
+    def test_suffix_which_is_not_in_custom_list(self):
+        result = extract_using_fake_suffix_list("www.google.com")
+        self.assertEquals(result.suffix, "")
+
+    def test_custom_suffixes(self):
+        for custom_suffix in ('foo', 'bar', 'baz'):
+            result = extract_using_fake_suffix_list("www.foo.bar.baz.quux" + "." + custom_suffix)
+            self.assertEquals(result.suffix, custom_suffix)
 
 def test_suite():
     return unittest.TestSuite([
         doctest.DocTestSuite(tldextract.tldextract),
         unittest.TestLoader().loadTestsFromTestCase(IntegrationTest),
         unittest.TestLoader().loadTestsFromTestCase(ExtractTest),
+        unittest.TestLoader().loadTestsFromTestCase(ExtractTestUsingCustomSuffixListFile),
     ])
+
 
 def run_tests(stream=sys.stderr):
     suite = test_suite()
     unittest.TextTestRunner(stream).run(suite)
+
 
 if __name__ == "__main__":
     run_tests()

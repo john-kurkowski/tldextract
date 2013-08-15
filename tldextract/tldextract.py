@@ -133,7 +133,8 @@ class ExtractResult(tuple):
 class TLDExtract(object):
     def __init__(self, fetch=True, cache_enabled=True, cache_file='',
                  suffix_list_file=None,
-                 fallback_to_snapshot=True):
+                 fallback_to_snapshot=True,
+                 debug=False):
         """
         Constructs a callable for extracting subdomain, domain, and TLD
         components from a URL.
@@ -169,6 +170,7 @@ class TLDExtract(object):
             os.environ.get("TLDEXTRACT_CACHE",
                 os.path.join(os.path.dirname(__file__), '.tld_set')))
         self.fallback_to_snapshot = fallback_to_snapshot
+        self.debug = debug
         self._extractor = None
 
     def __call__(self, url):
@@ -244,17 +246,18 @@ class TLDExtract(object):
                 raise Exception("tlds is empty, but fallback_to_snapshot is set"
                                 " to false. Cannot proceed without tlds.")
 
-        LOG.info("computed TLDs: [%s, ...]", ', '.join(list(tlds)[:10]))
-        if LOG.isEnabledFor(logging.DEBUG):
-            import difflib
-            with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
-                snapshot = sorted(pickle.load(snapshot_file))
-            new = sorted(tlds)
-            for line in difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=self.cache_file):
-                if sys.version_info < (3,):
-                    sys.stderr.write(line.encode('utf-8') + "\n")
-                else:
-                    sys.stderr.write(line + "\n")
+        if self.debug:
+            LOG.info("computed TLDs: [%s, ...]", ', '.join(list(tlds)[:10]))
+            if LOG.isEnabledFor(logging.DEBUG):
+                import difflib
+                with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
+                    snapshot = sorted(pickle.load(snapshot_file))
+                new = sorted(tlds)
+                for line in difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=self.cache_file):
+                    if sys.version_info < (3,):
+                        sys.stderr.write(line.encode('utf-8') + "\n")
+                    else:
+                        sys.stderr.write(line + "\n")
 
         if self.cache_enabled:
             try:

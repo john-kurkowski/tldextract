@@ -229,10 +229,16 @@ class TLDExtract(object):
             except Exception as ex:
                 LOG.error("error reading TLD cache file %s: %s", self.cache_file, ex)
 
-        if self.fetch or self.suffix_list_url:
-            suffix_list_source = fetch_file(self.suffix_list_url)
+        if self.fetch:
+            raw_suffix_list_data = fetch_file(self.suffix_list_url)
+        else:
+            raw_suffix_list_data = u''
 
-        tlds = get_tlds_from_suffix_list_source(suffix_list_source)
+        if not self.fetch and not self.cache_enabled:
+            LOG.error("Your arguments suggest not to fetch the suffix list, but you also "
+                            "have cache disabled. No way to get the suffix list!")
+
+        tlds = get_tlds_from_raw_suffix_list_data(raw_suffix_list_data)
         if not tlds:
             if self.fallback_to_snapshot:
                 with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
@@ -276,7 +282,7 @@ def extract(url):
 def update(*args, **kwargs):
     return TLD_EXTRACTOR.update(*args, **kwargs)
 
-def get_tlds_from_suffix_list_source(suffix_list_source):
+def get_tlds_from_raw_suffix_list_data(suffix_list_source):
     tld_finder = re.compile(r'^(?P<tld>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
     tld_iter = (m.group('tld') for m in tld_finder.finditer(suffix_list_source))
     return frozenset(tld_iter)

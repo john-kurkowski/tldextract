@@ -50,7 +50,7 @@ import re
 import socket
 try: # pragma: no cover
     # Python 2
-    from urllib2 import urlopen, URLError
+    from urllib2 import urlopen, URLError, Request
     from urlparse import scheme_chars
 except ImportError: # pragma: no cover
     # Python 3
@@ -65,9 +65,6 @@ PUBLIC_SUFFIX_LIST_URL = 'http://mxr.mozilla.org/mozilla-central/source/netwerk/
 
 SCHEME_RE = re.compile(r'^([' + scheme_chars + ']+:)?//')
 IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
-
-INCOMPATIBLE_OPTIONS_MESSAGE = \
-    "Incompatible options/kwargs! (fetch and suffix_list_file are incompatible)"
 
 class ExtractResult(tuple):
     'ExtractResult(subdomain, domain, suffix)'
@@ -132,7 +129,7 @@ class ExtractResult(tuple):
 
 class TLDExtract(object):
     def __init__(self, fetch=True, cache_enabled=True, cache_file='',
-                 suffix_list_file=None,
+                 suffix_list_url=PUBLIC_SUFFIX_LIST_URL,
                  fallback_to_snapshot=True,
                  debug=False):
         """
@@ -147,21 +144,25 @@ class TLDExtract(object):
         Specifying cache_file will override the location of the TLD set.
         Defaults to /path/to/tldextract/.tld_set.
 
-        Specifying suffix_list_file allows you to specify the location of
-        the Public Suffix List file, as opposed to using one obtained from
-        the internet. (This is a literal Public Suffix List file, not a pickled
-        representation thereof.) This option is INCOMPATIBLE with `fetch=True`.
+        Specifying suffix_list_url allows you to specify the location of
+        the Public Suffix List file, whether on the internet ('http[s]://', etc)
+        or on the local filesystem ('file://...').
+        (This is a literal Public Suffix List file, not a pickled
+        representation thereof.)
 
         By setting fallback_to_snapshot to `False`, you can be sure that
         tldextract will never fallback to a snapshot file. It will raise an
         exception if it hits that code path, in this case.
         """
-        if suffix_list_file and fetch:
-            raise Exception("Incompatible keyword arguments: if you specify "
-                            "a Public Suffix List input file, "
-                            "`fetch` must not be true.")
+        if suffix_list_url and not fetch:
+            LOG.warn("You specified a suffix_list_url, but `fetch==False`. "
+                     "That means tldextract will not load in the file at "
+                     "that url, and the argument will have no effect. If "
+                     "you want to load in from this url, set `fetch=True`. "
+                     "Also note that this file is only used if a cache file "
+                     "is not found, or if `cache_enabled` is `False`!  ")
         self.fetch = fetch
-        self.suffix_list_file = suffix_list_file
+        self.suffix_list_url = suffix_list_url
         if cache_enabled and cache_file:
             LOG.warn("You specified a cache_file argument, but caching "
                      "is not enabled. cache_file will not be used.")
@@ -228,13 +229,8 @@ class TLDExtract(object):
             except Exception as ex:
                 LOG.error("error reading TLD cache file %s: %s", self.cache_file, ex)
 
-        if self.fetch:
-            assert not self.suffix_list_file, INCOMPATIBLE_OPTIONS_MESSAGE
-            suffix_list_source = fetch_page(PUBLIC_SUFFIX_LIST_URL)
-
-        if self.suffix_list_file:
-            assert not self.fetch, INCOMPATIBLE_OPTIONS_MESSAGE
-            suffix_list_source = read_suffix_list_file(self.suffix_list_file)
+        if self.fetch or self.suffix_list_url:
+            suffix_list_source = fetch_file(self.suffix_list_url)
 
         tlds = get_tlds_from_suffix_list_source(suffix_list_source)
         if not tlds:
@@ -285,16 +281,25 @@ def get_tlds_from_suffix_list_source(suffix_list_source):
     tld_iter = (m.group('tld') for m in tld_finder.finditer(suffix_list_source))
     return frozenset(tld_iter)
 
-def read_suffix_list_file(suffix_list_file):
-    with open(suffix_list_file) as f:
-        return _decode_utf8(f.read())
 
-def fetch_page(url):
+def fetch_file(url):
+    """ Fetch the file and decode it from UTF-8 encoding to Python unicode.
+    """
+    # NOTE: On Python 2.7.3 you get a pretty misleading, irrelevant AttributeError message bubbling
+    # up from urllib2, if the `url` argument happens to be `None`. (Something about the `request`
+    # object being `None`, and thus having no `timeout` attribute.) With this slightly more verbose
+    # form, where you create the timeout first, the error message in this case is slightly less
+    # bewildering.
+    timeout = 10
+    req = Request(url)
+    req.timeout = timeout
+    conn = urlopen(req, timeout=timeout)
     try:
-        return _decode_utf8(urlopen(url).read())
+        s = conn.read()
     except URLError as e:
         LOG.error(e)
-        return u''
+        s = ''
+    return _decode_utf8(s)
 
 def _decode_utf8(s):
     """ Decode from utf8 to Python unicode string.

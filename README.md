@@ -91,6 +91,30 @@ or:
 
 It is also recommended to delete the file after upgrading this lib.
 
+### Specifying your own URL or file for the Suffix List data
+
+You can specify your own input data in place of the default Mozilla Public Suffix List:
+
+    extract = tldextract.TLDExtract(
+        fetch=True,
+        suffix_list_url="http://foo.bar.baz",
+        # Recommended: Specify your own cache file, to minimize ambiguities about where
+        # tldextract is getting its data, or cached data, from.
+        cache_file='/path/to/your/cache/file')
+
+The above snippet will fetch from the URL *you* specified, upon first need to download the
+suffix list (i.e. if the cache_file doesn't exist).
+
+If you want to use input data from your local filesystem, just use the `file://` protocol:
+
+    extract = tldextract.TLDExtract(
+        fetch=True,
+        suffix_list_url="file://absolute/path/to/your/local/suffix/list/file",
+        cache_file='/path/to/your/cache/file')
+
+Use an absolute path when specifying the `suffix_list_url` keyword argument. `os.path` is your
+friend.
+
 # Public API
 
 I know it's just one method, but I've needed this functionality in a few

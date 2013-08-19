@@ -73,12 +73,16 @@ callable by setting TLDEXTRACT_CACHE environment variable or by setting the
 cache_file path in TLDExtract initialization.
 
     # extract callable that falls back to the included TLD snapshot, no live HTTP fetching
-    no_fetch_extract = tldextract.TLDExtract(fetch=False)
+    no_fetch_extract = tldextract.TLDExtract(suffix_list_file=False)
     no_fetch_extract('http://www.google.com')
 
     # extract callable that reads/writes the updated TLD set to a different path
     custom_cache_extract = tldextract.TLDExtract(cache_file='/path/to/your/cache/file')
     custom_cache_extract('http://www.google.com')
+
+    # extract callable that doesn't use caching
+    no_cache_extract = tldextract.TLDExtract(cache_file=False)
+    no_cache_extract('http://www.google.com')
 
 If you want to stay fresh with the TLD definitions--though they don't change
 often--delete the cache file occasionally, or run
@@ -96,7 +100,6 @@ It is also recommended to delete the file after upgrading this lib.
 You can specify your own input data in place of the default Mozilla Public Suffix List:
 
     extract = tldextract.TLDExtract(
-        fetch=True,
         suffix_list_url="http://foo.bar.baz",
         # Recommended: Specify your own cache file, to minimize ambiguities about where
         # tldextract is getting its data, or cached data, from.
@@ -108,7 +111,6 @@ suffix list (i.e. if the cache_file doesn't exist).
 If you want to use input data from your local filesystem, just use the `file://` protocol:
 
     extract = tldextract.TLDExtract(
-        fetch=True,
         suffix_list_url="file://absolute/path/to/your/local/suffix/list/file",
         cache_file='/path/to/your/cache/file')
 

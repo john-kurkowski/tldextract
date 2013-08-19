@@ -20,6 +20,7 @@ top-level domain) from the registered domain and subdomains of a URL.
 """
 
 from __future__ import with_statement
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -49,7 +50,7 @@ import re
 import socket
 try: # pragma: no cover
     # Python 2
-    from urllib2 import urlopen, URLError
+    from urllib2 import urlopen, URLError, Request
     from urlparse import scheme_chars
 except ImportError: # pragma: no cover
     # Python 3
@@ -59,6 +60,12 @@ except ImportError: # pragma: no cover
     unicode = str
 
 LOG = logging.getLogger("tldextract")
+
+CACHE_FILE_DEFAULT = os.path.join(os.path.dirname(__file__), '.tld_cache_file.pickle')
+CACHE_FILE = os.path.expanduser(os.environ.get("TLDEXTRACT_CACHE", CACHE_FILE_DEFAULT))
+
+PUBLIC_SUFFIX_LIST_URL = \
+    'http://mxr.mozilla.org/mozilla-central/source/netwerk/dns/effective_tld_names.dat?raw=1'
 
 SCHEME_RE = re.compile(r'^([' + scheme_chars + ']+:)?//')
 IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
@@ -125,30 +132,48 @@ class ExtractResult(tuple):
       return ''
 
 class TLDExtract(object):
-    def __init__(self, fetch=True, cache_file=''):
+    def __init__(self, cache_file=CACHE_FILE, suffix_list_url=PUBLIC_SUFFIX_LIST_URL,
+                 fallback_to_snapshot=True):
         """
-        Constructs a callable for extracting subdomain, domain, and TLD
+        Constructs a callable for extracting subdomain, domain, and suffix
         components from a URL.
 
-        If fetch is True (the default) and no cached TLD set is found, this
-        extractor will fetch TLD sources live over HTTP on first use. Set to
-        False to not make HTTP requests. Either way, if the TLD set can't be
-        read, the module will fall back to the included TLD set snapshot.
+        Upon calling it, it first checks for a Python-pickled `cache_file`.
+        By default, the `cache_file` will live in the tldextract directory.
 
-        Specifying cache_file will override the location of the TLD set.
-        Defaults to /path/to/tldextract/.tld_set.
+        You can disable the caching functionality of this module  by setting `cache_file` to False.
 
+        If the `cache_file` does not exist (such as on the first run), a live HTTP request
+        will be made to obtain the data at the `suffix_list_url` -- unless `suffix_list_url`
+        evaluates to `False`. Therefore you can deactivate the HTTP request functionality
+        by setting this argument to `False`.
+
+        The default URL points to the latest version of the Mozilla Public Suffix List, but any
+        similar document could be specified.
+
+        Local files can be specified by using the `file://` protocol. (See `urllib2` documentation.)
+
+        If there is no `cache_file` loaded and no data is found from the `suffix_list_url`,
+        the module will fall back to the included TLD set snapshot. If you do not want
+        this behavior, you may set `fallback_to_snapshot` to False, and an exception will be
+        raised instead.
         """
-        self.fetch = fetch
-        self.cache_file = os.path.expanduser(cache_file or
-            os.environ.get("TLDEXTRACT_CACHE",
-                os.path.join(os.path.dirname(__file__), '.tld_set')))
+        self.suffix_list_url = suffix_list_url
+        if cache_file:
+            self.cache_file = os.path.expanduser(cache_file)
+        else:
+            self.cache_file = cache_file
+        self.fallback_to_snapshot = fallback_to_snapshot
+        if not (self.suffix_list_url or self.cache_file or self.fallback_to_snapshot):
+            raise ValueError("The arguments you have provided disable all ways for tldextract "
+                             "to obtain data. Please provide a suffix list data, a cache_file, "
+                             "or set `fallback_to_snapshot` to `True`.")
         self._extractor = None
 
     def __call__(self, url):
         """
         Takes a string URL and splits it into its subdomain, domain, and
-        gTLD/ccTLD component.
+        suffix (effective TLD, gTLD, ccTLD, etc.) component.
 
         >>> extract = TLDExtract()
         >>> extract('http://forums.news.cnn.com/')
@@ -186,30 +211,35 @@ class TLDExtract(object):
             self._get_tld_extractor()
 
     def _get_tld_extractor(self):
+
         if self._extractor:
             return self._extractor
 
-        cached_file = self.cache_file
-        try:
-            with open(cached_file) as f:
-                self._extractor = _PublicSuffixListTLDExtractor(pickle.load(f))
-                return self._extractor
-        except IOError as ioe:
-            file_not_found = ioe.errno == errno.ENOENT
-            if not file_not_found:
-              LOG.error("error reading TLD cache file %s: %s", cached_file, ioe)
-        except Exception as ex:
-            LOG.error("error reading TLD cache file %s: %s", cached_file, ex)
+        if self.cache_file:
+            try:
+                with open(self.cache_file) as f:
+                    self._extractor = _PublicSuffixListTLDExtractor(pickle.load(f))
+                    return self._extractor
+            except IOError as ioe:
+                file_not_found = ioe.errno == errno.ENOENT
+                if not file_not_found:
+                  LOG.error("error reading TLD cache file %s: %s", self.cache_file, ioe)
+            except Exception as ex:
+                LOG.error("error reading TLD cache file %s: %s", self.cache_file, ex)
 
         tlds = frozenset()
-        if self.fetch:
-            tld_sources = (_PublicSuffixListSource,)
-            tlds = frozenset(tld for tld_source in tld_sources for tld in tld_source())
+        if self.suffix_list_url:
+            raw_suffix_list_data = fetch_file(self.suffix_list_url)
+            tlds = get_tlds_from_raw_suffix_list_data(raw_suffix_list_data)
 
         if not tlds:
-            with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
-                self._extractor = _PublicSuffixListTLDExtractor(pickle.load(snapshot_file))
-                return self._extractor
+            if self.fallback_to_snapshot:
+                with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
+                    self._extractor = _PublicSuffixListTLDExtractor(pickle.load(snapshot_file))
+                    return self._extractor
+            else:
+                raise Exception("tlds is empty, but fallback_to_snapshot is set"
+                                " to false. Cannot proceed without tlds.")
 
         LOG.info("computed TLDs: [%s, ...]", ', '.join(list(tlds)[:10]))
         if LOG.isEnabledFor(logging.DEBUG):
@@ -217,17 +247,18 @@ class TLDExtract(object):
             with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
                 snapshot = sorted(pickle.load(snapshot_file))
             new = sorted(tlds)
-            for line in difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=cached_file):
+            for line in difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=self.cache_file):
                 if sys.version_info < (3,):
                     sys.stderr.write(line.encode('utf-8') + "\n")
                 else:
                     sys.stderr.write(line + "\n")
 
-        try:
-            with open(cached_file, 'wb') as f:
-                pickle.dump(tlds, f)
-        except IOError as e:
-            LOG.warn("unable to cache TLDs in file %s: %s", cached_file, e)
+        if self.cache_file:
+            try:
+                with open(self.cache_file, 'wb') as f:
+                    pickle.dump(tlds, f)
+            except IOError as e:
+                LOG.warn("unable to cache TLDs in file %s: %s", self.cache_file, e)
 
         self._extractor = _PublicSuffixListTLDExtractor(tlds)
         return self._extractor
@@ -242,19 +273,30 @@ def extract(url):
 def update(*args, **kwargs):
     return TLD_EXTRACTOR.update(*args, **kwargs)
 
-def _fetch_page(url):
+def get_tlds_from_raw_suffix_list_data(suffix_list_source):
+    tld_finder = re.compile(r'^(?P<tld>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
+    tld_iter = (m.group('tld') for m in tld_finder.finditer(suffix_list_source))
+    return frozenset(tld_iter)
+
+
+def fetch_file(url):
+    """ Fetch the file and decode it from UTF-8 encoding to Python unicode.
+    """
+    conn = urlopen(url)
     try:
-        return unicode(urlopen(url).read(), 'utf-8')
+        s = conn.read()
     except URLError as e:
         LOG.error(e)
-        return u''
+        s = ''
+    return _decode_utf8(s)
 
-def _PublicSuffixListSource():
-    page = _fetch_page('http://mxr.mozilla.org/mozilla-central/source/netwerk/dns/effective_tld_names.dat?raw=1')
+def _decode_utf8(s):
+    """ Decode from utf8 to Python unicode string.
 
-    tld_finder = re.compile(r'^(?P<tld>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
-    tlds = [m.group('tld') for m in tld_finder.finditer(page)]
-    return tlds
+    The suffix list, wherever its origin, should be UTF-8 encoded.
+    """
+    return unicode(s, 'utf-8')
+
 
 class _PublicSuffixListTLDExtractor(object):
     def __init__(self, tlds):
@@ -280,7 +322,6 @@ class _PublicSuffixListTLDExtractor(object):
 
 
 def main():
-    """docstring for main"""
     import argparse
 
     distribution = pkg_resources.get_distribution('tldextract')

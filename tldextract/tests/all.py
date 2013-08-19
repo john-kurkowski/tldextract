@@ -2,10 +2,40 @@ import doctest
 import logging
 import os
 import sys
+import tempfile
 import unittest
 
 import tldextract
-from tldextract import extract
+
+
+def _temporary_file():
+    """ Make a writable temporary file and return its absolute path.
+    """
+    return tempfile.mkstemp()[1]
+
+
+fake_suffix_list_url = "file://" + os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    'fixtures/fake_suffix_list_fixture.dat'
+)
+
+extract = tldextract.TLDExtract(cache_file=_temporary_file())
+extract_no_cache = tldextract.TLDExtract(cache_file=False)
+extract_using_real_local_suffix_list = tldextract.TLDExtract(cache_file=_temporary_file())
+extract_using_real_local_suffix_list_no_cache = tldextract.TLDExtract(cache_file=False)
+extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
+    cache_file=None,
+    suffix_list_url=None
+)
+extract_using_fake_suffix_list = tldextract.TLDExtract(
+    cache_file=_temporary_file(),
+    suffix_list_url=fake_suffix_list_url
+)
+extract_using_fake_suffix_list_no_cache = tldextract.TLDExtract(
+    cache_file=None,
+    suffix_list_url=fake_suffix_list_url
+)
+
 
 class IntegrationTest(unittest.TestCase):
     def test_log_snapshot_diff(self):
@@ -20,13 +50,28 @@ class IntegrationTest(unittest.TestCase):
         # TODO: if .tld_set_snapshot is up to date, this won't trigger a diff
         extractor('ignore.com')
 
+    def test_bad_kwargs(self):
+        self.assertRaises(
+            ValueError,
+            tldextract.TLDExtract,
+            cache_file=False, suffix_list_url=False, fallback_to_snapshot=False
+        )
+
+
 class ExtractTest(unittest.TestCase):
-    def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url, fns=(extract,)):
+    def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url,
+                      fns=(
+                          extract,
+                          extract_no_cache,
+                          extract_using_real_local_suffix_list,
+                          extract_using_real_local_suffix_list_no_cache,
+                          extract_using_fallback_to_snapshot_no_cache
+                      )):
         for fn in fns:
-          ext = fn(url)
-          self.assertEquals(expected_subdomain, ext.subdomain)
-          self.assertEquals(expected_domain, ext.domain)
-          self.assertEquals(expected_tld, ext.tld)
+            ext = fn(url)
+            self.assertEquals(expected_subdomain, ext.subdomain)
+            self.assertEquals(expected_domain, ext.domain)
+            self.assertEquals(expected_tld, ext.tld)
 
     def test_american(self):
         self.assertExtract('www', 'google', 'com', 'http://www.google.com')
@@ -38,7 +83,8 @@ class ExtractTest(unittest.TestCase):
         self.assertExtract("", "gmail", "com", "http://gmail.com")
 
     def test_nested_subdomain(self):
-        self.assertExtract("media.forums", "theregister", "co.uk", "http://media.forums.theregister.co.uk")
+        self.assertExtract("media.forums", "theregister", "co.uk",
+            "http://media.forums.theregister.co.uk")
 
     def test_odd_but_possible(self):
         self.assertExtract('www', 'www', 'com', 'http://www.www.com')
@@ -88,21 +134,39 @@ class ExtractTest(unittest.TestCase):
 
     def test_tld_is_a_website_too(self):
         self.assertExtract('www', 'metp', 'net.cn', 'http://www.metp.net.cn')
-        #self.assertExtract('www', 'net', 'cn', 'http://www.net.cn') # This is unhandled by the PSL. Or is it?
+        #self.assertExtract('www', 'net', 'cn', 'http://www.net.cn') # This is unhandled by the
+        # PSL. Or is it?
 
     def test_dns_root_label(self):
         self.assertExtract('www', 'example', 'com', 'http://www.example.com./')
+
+
+class ExtractTestUsingCustomSuffixListFile(unittest.TestCase):
+    def test_suffix_which_is_not_in_custom_list(self):
+        for fn in (extract_using_fake_suffix_list, extract_using_fake_suffix_list_no_cache):
+            result = fn("www.google.com")
+            self.assertEquals(result.suffix, "")
+
+    def test_custom_suffixes(self):
+        for fn in (extract_using_fake_suffix_list, extract_using_fake_suffix_list_no_cache):
+            for custom_suffix in ('foo', 'bar', 'baz'):
+                result = fn("www.foo.bar.baz.quux" + "." + custom_suffix)
+                self.assertEquals(result.suffix, custom_suffix)
+
 
 def test_suite():
     return unittest.TestSuite([
         doctest.DocTestSuite(tldextract.tldextract),
         unittest.TestLoader().loadTestsFromTestCase(IntegrationTest),
         unittest.TestLoader().loadTestsFromTestCase(ExtractTest),
+        unittest.TestLoader().loadTestsFromTestCase(ExtractTestUsingCustomSuffixListFile),
     ])
+
 
 def run_tests(stream=sys.stderr):
     suite = test_suite()
     unittest.TextTestRunner(stream).run(suite)
+
 
 if __name__ == "__main__":
     run_tests()

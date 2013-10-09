@@ -250,7 +250,7 @@ def _fetch_page(url):
         return u''
 
 def _PublicSuffixListSource():
-    page = _fetch_page('http://mxr.mozilla.org/mozilla-central/source/netwerk/dns/effective_tld_names.dat?raw=1')
+    page = _fetch_page('https://raw.github.com/mozilla/mozilla-central/master/netwerk/dns/effective_tld_names.dat')
 
     tld_finder = re.compile(r'^(?P<tld>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
     tlds = [m.group('tld') for m in tld_finder.finditer(page)]
@@ -301,11 +301,7 @@ def main():
         TLD_EXTRACTOR.cache_file = args.cache_file
 
     if args.update:
-        try:
-            TLD_EXTRACTOR.update(True)
-        except Exception as exc:
-            sys.stderr.write(exc + "\n")
-            exit(2)
+        TLD_EXTRACTOR.update(True)
     elif len(args.input) is 0:
         parser.print_usage()
         exit(1)

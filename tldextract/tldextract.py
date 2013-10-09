@@ -51,6 +51,7 @@ try: # pragma: no cover
     # Python 2
     from urllib2 import urlopen, URLError
     from urlparse import scheme_chars
+    from httplib import BadStatusLine
 except ImportError: # pragma: no cover
     # Python 3
     from urllib.request import urlopen
@@ -246,6 +247,8 @@ def _fetch_page(url):
     try:
         return unicode(urlopen(url).read(), 'utf-8')
     except URLError as e:
+        LOG.error(e)
+    except BadStatusLine as e:
         LOG.error(e)
         return u''
 

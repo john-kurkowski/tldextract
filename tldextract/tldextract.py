@@ -49,12 +49,11 @@ import re
 import socket
 try: # pragma: no cover
     # Python 2
-    from urllib2 import urlopen, URLError
+    from urllib2 import urlopen
     from urlparse import scheme_chars
 except ImportError: # pragma: no cover
     # Python 3
     from urllib.request import urlopen
-    from urllib.error import URLError
     from urllib.parse import scheme_chars
     unicode = str
 
@@ -242,15 +241,13 @@ def extract(url):
 def update(*args, **kwargs):
     return TLD_EXTRACTOR.update(*args, **kwargs)
 
-def _fetch_page(url):
-    try:
-        return unicode(urlopen(url).read(), 'utf-8')
-    except URLError as e:
-        LOG.error(e)
-        return u''
-
 def _PublicSuffixListSource():
-    page = _fetch_page('https://raw.github.com/mozilla/mozilla-central/master/netwerk/dns/effective_tld_names.dat')
+    url = 'https://raw.github.com/mozilla/mozilla-central/master/netwerk/dns/effective_tld_names.dat'
+    try:
+        page = unicode(urlopen(url).read(), 'utf-8')
+    except Exception as e:
+        LOG.exception('Exception reading Public Suffix List url ' + url + '. Consider using a mirror or constructing your TLDExtract with `fetch=False`.')
+        page = ''
 
     tld_finder = re.compile(r'^(?P<tld>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
     tlds = [m.group('tld') for m in tld_finder.finditer(page)]

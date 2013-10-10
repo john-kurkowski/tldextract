@@ -14,7 +14,7 @@ class IntegrationTest(unittest.TestCase):
         extractor = tldextract.TLDExtract()
         try:
             os.remove(extractor.cache_file)
-        except IOError:
+        except (IOError, OSError):
             pass
 
         # TODO: if .tld_set_snapshot is up to date, this won't trigger a diff

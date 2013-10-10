@@ -280,6 +280,8 @@ def main():
     """docstring for main"""
     import argparse
 
+    logging.basicConfig()
+
     distribution = pkg_resources.get_distribution('tldextract')
 
     parser = argparse.ArgumentParser(

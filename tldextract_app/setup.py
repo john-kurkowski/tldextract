@@ -2,12 +2,18 @@ import os
 import sys
 
 if __name__ == "__main__":
+    # Must include deps in this folder for GAE. It doesn't use a e.g.
+    # requirements.txt.
     cwd = os.path.dirname(__file__)
     sys.path.append(os.path.abspath(os.path.join(cwd, os.pardir)))
-    for mod in ('tldextract', 'web'):
-        mod = __import__(mod)
-        loc = os.path.dirname(mod.__file__)
-        symlink = os.path.join(cwd, mod.__name__)
-        os.symlink(loc, symlink)
-    sys.exit(0)
+    deps = ('tldextract', 'web')
+    for modname in deps:
+        symlink = os.path.join(cwd, modname)
+        try:
+            os.remove(symlink)
+        except (OSError, IOError) as e:
+            pass
 
+        mod = __import__(modname)
+        loc = os.path.dirname(mod.__file__)
+        os.symlink(loc, symlink)

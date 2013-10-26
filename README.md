@@ -73,7 +73,7 @@ callable by setting TLDEXTRACT_CACHE environment variable or by setting the
 cache_file path in TLDExtract initialization.
 
     # extract callable that falls back to the included TLD snapshot, no live HTTP fetching
-    no_fetch_extract = tldextract.TLDExtract(suffix_list_file=False)
+    no_fetch_extract = tldextract.TLDExtract(suffix_list_url=False)
     no_fetch_extract('http://www.google.com')
 
     # extract callable that reads/writes the updated TLD set to a different path

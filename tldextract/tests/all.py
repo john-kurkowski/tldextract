@@ -100,12 +100,12 @@ class ExtractTest(unittest.TestCase):
         self.assertExtract('', 'www', 'com', 'http://www.com')
 
     def test_local_host(self):
-        self.assertExtract('', 'wiki', '', 'http://wiki/')
-        self.assertExtract('wiki', 'bizarre', '', 'http://wiki.bizarre')
+        self.assertExtract('', 'internalunlikelyhostname', '', 'http://internalunlikelyhostname/')
+        self.assertExtract('internalunlikelyhostname', 'bizarre', '', 'http://internalunlikelyhostname.bizarre')
 
     def test_qualified_local_host(self):
-        self.assertExtract('', 'wiki', 'info', 'http://wiki.info/')
-        self.assertExtract('wiki', 'information', '', 'http://wiki.information/')
+        self.assertExtract('', 'internalunlikelyhostname', 'info', 'http://internalunlikelyhostname.info/')
+        self.assertExtract('internalunlikelyhostname', 'information', '', 'http://internalunlikelyhostname.information/')
 
     def test_ip(self):
         self.assertExtract('', '216.22.0.192', '', 'http://216.22.0.192/')

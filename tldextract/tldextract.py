@@ -25,6 +25,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
+from contextlib import closing
 import errno
 from functools import wraps
 import logging
@@ -234,7 +235,7 @@ class TLDExtract(object):
 
         if not tlds:
             if self.fallback_to_snapshot:
-                with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
+                with closing(pkg_resources.resource_stream(__name__, '.tld_set_snapshot')) as snapshot_file:
                     self._extractor = _PublicSuffixListTLDExtractor(pickle.load(snapshot_file))
                     return self._extractor
             else:
@@ -244,7 +245,7 @@ class TLDExtract(object):
         LOG.info("computed TLDs: [%s, ...]", ', '.join(list(tlds)[:10]))
         if LOG.isEnabledFor(logging.DEBUG):
             import difflib
-            with pkg_resources.resource_stream(__name__, '.tld_set_snapshot') as snapshot_file:
+            with closing(pkg_resources.resource_stream(__name__, '.tld_set_snapshot')) as snapshot_file:
                 snapshot = sorted(pickle.load(snapshot_file))
             new = sorted(tlds)
             for line in difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=self.cache_file):

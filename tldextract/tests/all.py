@@ -65,7 +65,7 @@ class IntegrationTest(unittest.TestCase):
         GitHub issue #41.
         """
         extractor = tldextract.TLDExtract(suffix_list_url='foo', fetch=False)
-        assert not extractor.suffix_list_url
+        assert not extractor.suffix_list_urls
 
 class ExtractTest(unittest.TestCase):
     def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url,

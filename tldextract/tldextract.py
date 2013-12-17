@@ -281,8 +281,8 @@ def get_tlds_from_raw_suffix_list_data(suffix_list_source):
 def fetch_file(url):
     """ Fetch the file and decode it from UTF-8 encoding to Python unicode.
     """
-    conn = urlopen(url)
     try:
+        conn = urlopen(url)
         s = conn.read()
     except Exception as e:
         LOG.exception('Exception reading Public Suffix List url ' + url + '. Consider using a mirror or constructing your TLDExtract with `fetch=False`.')

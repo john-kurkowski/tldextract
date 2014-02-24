@@ -352,9 +352,9 @@ def main():
     distribution = pkg_resources.get_distribution('tldextract')
 
     parser = argparse.ArgumentParser(
-        version='%(prog)s ' + distribution.version,
         description='Parse hostname from a url or fqdn')
 
+    parser.add_argument('--version', action='version', version='%(prog)s ' + distribution.version)
     parser.add_argument('input', metavar='fqdn|url',
                         type=unicode, nargs='*', help='fqdn or url')
 

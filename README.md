@@ -54,9 +54,13 @@ Command-line usage, splits the url components by space:
     $ tldextract http://forums.bbc.co.uk
     forums bbc co.uk
 
-Run tests:
+## Tests
 
     $ python -m tldextract.tests.all
+
+or run against all supported Python versions:
+
+    $ tox
 
 ## Note About Caching & Advanced Usage
 

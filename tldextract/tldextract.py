@@ -235,7 +235,7 @@ class TLDExtract(object):
 
         if self.cache_file:
             try:
-                with open(self.cache_file) as f:
+                with open(self.cache_file, 'rb') as f:
                     self._extractor = _PublicSuffixListTLDExtractor(pickle.load(f))
                     return self._extractor
             except IOError as ioe:

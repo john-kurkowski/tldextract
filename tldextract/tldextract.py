@@ -25,6 +25,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
+import codecs
 from contextlib import closing
 import errno
 from functools import wraps
@@ -206,6 +207,10 @@ class TLDExtract(object):
           .split("@")[-1] \
           .partition(":")[0] \
           .rstrip(".")
+
+        is_punycode = netloc.startswith('xn--') or '.xn--' in netloc
+        if is_punycode:
+            netloc = codecs.decode(netloc, 'idna')
 
         registered_domain, tld = self._get_tld_extractor().extract(netloc)
         if not tld and netloc and netloc[0].isdigit():

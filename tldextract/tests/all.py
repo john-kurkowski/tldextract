@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import doctest
 import logging
 import os
@@ -110,6 +111,9 @@ class ExtractTest(unittest.TestCase):
     def test_ip(self):
         self.assertExtract('', '216.22.0.192', '', 'http://216.22.0.192/')
         self.assertExtract('216.22', 'project', 'coop', 'http://216.22.project.coop/')
+
+    def test_punycode(self):
+        self.assertExtract('', u'россия', u'рф', 'http://xn--h1alffa9f.xn--p1ai')
 
     def test_empty(self):
         self.assertExtract('', '', '', 'http://')

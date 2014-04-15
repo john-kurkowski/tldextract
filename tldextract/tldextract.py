@@ -210,7 +210,7 @@ class TLDExtract(object):
 
         is_punycode = netloc.startswith('xn--') or '.xn--' in netloc
         if is_punycode:
-            netloc = codecs.decode(netloc, 'idna')
+            netloc = codecs.decode(netloc.encode('ascii'), 'idna')
 
         registered_domain, tld = self._get_tld_extractor().extract(netloc)
         if not tld and netloc and netloc[0].isdigit():

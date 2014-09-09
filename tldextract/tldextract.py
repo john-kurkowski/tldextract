@@ -19,13 +19,12 @@ top-level domain) from the registered domain and subdomains of a URL.
     'forums.bbc'
 """
 
-from __future__ import with_statement
-
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 import codecs
+import collections
 from contextlib import closing
 import errno
 from functools import wraps
@@ -79,47 +78,7 @@ PUBLIC_SUFFIX_LIST_URLS = (
 SCHEME_RE = re.compile(r'^([' + scheme_chars + ']+:)?//')
 IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
 
-class ExtractResult(tuple):
-    'ExtractResult(subdomain, domain, suffix)'
-    __slots__ = ()
-    _fields = ('subdomain', 'domain', 'suffix')
-
-    def __new__(_cls, subdomain, domain, suffix):
-        'Create new instance of ExtractResult(subdomain, domain, suffix)'
-        return tuple.__new__(_cls, (subdomain, domain, suffix))
-
-    @classmethod
-    def _make(cls, iterable, new=tuple.__new__, len=len):
-        'Make a new ExtractResult object from a sequence or iterable'
-        result = new(cls, iterable)
-        if len(result) != 3:
-            raise TypeError('Expected 3 arguments, got %d' % len(result))
-        return result
-
-    def __repr__(self):
-        'Return a nicely formatted representation string'
-        return 'ExtractResult(subdomain=%r, domain=%r, suffix=%r)' % self
-
-    def _asdict(self):
-        'Return a new dict which maps field names to their values'
-        base_zip = zip(self._fields, self)
-        zipped = base_zip + [('tld', self.tld)]
-        return dict(zipped)
-
-    def _replace(_self, **kwds):
-        'Return a new ExtractResult object replacing specified fields with new values'
-        result = _self._make(map(kwds.pop, ('subdomain', 'domain', 'suffix'), _self))
-        if kwds:
-            raise ValueError('Got unexpected field names: %r' % kwds.keys())
-        return result
-
-    def __getnewargs__(self):
-        'Return self as a plain tuple.  Used by copy and pickle.'
-        return tuple(self)
-
-    subdomain = property(itemgetter(0), doc='Alias for field number 0')
-    domain = property(itemgetter(1), doc='Alias for field number 1')
-    suffix = property(itemgetter(2), doc='Alias for field number 2')
+class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain suffix')):
 
     @property
     def tld(self):

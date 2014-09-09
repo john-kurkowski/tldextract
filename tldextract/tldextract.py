@@ -142,7 +142,7 @@ class ExtractResult(tuple):
 
 class TLDExtract(object):
     def __init__(self, cache_file=CACHE_FILE, suffix_list_url=PUBLIC_SUFFIX_LIST_URLS, fetch=True,
-                 fallback_to_snapshot=True):
+                 fallback_to_snapshot=True, include_psl_private_domains=False):
         """
         Constructs a callable for extracting subdomain, domain, and suffix
         components from a URL.
@@ -166,6 +166,11 @@ class TLDExtract(object):
         the module will fall back to the included TLD set snapshot. If you do not want
         this behavior, you may set `fallback_to_snapshot` to False, and an exception will be
         raised instead.
+
+        The Public Suffix List includes a list of "private domains" as TLDs,
+        such as blogspot.com. These do not fit `tldextract`'s definition of a
+        suffix, so these domains are excluded by default. If you'd like them
+        included instead, set `include_psl_private_domains` to True.
         """
         if not fetch:
             LOG.warning("The 'fetch' argument is deprecated. Instead of specifying fetch, "
@@ -187,6 +192,8 @@ class TLDExtract(object):
             raise ValueError("The arguments you have provided disable all ways for tldextract "
                              "to obtain data. Please provide a suffix list data, a cache_file, "
                              "or set `fallback_to_snapshot` to `True`.")
+
+        self.include_psl_private_domains = include_psl_private_domains
         self._extractor = None
 
     def __call__(self, url):
@@ -253,7 +260,7 @@ class TLDExtract(object):
         tlds = frozenset()
         if self.suffix_list_urls:
             raw_suffix_list_data = fetch_file(self.suffix_list_urls)
-            tlds = get_tlds_from_raw_suffix_list_data(raw_suffix_list_data)
+            tlds = get_tlds_from_raw_suffix_list_data(raw_suffix_list_data, self.include_psl_private_domains)
 
         if not tlds:
             if self.fallback_to_snapshot:
@@ -296,9 +303,14 @@ def extract(url):
 def update(*args, **kwargs):
     return TLD_EXTRACTOR.update(*args, **kwargs)
 
-def get_tlds_from_raw_suffix_list_data(suffix_list_source):
+def get_tlds_from_raw_suffix_list_data(suffix_list_source, include_psl_private_domains=False):
+    if include_psl_private_domains:
+        text = suffix_list_source
+    else:
+        text, _, _ = suffix_list_source.partition('// ===BEGIN PRIVATE DOMAINS===')
+
     tld_finder = re.compile(r'^(?P<tld>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
-    tld_iter = (m.group('tld') for m in tld_finder.finditer(suffix_list_source))
+    tld_iter = (m.group('tld') for m in tld_finder.finditer(text))
     return frozenset(tld_iter)
 
 def fetch_file(urls):

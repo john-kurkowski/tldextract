@@ -156,6 +156,9 @@ class ExtractTest(unittest.TestCase):
     def test_dns_root_label(self):
         self.assertExtract('www', 'example', 'com', 'http://www.example.com./')
 
+    def test_private_domains(self):
+        self.assertExtract('waiterrant', 'blogspot', 'com', 'http://waiterrant.blogspot.com')
+
 
 class ExtractTestUsingCustomSuffixListFile(unittest.TestCase):
     def test_suffix_which_is_not_in_custom_list(self):

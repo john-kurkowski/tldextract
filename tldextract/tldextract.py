@@ -38,6 +38,7 @@ try:
     import pkg_resources
 except ImportError:
     class pkg_resources(object):
+
         """Fake pkg_resources interface which falls back to getting resources
         inside `tldextract`'s directory.
         """
@@ -55,11 +56,11 @@ try:
 except NameError:
     string_types = str
 
-try: # pragma: no cover
+try:  # pragma: no cover
     # Python 2
     from urllib2 import urlopen
     from urlparse import scheme_chars
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     # Python 3
     from urllib.request import urlopen
     from urllib.parse import scheme_chars
@@ -78,28 +79,31 @@ PUBLIC_SUFFIX_LIST_URLS = (
 SCHEME_RE = re.compile(r'^([' + scheme_chars + ']+:)?//')
 IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
 
+
 class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain suffix')):
 
     @property
     def tld(self):
-      warnings.warn('This use of tld is misleading. Use `suffix` instead.', DeprecationWarning)
-      return self.suffix
+        warnings.warn('This use of tld is misleading. Use `suffix` instead.', DeprecationWarning)
+        return self.suffix
 
     @property
     def registered_domain(self):
-      """
-      Joins the domain and suffix fields with a dot, if they're both set.
+        """
+        Joins the domain and suffix fields with a dot, if they're both set.
 
-      >>> extract('http://forums.bbc.co.uk').registered_domain
-      'bbc.co.uk'
-      >>> extract('http://localhost:8080').registered_domain
-      ''
-      """
-      if self.domain and self.suffix:
-          return self.domain + '.' + self.suffix
-      return ''
+        >>> extract('http://forums.bbc.co.uk').registered_domain
+        'bbc.co.uk'
+        >>> extract('http://localhost:8080').registered_domain
+        ''
+        """
+        if self.domain and self.suffix:
+            return self.domain + '.' + self.suffix
+        return ''
+
 
 class TLDExtract(object):
+
     def __init__(self, cache_file=CACHE_FILE, suffix_list_url=PUBLIC_SUFFIX_LIST_URLS, fetch=True,
                  fallback_to_snapshot=True, include_psl_private_domains=False):
         """
@@ -167,12 +171,12 @@ class TLDExtract(object):
         ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
         """
         netloc = SCHEME_RE.sub("", url) \
-          .partition("/")[0] \
-          .partition("?")[0] \
-          .partition("#")[0] \
-          .split("@")[-1] \
-          .partition(":")[0] \
-          .rstrip(".")
+            .partition("/")[0] \
+            .partition("?")[0] \
+            .partition("#")[0] \
+            .split("@")[-1] \
+            .partition(":")[0] \
+            .rstrip(".")
 
         is_punycode = netloc.startswith('xn--') or '.xn--' in netloc
         if is_punycode:
@@ -212,7 +216,7 @@ class TLDExtract(object):
             except IOError as ioe:
                 file_not_found = ioe.errno == errno.ENOENT
                 if not file_not_found:
-                  LOG.error("error reading TLD cache file %s: %s", self.cache_file, ioe)
+                    LOG.error("error reading TLD cache file %s: %s", self.cache_file, ioe)
             except Exception as ex:
                 LOG.error("error reading TLD cache file %s: %s", self.cache_file, ex)
 
@@ -254,13 +258,16 @@ class TLDExtract(object):
 
 TLD_EXTRACTOR = TLDExtract()
 
+
 @wraps(TLD_EXTRACTOR.__call__)
 def extract(url):
     return TLD_EXTRACTOR(url)
 
+
 @wraps(TLD_EXTRACTOR.update)
 def update(*args, **kwargs):
     return TLD_EXTRACTOR.update(*args, **kwargs)
+
 
 def get_tlds_from_raw_suffix_list_data(suffix_list_source, include_psl_private_domains=False):
     if include_psl_private_domains:
@@ -271,6 +278,7 @@ def get_tlds_from_raw_suffix_list_data(suffix_list_source, include_psl_private_d
     tld_finder = re.compile(r'^(?P<tld>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
     tld_iter = (m.group('tld') for m in tld_finder.finditer(text))
     return frozenset(tld_iter)
+
 
 def fetch_file(urls):
     """ Decode the first successfully fetched URL, from UTF-8 encoding to
@@ -290,6 +298,7 @@ def fetch_file(urls):
     LOG.error('No Public Suffix List found. Consider using a mirror or constructing your TLDExtract with `fetch=False`.')
     return u''
 
+
 def _decode_utf8(s):
     """ Decode from utf8 to Python unicode string.
 
@@ -297,7 +306,9 @@ def _decode_utf8(s):
     """
     return unicode(s, 'utf-8')
 
+
 class _PublicSuffixListTLDExtractor(object):
+
     def __init__(self, tlds):
         self.tlds = tlds
 
@@ -308,12 +319,12 @@ class _PublicSuffixListTLDExtractor(object):
             maybe_tld = '.'.join(lower_spl[i:])
             exception_tld = '!' + maybe_tld
             if exception_tld in self.tlds:
-                return '.'.join(spl[:i+1]), '.'.join(spl[i+1:])
+                return '.'.join(spl[:i + 1]), '.'.join(spl[i + 1:])
 
             if maybe_tld in self.tlds:
                 return '.'.join(spl[:i]), '.'.join(spl[i:])
 
-            wildcard_tld = '*.' + '.'.join(lower_spl[i+1:])
+            wildcard_tld = '*.' + '.'.join(lower_spl[i + 1:])
             if wildcard_tld in self.tlds:
                 return '.'.join(spl[:i]), '.'.join(spl[i:])
 

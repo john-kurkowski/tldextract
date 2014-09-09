@@ -68,7 +68,9 @@ class IntegrationTest(unittest.TestCase):
         extractor = tldextract.TLDExtract(suffix_list_url='foo', fetch=False)
         assert not extractor.suffix_list_urls
 
+
 class ExtractTest(unittest.TestCase):
+
     def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url,
                       fns=(
                           extract,
@@ -94,7 +96,7 @@ class ExtractTest(unittest.TestCase):
 
     def test_nested_subdomain(self):
         self.assertExtract("media.forums", "theregister", "co.uk",
-            "http://media.forums.theregister.co.uk")
+                           "http://media.forums.theregister.co.uk")
 
     def test_odd_but_possible(self):
         self.assertExtract('www', 'www', 'com', 'http://www.www.com')
@@ -150,7 +152,7 @@ class ExtractTest(unittest.TestCase):
 
     def test_tld_is_a_website_too(self):
         self.assertExtract('www', 'metp', 'net.cn', 'http://www.metp.net.cn')
-        #self.assertExtract('www', 'net', 'cn', 'http://www.net.cn') # This is unhandled by the
+        # self.assertExtract('www', 'net', 'cn', 'http://www.net.cn') # This is unhandled by the
         # PSL. Or is it?
 
     def test_dns_root_label(self):
@@ -161,6 +163,7 @@ class ExtractTest(unittest.TestCase):
 
 
 class ExtractTestUsingCustomSuffixListFile(unittest.TestCase):
+
     def test_suffix_which_is_not_in_custom_list(self):
         for fn in (extract_using_fake_suffix_list, extract_using_fake_suffix_list_no_cache):
             result = fn("www.google.com")
@@ -189,4 +192,3 @@ def run_tests(stream=sys.stderr):
 
 if __name__ == "__main__":
     run_tests()
-

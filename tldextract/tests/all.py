@@ -112,6 +112,9 @@ class ExtractTest(unittest.TestCase):
         self.assertExtract('', '216.22.0.192', '', 'http://216.22.0.192/')
         self.assertExtract('216.22', 'project', 'coop', 'http://216.22.project.coop/')
 
+    def test_looks_like_ip(self):
+        self.assertExtract('', u'1\xe9', '', u'1\xe9')
+
     def test_punycode(self):
         self.assertExtract('', u'россия', u'рф', 'http://xn--h1alffa9f.xn--p1ai')
 

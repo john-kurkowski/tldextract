@@ -217,7 +217,7 @@ class TLDExtract(object):
             try:
                 is_ip = socket.inet_aton(netloc)
                 return ExtractResult('', netloc, '')
-            except AttributeError:
+            except (AttributeError, UnicodeError):
                 if IP_RE.match(netloc):
                     return ExtractResult('', netloc, '')
             except socket.error:

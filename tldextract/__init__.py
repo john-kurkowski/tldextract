@@ -1,3 +1,3 @@
 from .tldextract import extract, TLDExtract
 
-__version__ = "1.4"
+__version__ = "1.5"

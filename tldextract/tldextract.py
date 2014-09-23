@@ -159,7 +159,7 @@ class TLDExtract(object):
         self.include_psl_private_domains = include_psl_private_domains
         self._extractor = None
 
-    def __call__(self, url):
+    def __call__(self, url, decode_punycode=True):
         """
         Takes a string URL and splits it into its subdomain, domain, and
         suffix (effective TLD, gTLD, ccTLD, etc.) component.
@@ -179,7 +179,7 @@ class TLDExtract(object):
             .rstrip(".")
 
         is_punycode = netloc.startswith('xn--') or '.xn--' in netloc
-        if is_punycode:
+        if is_punycode and decode_punycode:
             netloc = codecs.decode(netloc.encode('ascii'), 'idna')
 
         registered_domain, tld = self._get_tld_extractor().extract(netloc)
@@ -260,8 +260,8 @@ TLD_EXTRACTOR = TLDExtract()
 
 
 @wraps(TLD_EXTRACTOR.__call__)
-def extract(url):
-    return TLD_EXTRACTOR(url)
+def extract(url,decode_punycode=True):
+    return TLD_EXTRACTOR(url,decode_punycode)
 
 
 @wraps(TLD_EXTRACTOR.update)

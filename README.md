@@ -28,10 +28,14 @@ country code.
 `ExtractResult` is a namedtuple, so it's simple to access the parts you want.
 
     >>> ext = tldextract.extract('http://forums.bbc.co.uk')
-    >>> ext.domain
-    'bbc'
-    >>> '.'.join(ext[:2]) # rejoin subdomain and domain
+    >>> (ext.subdomain, ext.domain, ext.suffix)
+    ('forums', 'bbc', 'co.uk')
+    >>> # rejoin subdomain and domain
+    >>> '.'.join(ext[:2])
     'forums.bbc'
+    >>> # a common alias
+    >>> ext.registered_domain
+    'bbc.co.uk'
 
 This module started by implementing the chosen answer from [this StackOverflow question on
 getting the "domain name" from a URL](http://stackoverflow.com/questions/569137/how-to-get-domain-name-from-url/569219#569219).

@@ -64,6 +64,7 @@ try:  # pragma: no cover
     # Python 2
     from urllib2 import urlopen
     from urlparse import scheme_chars
+    unicode = unicode
 except ImportError:  # pragma: no cover
     # Python 3
     from urllib.request import urlopen
@@ -300,7 +301,7 @@ def fetch_file(urls):
             return _decode_utf8(s)
 
     LOG.error('No Public Suffix List found. Consider using a mirror or constructing your TLDExtract with `fetch=False`.')
-    return u''
+    return unicode('')
 
 
 def _decode_utf8(s):

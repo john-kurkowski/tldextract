@@ -3,6 +3,12 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 1.5.1 (2014-10-13)
+
+* Bugfixes
+    * Missing setuptools dependency
+    * Avoid u'' literal for Python 3.0 - 3.2 compatibility. Tests will still fail though.
+
 ## 1.5 (2014-09-08)
 
 * Bugfixes

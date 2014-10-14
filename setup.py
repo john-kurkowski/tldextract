@@ -8,7 +8,7 @@ import tldextract
 long_description_markdown = tldextract.tldextract.__doc__
 long_description = re.sub(r'(?s)\[(.*?)\]\((http.*?)\)', r'\1', long_description_markdown)
 
-install_requires = []
+install_requires = ["setuptools"]
 if (2, 7) > sys.version_info:
     install_requires.append("argparse>=1.2.1")
 

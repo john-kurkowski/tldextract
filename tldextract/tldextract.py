@@ -188,6 +188,11 @@ class TLDExtract(object):
             netloc = codecs.decode(netloc.encode('ascii'), 'idna')
 
         registered_domain, tld = self._get_tld_extractor().extract(netloc)
+
+        if is_punycode:
+            registered_domain = codecs.encode(registered_domain, 'idna')
+            tld = codecs.encode(tld, 'idna')
+
         if not tld and netloc and netloc[0].isdigit():
             try:
                 is_ip = socket.inet_aton(netloc)

@@ -20,6 +20,7 @@ fake_suffix_list_url = "file://" + os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     'fixtures/fake_suffix_list_fixture.dat'
 )
+extra_suffixes = ['foo1', 'bar1', 'baz1']
 
 extract = tldextract.TLDExtract(cache_file=_temporary_file())
 extract_no_cache = tldextract.TLDExtract(cache_file=False)
@@ -36,6 +37,11 @@ extract_using_fake_suffix_list = tldextract.TLDExtract(
 extract_using_fake_suffix_list_no_cache = tldextract.TLDExtract(
     cache_file=None,
     suffix_list_url=fake_suffix_list_url
+)
+extract_using_extra_suffixes = tldextract.TLDExtract(
+    cache_file=None,
+    suffix_list_url=fake_suffix_list_url,
+    extra_suffixes=extra_suffixes
 )
 
 
@@ -176,12 +182,26 @@ class ExtractTestUsingCustomSuffixListFile(unittest.TestCase):
                 self.assertEquals(result.suffix, custom_suffix)
 
 
+class ExtractTestUsingExtraSuffixes(unittest.TestCase):
+
+    def test_suffix_which_is_not_in_extra_list(self):
+        result = extract_using_extra_suffixes("www.google.com")
+        self.assertEquals(result.suffix, "")
+
+    def test_extra_suffixes(self):
+        for custom_suffix in extra_suffixes:
+            netloc = "www.foo.bar.baz.quux" + "." + custom_suffix
+            result = extract_using_extra_suffixes(netloc)
+            self.assertEquals(result.suffix, custom_suffix)
+
+
 def test_suite():
     return unittest.TestSuite([
         doctest.DocTestSuite(tldextract.tldextract),
         unittest.TestLoader().loadTestsFromTestCase(IntegrationTest),
         unittest.TestLoader().loadTestsFromTestCase(ExtractTest),
         unittest.TestLoader().loadTestsFromTestCase(ExtractTestUsingCustomSuffixListFile),
+        unittest.TestLoader().loadTestsFromTestCase(ExtractTestUsingExtraSuffixes),
     ])
 
 

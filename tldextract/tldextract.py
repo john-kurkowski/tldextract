@@ -110,7 +110,7 @@ class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain su
 class TLDExtract(object):
 
     def __init__(self, cache_file=CACHE_FILE, suffix_list_url=PUBLIC_SUFFIX_LIST_URLS, fetch=True,
-                 fallback_to_snapshot=True, include_psl_private_domains=False):
+                 fallback_to_snapshot=True, include_psl_private_domains=False, extra_suffixes=None):
         """
         Constructs a callable for extracting subdomain, domain, and suffix
         components from a URL.
@@ -139,6 +139,8 @@ class TLDExtract(object):
         such as blogspot.com. These do not fit `tldextract`'s definition of a
         suffix, so these domains are excluded by default. If you'd like them
         included instead, set `include_psl_private_domains` to True.
+
+        You can pass additional suffixed in `extra_suffixes` argument without changing list URL
         """
         if not fetch:
             LOG.warning("The 'fetch' argument is deprecated. Instead of specifying fetch, "
@@ -162,6 +164,7 @@ class TLDExtract(object):
                              "or set `fallback_to_snapshot` to `True`.")
 
         self.include_psl_private_domains = include_psl_private_domains
+        self.extra_suffixes = extra_suffixes
         self._extractor = None
 
     def __call__(self, url):
@@ -221,7 +224,9 @@ class TLDExtract(object):
         if self.cache_file:
             try:
                 with open(self.cache_file, 'rb') as f:
-                    self._extractor = _PublicSuffixListTLDExtractor(pickle.load(f))
+                    self._extractor = _PublicSuffixListTLDExtractor(
+                        self._add_extra_suffixes(pickle.load(f))
+                    )
                     return self._extractor
             except IOError as ioe:
                 file_not_found = ioe.errno == errno.ENOENT
@@ -238,7 +243,9 @@ class TLDExtract(object):
         if not tlds:
             if self.fallback_to_snapshot:
                 with closing(pkg_resources.resource_stream(__name__, '.tld_set_snapshot')) as snapshot_file:
-                    self._extractor = _PublicSuffixListTLDExtractor(pickle.load(snapshot_file))
+                    self._extractor = _PublicSuffixListTLDExtractor(
+                        self._add_extra_suffixes(pickle.load(snapshot_file))
+                    )
                     return self._extractor
             else:
                 raise Exception("tlds is empty, but fallback_to_snapshot is set"
@@ -263,8 +270,16 @@ class TLDExtract(object):
             except IOError as e:
                 LOG.warn("unable to cache TLDs in file %s: %s", self.cache_file, e)
 
-        self._extractor = _PublicSuffixListTLDExtractor(tlds)
+        self._extractor = _PublicSuffixListTLDExtractor(self._add_extra_suffixes(tlds))
         return self._extractor
+
+    def _add_extra_suffixes(self, suffixes):
+        if self.extra_suffixes:
+            suffixes = set(suffixes)
+            for extra_suffix in self.extra_suffixes:
+                suffixes.add(extra_suffix)
+            return frozenset(suffixes)
+        return suffixes
 
 TLD_EXTRACTOR = TLDExtract()
 

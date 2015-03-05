@@ -281,7 +281,7 @@ class TLDExtract(object):
             return frozenset(suffixes)
         return suffixes
 
-TLD_EXTRACTOR = TLDExtract()
+TLD_EXTRACTOR = TLDExtract(include_psl_private_domains=True)
 
 
 @wraps(TLD_EXTRACTOR.__call__)

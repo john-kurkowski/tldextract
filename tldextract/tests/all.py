@@ -45,10 +45,16 @@ extract_using_extra_suffixes = tldextract.TLDExtract(
 )
 
 
-class IntegrationTest(unittest.TestCase):
+class TldextractTestCase(unittest.TestCase):
+
+    def setUp(self):
+        logging.getLogger().setLevel(logging.WARN)
+
+
+class IntegrationTest(TldextractTestCase):
 
     def test_log_snapshot_diff(self):
-        logging.basicConfig(level=logging.DEBUG)
+        logging.getLogger().setLevel(logging.DEBUG)
 
         extractor = tldextract.TLDExtract()
         try:
@@ -75,7 +81,7 @@ class IntegrationTest(unittest.TestCase):
         assert not extractor.suffix_list_urls
 
 
-class ExtractTest(unittest.TestCase):
+class ExtractTest(TldextractTestCase):
 
     def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url,
                       fns=(
@@ -168,7 +174,7 @@ class ExtractTest(unittest.TestCase):
         self.assertExtract('waiterrant', 'blogspot', 'com', 'http://waiterrant.blogspot.com')
 
 
-class ExtractTestUsingCustomSuffixListFile(unittest.TestCase):
+class ExtractTestUsingCustomSuffixListFile(TldextractTestCase):
 
     def test_suffix_which_is_not_in_custom_list(self):
         for fn in (extract_using_fake_suffix_list, extract_using_fake_suffix_list_no_cache):
@@ -182,7 +188,7 @@ class ExtractTestUsingCustomSuffixListFile(unittest.TestCase):
                 self.assertEquals(result.suffix, custom_suffix)
 
 
-class ExtractTestUsingExtraSuffixes(unittest.TestCase):
+class ExtractTestUsingExtraSuffixes(TldextractTestCase):
 
     def test_suffix_which_is_not_in_extra_list(self):
         result = extract_using_extra_suffixes("www.google.com")
@@ -196,6 +202,8 @@ class ExtractTestUsingExtraSuffixes(unittest.TestCase):
 
 
 def test_suite():
+    logging.basicConfig()
+
     return unittest.TestSuite([
         doctest.DocTestSuite(tldextract.tldextract),
         unittest.TestLoader().loadTestsFromTestCase(IntegrationTest),

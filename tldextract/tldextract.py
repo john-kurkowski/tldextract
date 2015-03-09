@@ -257,11 +257,7 @@ class TLDExtract(object):
             with closing(pkg_resources.resource_stream(__name__, '.tld_set_snapshot')) as snapshot_file:
                 snapshot = sorted(pickle.load(snapshot_file))
             new = sorted(tlds)
-            for line in difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=self.cache_file):
-                if sys.version_info < (3,):
-                    sys.stderr.write(line.encode('utf-8') + "\n")
-                else:
-                    sys.stderr.write(line + "\n")
+            LOG.debug('computed TLD diff:\n' + '\n'.join(difflib.unified_diff(snapshot, new, fromfile=".tld_set_snapshot", tofile=self.cache_file)))
 
         if self.cache_file:
             try:

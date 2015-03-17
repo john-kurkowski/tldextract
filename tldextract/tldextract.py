@@ -187,14 +187,32 @@ class TLDExtract(object):
             .rstrip(".")
 
         is_punycode = netloc.startswith('xn--') or '.xn--' in netloc
+        # Some IDN urls might generate an error
         if is_punycode:
-            netloc = codecs.decode(netloc.encode('ascii'), 'idna')
+            try:
+                netloc = codecs.decode(netloc.encode('ascii'), 'idna')
+            except UnicodeError:
+                LOG.error('UnicodeError when decoding netloc ' + netloc)
+                # We return the answer as it is
+                # We consider this not to be punycode!
+                is_punycode = False
 
         registered_domain, tld = self._get_tld_extractor().extract(netloc)
 
         if is_punycode:
-            registered_domain = codecs.encode(registered_domain, 'idna')
-            tld = codecs.encode(tld, 'idna')
+            """
+            If we are here, means that:
+            1) netloc is punycode
+            2) netloc decoded successfully to unicode
+            As such, we'll try to encode the netloc to ascii
+            """
+            try:
+                registered_domain = codecs.encode(registered_domain, 'idna')
+                tld = codecs.encode(tld, 'idna')
+            except UnicodeError:
+                LOG.error('UnicodeError when encoding netloc ' + netloc)
+                # If we get an error here, we give up
+                return ExtractResult('', '', '')
 
         if not tld and netloc and netloc[0].isdigit():
             try:

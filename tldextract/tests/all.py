@@ -131,6 +131,11 @@ class ExtractTest(TldextractTestCase):
 
     def test_punycode(self):
         self.assertExtract('', 'xn--h1alffa9f', 'xn--p1ai', 'http://xn--h1alffa9f.xn--p1ai')
+        # Entries that might generate UnicodeError exception
+        # This subdomain generates UnicodeError 'IDNA does not round-trip'
+        self.assertExtract('xn--tub-1m9d15sfkkhsifsbqygyujjrw602gk4li5qqk98aca0w','google', 'com', 'xn--tub-1m9d15sfkkhsifsbqygyujjrw602gk4li5qqk98aca0w.google.com')
+        # This subdomain generates UnicodeError 'incomplete punicode string'
+        self.assertExtract('xn--tub-1m9d15sfkkhsifsbqygyujjrw60','google','com','xn--tub-1m9d15sfkkhsifsbqygyujjrw60.google.com')
 
     def test_empty(self):
         self.assertExtract('', '', '', 'http://')

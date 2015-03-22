@@ -192,7 +192,7 @@ class TLDExtract(object):
             try:
                 netloc = codecs.decode(netloc.encode('ascii'), 'idna')
             except UnicodeError:
-                LOG.error('UnicodeError when decoding netloc ' + netloc)
+                LOG.warn('UnicodeError when decoding netloc ' + netloc)
                 # We return the answer as it is
                 # We consider this not to be punycode!
                 is_punycode = False
@@ -200,19 +200,8 @@ class TLDExtract(object):
         registered_domain, tld = self._get_tld_extractor().extract(netloc)
 
         if is_punycode:
-            """
-            If we are here, means that:
-            1) netloc is punycode
-            2) netloc decoded successfully to unicode
-            As such, we'll try to encode the netloc to ascii
-            """
-            try:
-                registered_domain = codecs.encode(registered_domain, 'idna')
-                tld = codecs.encode(tld, 'idna')
-            except UnicodeError:
-                LOG.error('UnicodeError when encoding netloc ' + netloc)
-                # If we get an error here, we give up
-                return ExtractResult('', '', '')
+            registered_domain = codecs.encode(registered_domain, 'idna')
+            tld = codecs.encode(tld, 'idna')
 
         if not tld and netloc and netloc[0].isdigit():
             try:

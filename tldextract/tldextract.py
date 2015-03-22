@@ -187,8 +187,13 @@ class TLDExtract(object):
             .rstrip(".")
 
         is_punycode = netloc.startswith('xn--') or '.xn--' in netloc
+        # Some IDN urls might generate an error
         if is_punycode:
-            netloc = codecs.decode(netloc.encode('ascii'), 'idna')
+            try:
+                netloc = codecs.decode(netloc.encode('ascii'), 'idna')
+            except UnicodeError:
+                # We return the answer as it is, not considering the input punycode
+                is_punycode = False
 
         registered_domain, tld = self._get_tld_extractor().extract(netloc)
 

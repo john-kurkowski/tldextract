@@ -125,6 +125,19 @@ If you want to use input data from your local filesystem, just use the `file://`
 Use an absolute path when specifying the `suffix_list_url` keyword argument. `os.path` is your
 friend.
 
+## FAQ
+
+### If I pass an invalid URL, I still get a result, no error. What gives?
+
+To keep `tldextract` light in LoC & overhead, and because there are plenty of
+URL validators out there, this library is very lenient with input. If valid
+URLs are important to you, validate them before calling `tldextract`.
+
+This lenient stance lowers the learning curve of using the library, at the cost
+of desensitizing users to the nuances of URLs. Who knows how much. But in the
+future, I would consider an overhaul. For example, users could opt into
+validation, either receiving exceptions or error metadata on results.
+
 # Public API
 
 I know it's just one method, but I've needed this functionality in a few

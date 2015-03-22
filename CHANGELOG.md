@@ -3,6 +3,15 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 1.6 (2015-03-22)
+
+* Features
+    * Pass `extra_suffixes` directly to constructor
+* Bugfixes
+    * Punycode URLs were returned decoded, rather than left alone
+    * Things that look like Punycode to tldextract, but aren't, shouldn't raise
+    * Print unified diff to debug log, rather than inconsistent stderr
+
 ## 1.5.1 (2014-10-13)
 
 * Bugfixes

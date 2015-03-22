@@ -198,8 +198,8 @@ class TLDExtract(object):
         registered_domain, tld = self._get_tld_extractor().extract(netloc)
 
         if is_punycode:
-            registered_domain = codecs.encode(registered_domain, 'idna')
-            tld = codecs.encode(tld, 'idna')
+            registered_domain = codecs.encode(registered_domain, 'idna').decode('utf-8')
+            tld = codecs.encode(tld, 'idna').decode('utf-8')
 
         if not tld and netloc and netloc[0].isdigit():
             try:

@@ -373,14 +373,16 @@ def main():
 
     parser.add_argument('-u', '--update', default=False, action='store_true', help='force fetch the latest TLD definitions')
     parser.add_argument('-c', '--cache_file', help='use an alternate TLD definition file')
+    parser.add_argument('-p', '--private_domains', default=False, action='store_true', help='Include private domains')
 
     args = parser.parse_args()
+    tld_extract = TLDExtract(include_psl_private_domains=args.private_domains)
 
     if args.cache_file:
-        TLD_EXTRACTOR.cache_file = args.cache_file
+        tld_extract.cache_file = args.cache_file
 
     if args.update:
-        TLD_EXTRACTOR.update(True)
+        tld_extract.update(True)
     elif len(args.input) is 0:
         parser.print_usage()
         exit(1)

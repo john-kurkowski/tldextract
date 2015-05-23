@@ -206,6 +206,16 @@ class ExtractTestUsingExtraSuffixes(TldextractTestCase):
             self.assertEquals(result.suffix, custom_suffix)
 
 
+class ExtractTestAsDict(TldextractTestCase):
+
+    def test_result_as_dict(self):
+        result = extract("http://admin:password1@www.google.com:666/secret/admin/interface?param1=42")
+        expected_dict = {'subdomain' : 'www',
+                         'domain' : 'google',
+                         'suffix' : 'com'}
+        self.assertEquals(result._asdict(), expected_dict)
+
+
 def test_suite():
     logging.basicConfig()
 

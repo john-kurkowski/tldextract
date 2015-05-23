@@ -87,6 +87,9 @@ IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0
 
 class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain suffix')):
 
+    # Necessary for __dict__ member to get populated in Python 3+
+    __slots__ = ()
+
     @property
     def tld(self):
         warnings.warn('This use of tld is misleading. Use `suffix` instead.', DeprecationWarning)

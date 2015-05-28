@@ -73,7 +73,7 @@ except ImportError:  # pragma: no cover
 
 LOG = logging.getLogger("tldextract")
 
-CACHE_FILE_DEFAULT = os.path.join(os.path.dirname(__file__), '.tld_set')
+CACHE_FILE_DEFAULT = os.path.join(os.path.dirname(__file__), '.tld_set_snapshot')
 CACHE_FILE = os.path.expanduser(os.environ.get("TLDEXTRACT_CACHE", CACHE_FILE_DEFAULT))
 
 PUBLIC_SUFFIX_LIST_URLS = (

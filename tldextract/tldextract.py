@@ -190,24 +190,30 @@ class TLDExtract(object):
             .rstrip(".")
 
         unicode_labels = []
-        is_punycode = False
+        puny_index = []
         for label in netloc.split("."):
-            tmp_is_punycode = netloc.startswith('xn--')
-            if tmp_is_punycode:
+            is_punycode = label.startswith('xn--')
+            if is_punycode:
                 try:
                     label = codecs.decode(label.encode('ascii'), 'idna')
-                    is_punycode = True
                 except UnicodeError:
-                    pass
+                    is_punycode = False
 
             unicode_labels.append(label)
+            puny_index.append(is_punycode)
         netloc = ".".join(unicode_labels)
 
         registered_domain, tld = self._get_tld_extractor().extract(netloc)
 
-        if is_punycode:
-            registered_domain = codecs.encode(registered_domain, 'idna').decode('utf-8')
-            tld = codecs.encode(tld, 'idna').decode('utf-8')
+        num_domain_labels = registered_domain.count(".")
+        if any(puny_index[:num_domain_labels]):
+            domain_labels = registered_domain.split(".")
+            registered_domain = merge_to_puny(domain_labels,
+                                              puny_index[:num_domain_labels])
+
+        if any(puny_index[num_domain_labels:]):
+            tld_labels = tld.split(".")
+            tld = merge_to_puny(tld_labels, puny_index[num_domain_labels:])
 
         if not tld and netloc and netloc[0].isdigit():
             try:
@@ -339,6 +345,24 @@ def _decode_utf8(s):
     The suffix list, wherever its origin, should be UTF-8 encoded.
     """
     return unicode(s, 'utf-8')
+
+
+def merge_to_puny(unicode_labels, puny_index):
+    """ Joins the unicode list with "." sepearators but first converts any
+    unicode label to puny if it's corresponding puny index is True
+
+    >>> merge_to_puny(
+    ...     [u"\u7e54\u572d\u30c6\u30cb\u30b9", u"blog", u"so-net",
+    ...      u"\u7e54\u572d\u30c6\u30cb", "jp"],
+    ...     [True, False, False, False, False])
+    u'xn--zckzap6140b352b.blog.so-net.\u7e54\u572d\u30c6\u30cb.jp'
+    """
+    puny_labels = []
+    for unicode_label, is_puny in zip(unicode_labels, puny_index):
+        if is_puny:
+            unicode_label = codecs.encode(unicode_label, 'idna').decode('utf-8')
+        puny_labels.append(unicode_label)
+    return ".".join(puny_labels)
 
 
 class _PublicSuffixListTLDExtractor(object):

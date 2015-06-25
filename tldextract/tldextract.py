@@ -340,24 +340,6 @@ def _decode_utf8(s):
     return unicode(s, 'utf-8')
 
 
-def merge_to_puny(unicode_labels, puny_index):
-    """ Joins the unicode list with "." sepearators but first converts any
-    unicode label to puny if it's corresponding puny index is True
-
-    >>> merge_to_puny(
-    ...     [u"\u7e54\u572d\u30c6\u30cb\u30b9", u"blog", u"so-net",
-    ...      u"\u7e54\u572d\u30c6\u30cb", "jp"],
-    ...     [True, False, False, False, False])
-    u'xn--zckzap6140b352b.blog.so-net.\u7e54\u572d\u30c6\u30cb.jp'
-    """
-    puny_labels = []
-    for unicode_label, is_puny in zip(unicode_labels, puny_index):
-        if is_puny:
-            unicode_label = codecs.encode(unicode_label, 'idna').decode('utf-8')
-        puny_labels.append(unicode_label)
-    return ".".join(puny_labels)
-
-
 class _PublicSuffixListTLDExtractor(object):
 
     def __init__(self, tlds):
@@ -381,13 +363,6 @@ class _PublicSuffixListTLDExtractor(object):
                 return i
 
         return len(lower_spl)
-
-    def extract(self, netloc):
-        spl = netloc.split('.')
-        lower_spl = tuple(el.lower() for el in spl)
-        suffix_index = self.suffix_index(lower_spl)
-
-        return ".".join(spl[:suffix_index]), ".".join(spl[suffix_index:])
 
 
 def main():

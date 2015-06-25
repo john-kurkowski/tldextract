@@ -189,31 +189,24 @@ class TLDExtract(object):
             .partition(":")[0] \
             .rstrip(".")
 
-        unicode_labels = []
-        puny_index = []
-        for label in netloc.split("."):
-            is_punycode = label.startswith('xn--')
-            if is_punycode:
+        labels = netloc.split(".")
+        translations = []
+        for label in labels:
+            if label.startswith("xn--"):
                 try:
-                    label = codecs.decode(label.encode('ascii'), 'idna')
+                    translation = codecs.decode(label.encode('ascii'), 'idna')
                 except UnicodeError:
-                    is_punycode = False
+                    translation = label
+            else:
+                translation = label
+            translation = translation.lower()
 
-            unicode_labels.append(label)
-            puny_index.append(is_punycode)
-        netloc = ".".join(unicode_labels)
+            translations.append(translation)
 
-        registered_domain, tld = self._get_tld_extractor().extract(netloc)
+        suffix_index = self._get_tld_extractor().suffix_index(translations)
 
-        num_domain_labels = registered_domain.count(".")
-        if any(puny_index[:num_domain_labels]):
-            domain_labels = registered_domain.split(".")
-            registered_domain = merge_to_puny(domain_labels,
-                                              puny_index[:num_domain_labels])
-
-        if any(puny_index[num_domain_labels:]):
-            tld_labels = tld.split(".")
-            tld = merge_to_puny(tld_labels, puny_index[num_domain_labels:])
+        registered_domain = ".".join(labels[:suffix_index])
+        tld = ".".join(labels[suffix_index:])
 
         if not tld and netloc and netloc[0].isdigit():
             try:
@@ -370,23 +363,31 @@ class _PublicSuffixListTLDExtractor(object):
     def __init__(self, tlds):
         self.tlds = tlds
 
-    def extract(self, netloc):
-        spl = netloc.split('.')
-        lower_spl = tuple(el.lower() for el in spl)
-        for i in range(len(spl)):
+    def suffix_index(self, lower_spl):
+        """Returns the index of the first suffix label.
+        Returns len(spl) if no suffix is found
+        """
+        for i in range(len(lower_spl)):
             maybe_tld = '.'.join(lower_spl[i:])
             exception_tld = '!' + maybe_tld
             if exception_tld in self.tlds:
-                return '.'.join(spl[:i + 1]), '.'.join(spl[i + 1:])
+                return i + 1
 
             if maybe_tld in self.tlds:
-                return '.'.join(spl[:i]), '.'.join(spl[i:])
+                return i
 
             wildcard_tld = '*.' + '.'.join(lower_spl[i + 1:])
             if wildcard_tld in self.tlds:
-                return '.'.join(spl[:i]), '.'.join(spl[i:])
+                return i
 
-        return netloc, ''
+        return len(lower_spl)
+
+    def extract(self, netloc):
+        spl = netloc.split('.')
+        lower_spl = tuple(el.lower() for el in spl)
+        suffix_index = self.suffix_index(lower_spl)
+
+        return ".".join(spl[:suffix_index]), ".".join(spl[suffix_index:])
 
 
 def main():

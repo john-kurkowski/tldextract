@@ -178,6 +178,12 @@ class ExtractTest(TldextractTestCase):
     def test_private_domains(self):
         self.assertExtract('waiterrant', 'blogspot', 'com', 'http://waiterrant.blogspot.com')
 
+    def test_invalid_puny_with_puny(self):
+        self.assertExtract('xn--zckzap6140b352by.blog', 'so-net', 'xn--wcvs22d.hk', 'http://xn--zckzap6140b352by.blog.so-net.xn--wcvs22d.hk')
+
+    def test_puny_with_non_puny(self):
+        self.assertExtract('xn--zckzap6140b352by.blog', 'so-net', u'教育.hk', u'http://xn--zckzap6140b352by.blog.so-net.教育.hk')
+
 
 class ExtractTestUsingCustomSuffixListFile(TldextractTestCase):
 

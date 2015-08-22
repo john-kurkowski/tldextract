@@ -3,6 +3,17 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 1.7 (2015-08-22)
+
+* Features
+    * Can include PSL's private domains on CLI with `--private_domains` boolean flag
+* Bugfixes
+    * Improved support for multiple Punycode (or Punycode-looking) parts of a URL
+        * Mixed in/valid
+        * Mixed encodings
+    * Fix `ExtractResult._asdict` on Python 3.4. This should also save space,
+      as `__dict__` is not created for each `ExtractResult` instance.
+
 ## 1.6 (2015-03-22)
 
 * Features

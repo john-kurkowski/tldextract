@@ -3,7 +3,11 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
-## 1.7 (2015-08-22)
+## 1.7.1 (2015-08-22)
+
+Fix publishing mistake with 1.7.0.
+
+## 1.7.0 (2015-08-22)
 
 * Features
     * Can include PSL's private domains on CLI with `--private_domains` boolean flag

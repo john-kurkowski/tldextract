@@ -189,20 +189,24 @@ class TLDExtract(object):
             .partition(":")[0] \
             .rstrip(".")
 
-        is_punycode = netloc.startswith('xn--') or '.xn--' in netloc
-        # Some IDN urls might generate an error
-        if is_punycode:
-            try:
-                netloc = codecs.decode(netloc.encode('ascii'), 'idna')
-            except UnicodeError:
-                # We return the answer as it is, not considering the input punycode
-                is_punycode = False
+        labels = netloc.split(".")
+        translations = []
+        for label in labels:
+            if label.startswith("xn--"):
+                try:
+                    translation = codecs.decode(label.encode('ascii'), 'idna')
+                except UnicodeError:
+                    translation = label
+            else:
+                translation = label
+            translation = translation.lower()
 
-        registered_domain, tld = self._get_tld_extractor().extract(netloc)
+            translations.append(translation)
 
-        if is_punycode:
-            registered_domain = codecs.encode(registered_domain, 'idna').decode('utf-8')
-            tld = codecs.encode(tld, 'idna').decode('utf-8')
+        suffix_index = self._get_tld_extractor().suffix_index(translations)
+
+        registered_domain = ".".join(labels[:suffix_index])
+        tld = ".".join(labels[suffix_index:])
 
         if not tld and netloc and netloc[0].isdigit():
             try:
@@ -341,23 +345,24 @@ class _PublicSuffixListTLDExtractor(object):
     def __init__(self, tlds):
         self.tlds = tlds
 
-    def extract(self, netloc):
-        spl = netloc.split('.')
-        lower_spl = tuple(el.lower() for el in spl)
-        for i in range(len(spl)):
+    def suffix_index(self, lower_spl):
+        """Returns the index of the first suffix label.
+        Returns len(spl) if no suffix is found
+        """
+        for i in range(len(lower_spl)):
             maybe_tld = '.'.join(lower_spl[i:])
             exception_tld = '!' + maybe_tld
             if exception_tld in self.tlds:
-                return '.'.join(spl[:i + 1]), '.'.join(spl[i + 1:])
+                return i + 1
 
             if maybe_tld in self.tlds:
-                return '.'.join(spl[:i]), '.'.join(spl[i:])
+                return i
 
             wildcard_tld = '*.' + '.'.join(lower_spl[i + 1:])
             if wildcard_tld in self.tlds:
-                return '.'.join(spl[:i]), '.'.join(spl[i:])
+                return i
 
-        return netloc, ''
+        return len(lower_spl)
 
 
 def main():

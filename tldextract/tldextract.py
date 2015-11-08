@@ -294,7 +294,7 @@ TLD_EXTRACTOR = TLDExtract()
 
 @wraps(TLD_EXTRACTOR.__call__)
 def extract(url):
-    return TLD_EXTRACTOR(url)
+    return TLD_EXTRACTOR(url.strip())
 
 
 @wraps(TLD_EXTRACTOR.update)

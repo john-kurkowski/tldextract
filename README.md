@@ -1,6 +1,6 @@
 # tldextract
 
-## Python Module
+## Python Module [![Build Status](https://travis-ci.org/john-kurkowski/tldextract.svg?branch=master)](https://travis-ci.org/john-kurkowski/tldextract) [![Code Climate](https://codeclimate.com/github/john-kurkowski/tldextract/badges/gpa.svg)](https://codeclimate.com/github/john-kurkowski/tldextract)
 
 `tldextract` accurately separates the gTLD or ccTLD (generic or country code
 top-level domain) from the registered domain and subdomains of a URL. For

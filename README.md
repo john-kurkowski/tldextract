@@ -1,4 +1,6 @@
-# Python Module
+# tldextract
+
+## Python Module
 
 `tldextract` accurately separates the gTLD or ccTLD (generic or country code
 top-level domain) from the registered domain and subdomains of a URL. For
@@ -43,7 +45,7 @@ However, the proposed regex solution doesn't address many country codes like
 com.au, or the exceptions to country codes like the registered domain
 parliament.uk. The Public Suffix List does, and so does this module.
 
-## Installation
+### Installation
 
 Latest release on PyPI:
 
@@ -58,7 +60,7 @@ Command-line usage, splits the url components by space:
     $ tldextract http://forums.bbc.co.uk
     forums bbc co.uk
 
-## Tests
+### Tests
 
     $ python -m tldextract.tests.all
 
@@ -66,7 +68,7 @@ or run against all supported Python versions:
 
     $ tox
 
-## Note About Caching & Advanced Usage
+### Note About Caching & Advanced Usage
 
 Beware when first running the module, it updates its TLD list with a live HTTP
 request. This updated TLD set is cached indefinitely in
@@ -103,7 +105,7 @@ or:
 
 It is also recommended to delete the file after upgrading this lib.
 
-### Specifying your own URL or file for the Suffix List data
+#### Specifying your own URL or file for the Suffix List data
 
 You can specify your own input data in place of the default Mozilla Public Suffix List:
 
@@ -125,9 +127,9 @@ If you want to use input data from your local filesystem, just use the `file://`
 Use an absolute path when specifying the `suffix_list_url` keyword argument. `os.path` is your
 friend.
 
-## FAQ
+### FAQ
 
-### If I pass an invalid URL, I still get a result, no error. What gives?
+#### If I pass an invalid URL, I still get a result, no error. What gives?
 
 To keep `tldextract` light in LoC & overhead, and because there are plenty of
 URL validators out there, this library is very lenient with input. If valid
@@ -138,7 +140,7 @@ of desensitizing users to the nuances of URLs. Who knows how much. But in the
 future, I would consider an overhaul. For example, users could opt into
 validation, either receiving exceptions or error metadata on results.
 
-# Public API
+## Public API
 
 I know it's just one method, but I've needed this functionality in a few
 projects and programming languages, so I've uploaded
@@ -148,4 +150,3 @@ your favorite HTTP client with the URL you want parsed like so:
 
     $ curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar/baz.html"
     {"domain": "bbc", "subdomain": "www", "suffix": "co.uk"}
-

@@ -182,12 +182,15 @@ class TLDExtract(object):
         ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
         """
         netloc = SCHEME_RE.sub("", url) \
-            .partition("/")[0] \
-            .partition("?")[0] \
             .partition("#")[0] \
+            .partition("?")[0] \
+            .partition("/")[0] \
             .split("@")[-1] \
-            .partition(":")[0] \
-            .rstrip(".")
+
+        if ']' in netloc:
+            netloc = netloc.partition("]")[0].strip("[")
+        elif netloc.count(':') == 1:
+            netloc = netloc.partition(":")[0]
 
         labels = netloc.split(".")
         translations = []
@@ -208,13 +211,18 @@ class TLDExtract(object):
         registered_domain = ".".join(labels[:suffix_index])
         tld = ".".join(labels[suffix_index:])
 
-        if not tld and netloc and netloc[0].isdigit():
+        if not tld and netloc:
             try:
-                is_ip = socket.inet_aton(netloc)
+                is_ip = socket.inet_pton(socket.AF_INET, netloc)
                 return ExtractResult('', netloc, '')
             except (AttributeError, UnicodeError):
                 if IP_RE.match(netloc):
                     return ExtractResult('', netloc, '')
+            except socket.error:
+                pass
+            try:
+                is_ip = socket.inet_pton(socket.AF_INET6, netloc)
+                return ExtractResult('', netloc, '')
             except socket.error:
                 pass
 

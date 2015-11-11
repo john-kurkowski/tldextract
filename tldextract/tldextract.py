@@ -207,15 +207,8 @@ class TLDExtract(object):
         registered_domain = ".".join(labels[:suffix_index])
         tld = ".".join(labels[suffix_index:])
 
-        if not tld and netloc and netloc[0].isdigit():
-            try:
-                socket.inet_aton(netloc)
-                return ExtractResult('', netloc, '')
-            except (AttributeError, UnicodeError):
-                if IP_RE.match(netloc):
-                    return ExtractResult('', netloc, '')
-            except socket.error:
-                pass
+        if not tld and netloc and looks_like_ip(netloc):
+            return ExtractResult('', netloc, '')
 
         subdomain, _, domain = registered_domain.rpartition('.')
         return ExtractResult(subdomain, domain, tld)
@@ -363,6 +356,21 @@ class _PublicSuffixListTLDExtractor(object):
                 return i
 
         return len(lower_spl)
+
+
+def looks_like_ip(maybe_ip):
+    """Does the given str look like an IP address?"""
+    if not maybe_ip[0].isdigit():
+        return False
+
+    try:
+        socket.inet_aton(maybe_ip)
+        return True
+    except (AttributeError, UnicodeError):
+        if IP_RE.match(maybe_ip):
+            return True
+    except socket.error:
+        return False
 
 
 def main():

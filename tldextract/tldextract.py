@@ -23,6 +23,7 @@ top-level domain) from the registered domain and subdomains of a URL.
     'bbc.co.uk'
 """
 
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -287,6 +288,7 @@ class TLDExtract(object):
             return frozenset(suffixes)
         return suffixes
 
+
 TLD_EXTRACTOR = TLDExtract()
 
 
@@ -395,6 +397,7 @@ def main():
 
     for i in args.input:
         print(' '.join(extract(i)))
+
 
 if __name__ == "__main__":
     main()

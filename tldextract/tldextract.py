@@ -33,9 +33,7 @@ from contextlib import closing
 import errno
 from functools import wraps
 import logging
-from operator import itemgetter
 import os
-import sys
 import warnings
 
 try:
@@ -210,7 +208,7 @@ class TLDExtract(object):
 
         if not tld and netloc and netloc[0].isdigit():
             try:
-                is_ip = socket.inet_aton(netloc)
+                socket.inet_aton(netloc)
                 return ExtractResult('', netloc, '')
             except (AttributeError, UnicodeError):
                 if IP_RE.match(netloc):

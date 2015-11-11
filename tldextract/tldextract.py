@@ -77,7 +77,7 @@ CACHE_FILE_DEFAULT = os.path.join(os.path.dirname(__file__), '.tld_set')
 CACHE_FILE = os.path.expanduser(os.environ.get("TLDEXTRACT_CACHE", CACHE_FILE_DEFAULT))
 
 PUBLIC_SUFFIX_LIST_URLS = (
-    'http://mxr.mozilla.org/mozilla-central/source/netwerk/dns/effective_tld_names.dat?raw=1',
+    'https://publicsuffix.org/list/public_suffix_list.dat',
     'https://raw.github.com/mozilla/gecko-dev/master/netwerk/dns/effective_tld_names.dat',
 )
 

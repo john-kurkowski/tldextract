@@ -78,7 +78,7 @@ CACHE_FILE = os.path.expanduser(os.environ.get("TLDEXTRACT_CACHE", CACHE_FILE_DE
 
 PUBLIC_SUFFIX_LIST_URLS = (
     'https://publicsuffix.org/list/public_suffix_list.dat',
-    'https://raw.github.com/mozilla/gecko-dev/master/netwerk/dns/effective_tld_names.dat',
+    'https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat',
 )
 
 SCHEME_RE = re.compile(r'^([' + scheme_chars + ']+:)?//')

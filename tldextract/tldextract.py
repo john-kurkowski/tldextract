@@ -187,7 +187,8 @@ class TLDExtract(object):
             .partition("#")[0] \
             .split("@")[-1] \
             .partition(":")[0] \
-            .rstrip(".")
+            .rstrip(".") \
+            .rstrip(" ")
 
         labels = netloc.split(".")
         translations = []
@@ -294,7 +295,7 @@ TLD_EXTRACTOR = TLDExtract()
 
 @wraps(TLD_EXTRACTOR.__call__)
 def extract(url):
-    return TLD_EXTRACTOR(url.strip())
+    return TLD_EXTRACTOR(url)
 
 
 @wraps(TLD_EXTRACTOR.update)

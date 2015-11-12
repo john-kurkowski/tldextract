@@ -188,8 +188,7 @@ class TLDExtract(object):
             .split("@")[-1] \
             .partition(":")[0] \
             .strip() \
-            .rstrip(".") \
-            .strip()
+            .rstrip(".")
 
         labels = netloc.split(".")
         translations = []

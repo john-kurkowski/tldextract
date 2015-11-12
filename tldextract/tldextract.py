@@ -187,6 +187,7 @@ class TLDExtract(object):
             .partition("#")[0] \
             .split("@")[-1] \
             .partition(":")[0] \
+            .strip() \
             .rstrip(".") \
             .strip()
 

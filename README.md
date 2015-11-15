@@ -70,18 +70,6 @@ tldextract http://forums.bbc.co.uk
 # forums bbc co.uk
 ```
 
-### Tests
-
-```zsh
-python -m tldextract.tests.all
-```
-
-or run against all supported Python versions:
-
-```zsh
-tox
-```
-
 ### Note About Caching & Advanced Usage
 
 Beware when first running the module, it updates its TLD list with a live HTTP
@@ -175,4 +163,16 @@ your favorite HTTP client with the URL you want parsed like so:
 ```zsh
 curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar/baz.html"
 # {"domain": "bbc", "subdomain": "www", "suffix": "co.uk"}
+```
+
+## Tests
+
+```zsh
+python -m tldextract.tests.all
+```
+
+or run against all supported Python versions:
+
+```zsh
+tox
 ```

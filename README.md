@@ -19,25 +19,29 @@ looking up the currently living ones according to
 given a URL, it knows its subdomain from its domain, and its domain from its
 country code.
 
-    >>> import tldextract
-    >>> tldextract.extract('http://forums.news.cnn.com/')
-    ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
-    >>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
-    ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
-    >>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
-    ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
+```python
+>>> import tldextract
+>>> tldextract.extract('http://forums.news.cnn.com/')
+ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
+>>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
+ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
+>>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
+ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
+```
 
 `ExtractResult` is a namedtuple, so it's simple to access the parts you want.
 
-    >>> ext = tldextract.extract('http://forums.bbc.co.uk')
-    >>> (ext.subdomain, ext.domain, ext.suffix)
-    ('forums', 'bbc', 'co.uk')
-    >>> # rejoin subdomain and domain
-    >>> '.'.join(ext[:2])
-    'forums.bbc'
-    >>> # a common alias
-    >>> ext.registered_domain
-    'bbc.co.uk'
+```python
+>>> ext = tldextract.extract('http://forums.bbc.co.uk')
+>>> (ext.subdomain, ext.domain, ext.suffix)
+('forums', 'bbc', 'co.uk')
+>>> # rejoin subdomain and domain
+>>> '.'.join(ext[:2])
+'forums.bbc'
+>>> # a common alias
+>>> ext.registered_domain
+'bbc.co.uk'
+```
 
 This module started by implementing the chosen answer from [this StackOverflow question on
 getting the "domain name" from a URL](http://stackoverflow.com/questions/569137/how-to-get-domain-name-from-url/569219#569219).
@@ -49,24 +53,34 @@ parliament.uk. The Public Suffix List does, and so does this module.
 
 Latest release on PyPI:
 
-    $ pip install tldextract
+```zsh
+pip install tldextract
+```
 
 Or the latest dev version:
 
-    $ pip install -e git://github.com/john-kurkowski/tldextract.git#egg=tldextract
+```zsh
+pip install -e 'git://github.com/john-kurkowski/tldextract.git#egg=tldextract'
+```
 
 Command-line usage, splits the url components by space:
 
-    $ tldextract http://forums.bbc.co.uk
-    forums bbc co.uk
+```zsh
+tldextract http://forums.bbc.co.uk
+# forums bbc co.uk
+```
 
 ### Tests
 
-    $ python -m tldextract.tests.all
+```zsh
+python -m tldextract.tests.all
+```
 
 or run against all supported Python versions:
 
-    $ tox
+```zsh
+tox
+```
 
 ### Note About Caching & Advanced Usage
 
@@ -82,26 +96,32 @@ To avoid this fetch or control the cache's location, use your own extract
 callable by setting TLDEXTRACT_CACHE environment variable or by setting the
 cache_file path in TLDExtract initialization.
 
-    # extract callable that falls back to the included TLD snapshot, no live HTTP fetching
-    no_fetch_extract = tldextract.TLDExtract(suffix_list_url=False)
-    no_fetch_extract('http://www.google.com')
+```python
+# extract callable that falls back to the included TLD snapshot, no live HTTP fetching
+no_fetch_extract = tldextract.TLDExtract(suffix_list_url=False)
+no_fetch_extract('http://www.google.com')
 
-    # extract callable that reads/writes the updated TLD set to a different path
-    custom_cache_extract = tldextract.TLDExtract(cache_file='/path/to/your/cache/file')
-    custom_cache_extract('http://www.google.com')
+# extract callable that reads/writes the updated TLD set to a different path
+custom_cache_extract = tldextract.TLDExtract(cache_file='/path/to/your/cache/file')
+custom_cache_extract('http://www.google.com')
 
-    # extract callable that doesn't use caching
-    no_cache_extract = tldextract.TLDExtract(cache_file=False)
-    no_cache_extract('http://www.google.com')
+# extract callable that doesn't use caching
+no_cache_extract = tldextract.TLDExtract(cache_file=False)
+no_cache_extract('http://www.google.com')
+```
 
 If you want to stay fresh with the TLD definitions--though they don't change
 often--delete the cache file occasionally, or run
 
-    tldextract --update
+```zsh
+tldextract --update
+```
 
 or:
 
-    env TLDEXTRACT_CACHE="~/tldextract.cache" tldextract --update
+```zsh
+env TLDEXTRACT_CACHE="~/tldextract.cache" tldextract --update
+```
 
 It is also recommended to delete the file after upgrading this lib.
 
@@ -109,20 +129,24 @@ It is also recommended to delete the file after upgrading this lib.
 
 You can specify your own input data in place of the default Mozilla Public Suffix List:
 
-    extract = tldextract.TLDExtract(
-        suffix_list_url="http://foo.bar.baz",
-        # Recommended: Specify your own cache file, to minimize ambiguities about where
-        # tldextract is getting its data, or cached data, from.
-        cache_file='/path/to/your/cache/file')
+```python
+extract = tldextract.TLDExtract(
+    suffix_list_url="http://foo.bar.baz",
+    # Recommended: Specify your own cache file, to minimize ambiguities about where
+    # tldextract is getting its data, or cached data, from.
+    cache_file='/path/to/your/cache/file')
+```
 
 The above snippet will fetch from the URL *you* specified, upon first need to download the
 suffix list (i.e. if the cache_file doesn't exist).
 
 If you want to use input data from your local filesystem, just use the `file://` protocol:
 
-    extract = tldextract.TLDExtract(
-        suffix_list_url="file://absolute/path/to/your/local/suffix/list/file",
-        cache_file='/path/to/your/cache/file')
+```python
+extract = tldextract.TLDExtract(
+    suffix_list_url="file://absolute/path/to/your/local/suffix/list/file",
+    cache_file='/path/to/your/cache/file')
+```
 
 Use an absolute path when specifying the `suffix_list_url` keyword argument. `os.path` is your
 friend.
@@ -148,5 +172,7 @@ projects and programming languages, so I've uploaded
 GAE's free pricing plan until Google cuts it off. Just hit it with
 your favorite HTTP client with the URL you want parsed like so:
 
-    $ curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar/baz.html"
-    {"domain": "bbc", "subdomain": "www", "suffix": "co.uk"}
+```zsh
+curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar/baz.html"
+# {"domain": "bbc", "subdomain": "www", "suffix": "co.uk"}
+```

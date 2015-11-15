@@ -261,6 +261,8 @@ class ExtractTestAsDict(TldextractTestCase):
         expected_dict = {'subdomain' : 'www',
                          'domain' : 'google',
                          'suffix' : 'com'}
+        # TODO: Remove after Pylint 1.4+
+        # pylint: disable=protected-access
         self.assertEquals(result._asdict(), expected_dict)
 
 

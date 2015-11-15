@@ -416,7 +416,7 @@ def main():
     parser = argparse.ArgumentParser(
         description='Parse hostname from a url or fqdn')
 
-    parser.add_argument('--version', action='version', version='%(prog)s ' + distribution.version) # pylint: disable=no-member
+    parser.add_argument('--version', action='version', version='%(prog)s ' + distribution.version) # pylint: disable=maybe-no-member,no-member
     parser.add_argument('input', metavar='fqdn|url',
                         type=unicode, nargs='*', help='fqdn or url')
 

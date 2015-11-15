@@ -20,6 +20,8 @@ class Extract(object):
         if not url:
             return web.webapi.badrequest()
 
+        # TODO: Remove after Pylint 1.4+
+        # pylint: disable=protected-access
         ext = tldextract.extract(url)._asdict()
         web.header('Content-Type', 'application/json')
         return json.dumps(ext) + '\n'

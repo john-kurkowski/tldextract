@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+'''Run all tldextract test cases.'''
+
 import doctest
 import logging
 import os
@@ -17,12 +20,13 @@ def _temporary_file():
     return tempfile.mkstemp()[1]
 
 
-fake_suffix_list_url = "file://" + os.path.join(
+FAKE_SUFFIX_LIST_URL = "file://" + os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     'fixtures/fake_suffix_list_fixture.dat'
 )
-extra_suffixes = ['foo1', 'bar1', 'baz1']
+EXTRA_SUFFIXES = ['foo1', 'bar1', 'baz1']
 
+# pylint: disable=invalid-name
 extract = tldextract.TLDExtract(cache_file=_temporary_file())
 extract_no_cache = tldextract.TLDExtract(cache_file=False)
 extract_using_real_local_suffix_list = tldextract.TLDExtract(cache_file=_temporary_file())
@@ -33,17 +37,18 @@ extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
 )
 extract_using_fake_suffix_list = tldextract.TLDExtract(
     cache_file=_temporary_file(),
-    suffix_list_url=fake_suffix_list_url
+    suffix_list_url=FAKE_SUFFIX_LIST_URL
 )
 extract_using_fake_suffix_list_no_cache = tldextract.TLDExtract(
     cache_file=None,
-    suffix_list_url=fake_suffix_list_url
+    suffix_list_url=FAKE_SUFFIX_LIST_URL
 )
 extract_using_extra_suffixes = tldextract.TLDExtract(
     cache_file=None,
-    suffix_list_url=fake_suffix_list_url,
-    extra_suffixes=extra_suffixes
+    suffix_list_url=FAKE_SUFFIX_LIST_URL,
+    extra_suffixes=EXTRA_SUFFIXES
 )
+# pylint: enable=invalid-name
 
 
 class TldextractTestCase(unittest.TestCase):
@@ -54,7 +59,7 @@ class TldextractTestCase(unittest.TestCase):
 
 class IntegrationTest(TldextractTestCase):
 
-    def test_log_snapshot_diff(self):
+    def test_log_snapshot_diff(self): # pylint: disable=no-self-use
         logging.getLogger().setLevel(logging.DEBUG)
 
         extractor = tldextract.TLDExtract()
@@ -79,21 +84,27 @@ class IntegrationTest(TldextractTestCase):
         GitHub issue #41.
         """
         extractor = tldextract.TLDExtract(suffix_list_url='foo', fetch=False)
-        assert not extractor.suffix_list_urls
+        self.assertFalse(extractor.suffix_list_urls)
 
 
-class ExtractTest(TldextractTestCase):
+class ExtractTest(TldextractTestCase): # pylint: disable=too-many-public-methods
 
-    def assertExtract(self, expected_subdomain, expected_domain, expected_tld, url,
-                      fns=(
-                          extract,
-                          extract_no_cache,
-                          extract_using_real_local_suffix_list,
-                          extract_using_real_local_suffix_list_no_cache,
-                          extract_using_fallback_to_snapshot_no_cache
-                      )):
-        for fn in fns:
-            ext = fn(url)
+    def assertExtract( # pylint: disable=invalid-name,too-many-arguments
+            self,
+            expected_subdomain,
+            expected_domain,
+            expected_tld,
+            url,
+            funs=(
+                extract,
+                extract_no_cache,
+                extract_using_real_local_suffix_list,
+                extract_using_real_local_suffix_list_no_cache,
+                extract_using_fallback_to_snapshot_no_cache
+            )):
+
+        for fun in funs:
+            ext = fun(url)
             self.assertEquals(expected_subdomain, ext.subdomain)
             self.assertEquals(expected_domain, ext.domain)
             self.assertEquals(expected_tld, ext.tld)
@@ -116,12 +127,24 @@ class ExtractTest(TldextractTestCase):
         self.assertExtract('', 'www', 'com', 'http://www.com')
 
     def test_local_host(self):
-        self.assertExtract('', 'internalunlikelyhostname', '', 'http://internalunlikelyhostname/')
-        self.assertExtract('internalunlikelyhostname', 'bizarre', '', 'http://internalunlikelyhostname.bizarre')
+        self.assertExtract(
+            '', 'internalunlikelyhostname', '',
+            'http://internalunlikelyhostname/'
+        )
+        self.assertExtract(
+            'internalunlikelyhostname', 'bizarre', '',
+            'http://internalunlikelyhostname.bizarre'
+        )
 
     def test_qualified_local_host(self):
-        self.assertExtract('', 'internalunlikelyhostname', 'info', 'http://internalunlikelyhostname.info/')
-        self.assertExtract('internalunlikelyhostname', 'information', '', 'http://internalunlikelyhostname.information/')
+        self.assertExtract(
+            '', 'internalunlikelyhostname', 'info',
+            'http://internalunlikelyhostname.info/'
+        )
+        self.assertExtract(
+            'internalunlikelyhostname', 'information', '',
+            'http://internalunlikelyhostname.information/'
+        )
 
     def test_ip(self):
         self.assertExtract('', '216.22.0.192', '', 'http://216.22.0.192/')
@@ -131,12 +154,21 @@ class ExtractTest(TldextractTestCase):
         self.assertExtract('', u'1\xe9', '', u'1\xe9')
 
     def test_punycode(self):
-        self.assertExtract('', 'xn--h1alffa9f', 'xn--p1ai', 'http://xn--h1alffa9f.xn--p1ai')
+        self.assertExtract(
+            '', 'xn--h1alffa9f', 'xn--p1ai',
+            'http://xn--h1alffa9f.xn--p1ai'
+        )
         # Entries that might generate UnicodeError exception
         # This subdomain generates UnicodeError 'IDNA does not round-trip'
-        self.assertExtract('xn--tub-1m9d15sfkkhsifsbqygyujjrw602gk4li5qqk98aca0w','google', 'com', 'xn--tub-1m9d15sfkkhsifsbqygyujjrw602gk4li5qqk98aca0w.google.com')
+        self.assertExtract(
+            'xn--tub-1m9d15sfkkhsifsbqygyujjrw602gk4li5qqk98aca0w', 'google', 'com',
+            'xn--tub-1m9d15sfkkhsifsbqygyujjrw602gk4li5qqk98aca0w.google.com'
+        )
         # This subdomain generates UnicodeError 'incomplete punicode string'
-        self.assertExtract('xn--tub-1m9d15sfkkhsifsbqygyujjrw60','google','com','xn--tub-1m9d15sfkkhsifsbqygyujjrw60.google.com')
+        self.assertExtract(
+            'xn--tub-1m9d15sfkkhsifsbqygyujjrw60', 'google', 'com',
+            'xn--tub-1m9d15sfkkhsifsbqygyujjrw60.google.com'
+        )
 
     def test_empty(self):
         self.assertExtract('', '', '', 'http://')
@@ -145,7 +177,7 @@ class ExtractTest(TldextractTestCase):
         self.assertExtract('mail', 'google', 'com', 'https://mail.google.com/mail')
         self.assertExtract('mail', 'google', 'com', 'ssh://mail.google.com/mail')
         self.assertExtract('mail', 'google', 'com', '//mail.google.com/mail')
-        self.assertExtract('mail', 'google', 'com', 'mail.google.com/mail', fns=(extract,))
+        self.assertExtract('mail', 'google', 'com', 'mail.google.com/mail', funs=(extract,))
 
     def test_port(self):
         self.assertExtract('www', 'github', 'com', 'git+ssh://www.github.com:8443/')
@@ -180,23 +212,29 @@ class ExtractTest(TldextractTestCase):
         self.assertExtract('waiterrant', 'blogspot', 'com', 'http://waiterrant.blogspot.com')
 
     def test_invalid_puny_with_puny(self):
-        self.assertExtract('xn--zckzap6140b352by.blog', 'so-net', 'xn--wcvs22d.hk', 'http://xn--zckzap6140b352by.blog.so-net.xn--wcvs22d.hk')
+        self.assertExtract(
+            'xn--zckzap6140b352by.blog', 'so-net', 'xn--wcvs22d.hk',
+            'http://xn--zckzap6140b352by.blog.so-net.xn--wcvs22d.hk'
+        )
 
     def test_puny_with_non_puny(self):
-        self.assertExtract('xn--zckzap6140b352by.blog', 'so-net', u'教育.hk', u'http://xn--zckzap6140b352by.blog.so-net.教育.hk')
+        self.assertExtract(
+            'xn--zckzap6140b352by.blog', 'so-net', u'教育.hk',
+            u'http://xn--zckzap6140b352by.blog.so-net.教育.hk'
+        )
 
 
 class ExtractTestUsingCustomSuffixListFile(TldextractTestCase):
 
     def test_suffix_which_is_not_in_custom_list(self):
-        for fn in (extract_using_fake_suffix_list, extract_using_fake_suffix_list_no_cache):
-            result = fn("www.google.com")
+        for fun in (extract_using_fake_suffix_list, extract_using_fake_suffix_list_no_cache):
+            result = fun("www.google.com")
             self.assertEquals(result.suffix, "")
 
     def test_custom_suffixes(self):
-        for fn in (extract_using_fake_suffix_list, extract_using_fake_suffix_list_no_cache):
+        for fun in (extract_using_fake_suffix_list, extract_using_fake_suffix_list_no_cache):
             for custom_suffix in ('foo', 'bar', 'baz'):
-                result = fn("www.foo.bar.baz.quux" + "." + custom_suffix)
+                result = fun("www.foo.bar.baz.quux" + "." + custom_suffix)
                 self.assertEquals(result.suffix, custom_suffix)
 
 
@@ -207,7 +245,7 @@ class ExtractTestUsingExtraSuffixes(TldextractTestCase):
         self.assertEquals(result.suffix, "")
 
     def test_extra_suffixes(self):
-        for custom_suffix in extra_suffixes:
+        for custom_suffix in EXTRA_SUFFIXES:
             netloc = "www.foo.bar.baz.quux" + "." + custom_suffix
             result = extract_using_extra_suffixes(netloc)
             self.assertEquals(result.suffix, custom_suffix)
@@ -216,7 +254,10 @@ class ExtractTestUsingExtraSuffixes(TldextractTestCase):
 class ExtractTestAsDict(TldextractTestCase):
 
     def test_result_as_dict(self):
-        result = extract("http://admin:password1@www.google.com:666/secret/admin/interface?param1=42")
+        result = extract(
+            "http://admin:password1@www.google.com:666"
+            "/secret/admin/interface?param1=42"
+        )
         expected_dict = {'subdomain' : 'www',
                          'domain' : 'google',
                          'suffix' : 'com'}

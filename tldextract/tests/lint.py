@@ -9,6 +9,9 @@ import unittest
 
 from .helpers import check_output
 
+if sys.version_info >= (3, 0):
+    unicode = str # pylint: disable=invalid-name,redefined-builtin
+
 
 class PylintTestMeta(type):
     '''Dynamically generates a test case for every Pylint error.'''
@@ -16,10 +19,15 @@ class PylintTestMeta(type):
     def __new__(mcs, name, bases, di):
         '''Runs all Python files in this project through Pylint. For each lint
         error, adds a test case method to `di`.'''
-        project_root = check_output(('git', 'rev-parse', '--show-toplevel')).strip()
+        is_pylint_compatible = (2, 7) <= sys.version_info < (3, 5)
+        if not is_pylint_compatible:
+            return super(PylintTestMeta, mcs).__new__(mcs, name, bases, di)
+
+        project_root_cmd = ('git', 'rev-parse', '--show-toplevel')
+        project_root = unicode(check_output(project_root_cmd), 'utf-8').strip()
 
         ls_files_cmd = ('git', '--git-dir', os.path.join(project_root, '.git'), 'ls-files')
-        ls_files = check_output(ls_files_cmd).splitlines()
+        ls_files = (unicode(f, 'utf-8') for f in check_output(ls_files_cmd).splitlines())
         py_files = (os.path.join(project_root, f) for f in ls_files if f.endswith('.py'))
 
         pylint_errors = itertools.chain.from_iterable(
@@ -75,9 +83,7 @@ class PylintTestMeta(type):
                 yield match
 
 
-class PylintTest(unittest.TestCase):
-
-    __metaclass__ = PylintTestMeta
+PylintTest = PylintTestMeta(str('PylintTest'), (unittest.TestCase,), {}) # pylint: disable=invalid-name
 
 
 def run_tests(stream=sys.stderr):

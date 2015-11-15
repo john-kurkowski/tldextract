@@ -54,12 +54,12 @@ except ImportError:
             path = os.path.join(moddir, resource_name)
             return open(path)
 
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,undefined-variable
 try:
     STRING_TYPE = basestring
 except NameError:
     STRING_TYPE = str
-# pylint: enable=invalid-name
+# pylint: enable=invalid-name,undefined-variable
 
 
 # pylint: disable=import-error,invalid-name,no-name-in-module,redefined-builtin

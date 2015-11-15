@@ -78,7 +78,8 @@ def run_tests(stream=sys.stderr):
     suite = unittest.TestSuite([
         unittest.TestLoader().loadTestsFromTestCase(PylintTest)
     ])
-    unittest.TextTestRunner(stream).run(suite)
+    result = unittest.TextTestRunner(stream).run(suite)
+    sys.exit(not result.wasSuccessful())
 
 
 if __name__ == '__main__':

@@ -279,7 +279,8 @@ def test_suite():
 
 def run_tests(stream=sys.stderr):
     suite = test_suite()
-    unittest.TextTestRunner(stream).run(suite)
+    result = unittest.TextTestRunner(stream).run(suite)
+    sys.exit(not result.wasSuccessful())
 
 
 if __name__ == "__main__":

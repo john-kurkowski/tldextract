@@ -234,29 +234,20 @@ class TLDExtract(object):
         return self._get_tld_extractor().tlds
 
     def _get_tld_extractor(self):
+        '''Get or compute this object's TLDExtractor. Looks up the TLDExtractor
+        in roughly the following order, based on the settings passed to
+        __init__:
+
+        1. Memoized on `self`
+        2. Local system cache file
+        3. Remote PSL, over HTTP
+        4. Bundled PSL snapshot file'''
         if self._extractor:
             return self._extractor
 
-        if self.cache_file:
-            try:
-                with open(self.cache_file, 'rb') as cache_file:
-                    try:
-                        suffixes = pickle.load(cache_file)
-                    except Exception as myriad_unpickling_errors: # pylint: disable=broad-except
-                        LOG.error(
-                            "error reading TLD cache file %s: %s",
-                            self.cache_file,
-                            myriad_unpickling_errors
-                        )
-                    else:
-                        self._extractor = _PublicSuffixListTLDExtractor(
-                            self._add_extra_suffixes(suffixes)
-                        )
-                        return self._extractor
-            except IOError as ioe:
-                file_not_found = ioe.errno == errno.ENOENT
-                if not file_not_found:
-                    LOG.error("error reading TLD cache file %s: %s", self.cache_file, ioe)
+        self._extractor = self._get_cached_tld_extractor()
+        if self._extractor:
+            return self._extractor
 
         tlds = frozenset()
         if self.suffix_list_urls:
@@ -266,18 +257,54 @@ class TLDExtract(object):
                 self.include_psl_private_domains
             )
 
-        if not tlds:
-            if self.fallback_to_snapshot:
-                snapshot_stream = pkg_resources.resource_stream(__name__, '.tld_set_snapshot')
-                with closing(snapshot_stream) as snapshot_file:
-                    self._extractor = _PublicSuffixListTLDExtractor(
-                        self._add_extra_suffixes(pickle.load(snapshot_file))
-                    )
-                    return self._extractor
-            else:
-                raise Exception("tlds is empty, but fallback_to_snapshot is set"
-                                " to false. Cannot proceed without tlds.")
+        if not tlds and self.fallback_to_snapshot:
+            self._extractor = self._get_snapshot_tld_extractor()
+            return self._extractor
+        elif not tlds:
+            raise Exception("tlds is empty, but fallback_to_snapshot is set"
+                            " to false. Cannot proceed without tlds.")
 
+        self._cache_tlds(tlds)
+
+        self._extractor = _PublicSuffixListTLDExtractor(self._add_extra_suffixes(tlds))
+        return self._extractor
+
+    def _get_cached_tld_extractor(self):
+        '''Unpickles the local TLD cache file. Returns None on IOError or other
+        unpickling error, or if this object is not set to use the cache
+        file.'''
+        if not self.cache_file:
+            return
+
+        try:
+            with open(self.cache_file, 'rb') as cache_file:
+                try:
+                    suffixes = pickle.load(cache_file)
+                except Exception as myriad_unpickling_errors: # pylint: disable=broad-except
+                    LOG.error(
+                        "error reading TLD cache file %s: %s",
+                        self.cache_file,
+                        myriad_unpickling_errors
+                    )
+                else:
+                    return _PublicSuffixListTLDExtractor(
+                        self._add_extra_suffixes(suffixes)
+                    )
+        except IOError as ioe:
+            file_not_found = ioe.errno == errno.ENOENT
+            if not file_not_found:
+                LOG.error("error reading TLD cache file %s: %s", self.cache_file, ioe)
+
+    def _get_snapshot_tld_extractor(self):
+        snapshot_stream = pkg_resources.resource_stream(__name__, '.tld_set_snapshot')
+        with closing(snapshot_stream) as snapshot_file:
+            return _PublicSuffixListTLDExtractor(
+                self._add_extra_suffixes(pickle.load(snapshot_file))
+            )
+
+    def _cache_tlds(self, tlds):
+        '''Logs a diff of the new TLDs and caches them on disk, according to
+        settings passed to __init__.'''
         LOG.info("computed TLDs: [%s, ...]", ', '.join(list(tlds)[:10]))
         if LOG.isEnabledFor(logging.DEBUG):
             import difflib
@@ -298,9 +325,6 @@ class TLDExtract(object):
                     pickle.dump(tlds, cache_file)
             except IOError as ioe:
                 LOG.warn("unable to cache TLDs in file %s: %s", self.cache_file, ioe)
-
-        self._extractor = _PublicSuffixListTLDExtractor(self._add_extra_suffixes(tlds))
-        return self._extractor
 
     def _add_extra_suffixes(self, suffixes):
         if self.extra_suffixes:

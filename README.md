@@ -165,13 +165,25 @@ curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar
 # {"domain": "bbc", "subdomain": "www", "suffix": "co.uk"}
 ```
 
-## Tests
+## Contribute
+
+### Installation
+
+You probably want to set up a [virtualenv](http://virtualenv.readthedocs.org/en/latest/index.html).
+
+1. `git clone` this repository.
+2. Change into the new directory.
+3. `pip install -r requirements.txt`
+
+### Running the Test Suite
+
+Run all tests against your current Python version:
 
 ```zsh
 python -m tldextract.tests.all
 ```
 
-or run against all supported Python versions:
+Or against all supported Python versions:
 
 ```zsh
 tox

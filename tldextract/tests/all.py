@@ -8,6 +8,7 @@ import traceback
 import unittest
 
 import tldextract
+import tldextract.tests.lint
 
 
 def _temporary_file():
@@ -231,6 +232,7 @@ def test_suite():
         unittest.TestLoader().loadTestsFromTestCase(ExtractTest),
         unittest.TestLoader().loadTestsFromTestCase(ExtractTestUsingCustomSuffixListFile),
         unittest.TestLoader().loadTestsFromTestCase(ExtractTestUsingExtraSuffixes),
+        unittest.TestLoader().loadTestsFromModule(tldextract.tests.lint),
     ])
 
 

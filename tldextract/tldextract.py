@@ -229,6 +229,10 @@ class TLDExtract(object):
         if fetch_now:
             self._get_tld_extractor()
 
+    @property
+    def tlds(self):
+        return self._get_tld_extractor().tlds
+
     def _get_tld_extractor(self):
         if self._extractor:
             return self._extractor

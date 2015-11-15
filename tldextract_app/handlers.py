@@ -1,22 +1,21 @@
-from cStringIO import StringIO
+'''web.py handlers for making a JSON-over-HTTP API around tldextract.'''
+
+import json
+
+# pylint: disable=import-error
 import tldextract
 import web
 
-try:
-    import json
-except ImportError:
-    from django.utils import simplejson as json
-
-urls = (
+URLS = (
     '/api/extract', 'Extract',
     '/api/re', 'TLDSet',
     '/test', 'Test',
 )
 
 
-class Extract:
+class Extract(object):
 
-    def GET(self):
+    def GET(self): # pylint: disable=invalid-name,no-self-use
         url = web.input(url='').url
         if not url:
             return web.webapi.badrequest()
@@ -26,20 +25,12 @@ class Extract:
         return json.dumps(ext) + '\n'
 
 
-class TLDSet:
+class TLDSet(object):
 
-    def GET(self):
-        extractor = tldextract.tldextract._get_tld_extractor()
+    def GET(self): # pylint: disable=invalid-name,no-self-use
         web.header('Content-Type', 'text/html; charset=utf-8')
-        return '<br/>'.join(sorted(extractor.tlds))
+        return '<br/>'.join(sorted(tldextract.tldextract.TLD_EXTRACTOR.tlds))
 
 
-class Test:
-
-    def GET(self):
-        stream = StringIO()
-        tldextract.tldextract.run_tests(stream)
-        return stream.getvalue()
-
-app = web.application(urls, globals())
-main = app.cgirun()
+APP = web.application(URLS, globals())
+main = APP.cgirun()

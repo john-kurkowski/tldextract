@@ -26,7 +26,7 @@ class PylintTestMeta(type):
             mcs.pylint_errors(project_root, py_file) for py_file in py_files
         )
         for pylint_error in pylint_errors:
-            test_name = 'test {0} {1}'.format(
+            test_name = 'test {} {}'.format(
                 pylint_error.group('location'),
                 pylint_error.group('category')
             )
@@ -48,7 +48,7 @@ class PylintTestMeta(type):
         # Match example:
         # tldextract/tldextract.py:337: convention (C0111, missing-docstring, _PublicSuffixListTLDExtractor) Missing class docstring # pylint: disable=line-too-long
         pylint_line_re = re.compile(r'''
-            \s*{0}{1}                   # Ignore absolute path outside project root
+            \s*{}{}                     # Ignore absolute path outside project root
             (?P<location>\S+\d+)        # File and lineno the error occurs
             :\s*
             (?P<category>\S+)           # e.g. convention, info, fatal
@@ -61,7 +61,7 @@ class PylintTestMeta(type):
         exclude_categories = set(('info',))
 
         pylintrc = os.path.join(project_root, 'pylintrc')
-        pylint_opts = '{0} --rcfile={1}'.format(py_file, pylintrc)
+        pylint_opts = '{} --rcfile={}'.format(py_file, pylintrc)
         stdout, stderr = pylint.epylint.py_run(pylint_opts, return_std=True)
 
         stderr_str = stderr.read()

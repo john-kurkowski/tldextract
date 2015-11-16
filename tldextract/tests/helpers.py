@@ -1,6 +1,7 @@
 '''tldextract test helpers.'''
 
 from subprocess import CalledProcessError, PIPE, Popen
+import tempfile
 
 
 def check_output(*popenargs, **kwargs):
@@ -16,3 +17,9 @@ def check_output(*popenargs, **kwargs):
             cmd = popenargs[0]
         raise CalledProcessError(retcode, cmd, output=output)
     return output
+
+
+def temporary_file():
+    """ Make a writable temporary file and return its absolute path.
+    """
+    return tempfile.mkstemp()[1]

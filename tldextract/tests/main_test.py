@@ -1,91 +1,20 @@
 # -*- coding: utf-8 -*-
-
-'''Run all tldextract test cases.'''
-
-import logging
-import os
-import pytest
-import tempfile
-import traceback
+'''Main tldextract unit tests.'''
 
 import tldextract
+from .helpers import temporary_file
 
-
-def _temporary_file():
-    """ Make a writable temporary file and return its absolute path.
-    """
-    return tempfile.mkstemp()[1]
-
-
-FAKE_SUFFIX_LIST_URL = "file://" + os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    'fixtures/fake_suffix_list_fixture.dat'
-)
-EXTRA_SUFFIXES = ['foo1', 'bar1', 'baz1']
 
 # pylint: disable=invalid-name
-extract = tldextract.TLDExtract(cache_file=_temporary_file())
+extract = tldextract.TLDExtract(cache_file=temporary_file())
 extract_no_cache = tldextract.TLDExtract(cache_file=False)
-extract_using_real_local_suffix_list = tldextract.TLDExtract(cache_file=_temporary_file())
+extract_using_real_local_suffix_list = tldextract.TLDExtract(cache_file=temporary_file())
 extract_using_real_local_suffix_list_no_cache = tldextract.TLDExtract(cache_file=False)
 extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
     cache_file=None,
     suffix_list_url=None
 )
-extract_using_fake_suffix_list = tldextract.TLDExtract(
-    cache_file=_temporary_file(),
-    suffix_list_url=FAKE_SUFFIX_LIST_URL
-)
-extract_using_fake_suffix_list_no_cache = tldextract.TLDExtract(
-    cache_file=None,
-    suffix_list_url=FAKE_SUFFIX_LIST_URL
-)
-extract_using_extra_suffixes = tldextract.TLDExtract(
-    cache_file=None,
-    suffix_list_url=FAKE_SUFFIX_LIST_URL,
-    extra_suffixes=EXTRA_SUFFIXES
-)
 # pylint: enable=invalid-name
-
-
-@pytest.fixture(autouse=True)
-def reset_log_level():
-    logging.getLogger().setLevel(logging.WARN)
-
-
-# Integration Tests
-
-
-def test_log_snapshot_diff():
-    logging.getLogger().setLevel(logging.DEBUG)
-
-    extractor = tldextract.TLDExtract()
-    try:
-        os.remove(extractor.cache_file)
-    except (IOError, OSError):
-        logging.warning(traceback.format_exc())
-
-    # TODO: if .tld_set_snapshot is up to date, this won't trigger a diff
-    extractor('ignore.com')
-
-
-def test_bad_kwargs():
-    with pytest.raises(ValueError):
-        tldextract.TLDExtract(
-            cache_file=False, suffix_list_url=False, fallback_to_snapshot=False
-        )
-
-
-def test_fetch_and_suffix_list_conflict():
-    """ Make sure we support both fetch and suffix_list_url kwargs for this version.
-
-    GitHub issue #41.
-    """
-    extractor = tldextract.TLDExtract(suffix_list_url='foo', fetch=False)
-    assert not extractor.suffix_list_urls
-
-
-# Extraction Unit Tests
 
 
 def assert_extract(
@@ -241,40 +170,6 @@ def test_puny_with_non_puny():
         'xn--zckzap6140b352by.blog', 'so-net', u'教育.hk',
         u'http://xn--zckzap6140b352by.blog.so-net.教育.hk'
     )
-
-
-# Custom Suffix List Tests
-
-
-def test_suffix_which_is_not_in_custom_list():
-    for fun in (extract_using_fake_suffix_list, extract_using_fake_suffix_list_no_cache):
-        result = fun("www.google.com")
-        assert result.suffix == ""
-
-
-def test_custom_suffixes():
-    for fun in (extract_using_fake_suffix_list, extract_using_fake_suffix_list_no_cache):
-        for custom_suffix in ('foo', 'bar', 'baz'):
-            result = fun("www.foo.bar.baz.quux" + "." + custom_suffix)
-            assert result.suffix == custom_suffix
-
-
-# Extra Suffixes Tests
-
-
-def test_suffix_which_is_not_in_extra_list():
-    result = extract_using_extra_suffixes("www.google.com")
-    assert result.suffix == ""
-
-
-def test_extra_suffixes():
-    for custom_suffix in EXTRA_SUFFIXES:
-        netloc = "www.foo.bar.baz.quux" + "." + custom_suffix
-        result = extract_using_extra_suffixes(netloc)
-        assert result.suffix == custom_suffix
-
-
-# _asdict Tests
 
 
 def test_result_as_dict():

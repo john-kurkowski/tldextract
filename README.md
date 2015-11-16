@@ -70,18 +70,6 @@ tldextract http://forums.bbc.co.uk
 # forums bbc co.uk
 ```
 
-### Tests
-
-```zsh
-python -m tldextract.tests.all
-```
-
-or run against all supported Python versions:
-
-```zsh
-tox
-```
-
 ### Note About Caching & Advanced Usage
 
 Beware when first running the module, it updates its TLD list with a live HTTP
@@ -175,4 +163,28 @@ your favorite HTTP client with the URL you want parsed like so:
 ```zsh
 curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar/baz.html"
 # {"domain": "bbc", "subdomain": "www", "suffix": "co.uk"}
+```
+
+## Contribute
+
+### Installation
+
+You probably want to set up a [virtualenv](http://virtualenv.readthedocs.org/en/latest/index.html).
+
+1. `git clone` this repository.
+2. Change into the new directory.
+3. `pip install -r requirements.txt`
+
+### Running the Test Suite
+
+Run all tests against your current Python version:
+
+```zsh
+python -m tldextract.tests.all
+```
+
+Or against all supported Python versions:
+
+```zsh
+tox
 ```

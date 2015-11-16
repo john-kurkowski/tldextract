@@ -6,4 +6,4 @@ python:
   - "3.4"
   - "3.5"
 install: pip install -r requirements.txt
-script: python -m tldextract.tests.all
+script: py.test

@@ -24,7 +24,7 @@ setup(
     license="BSD License",
     keywords="tld domain subdomain url parse extract urlparse urlsplit public suffix list",
     url="https://github.com/john-kurkowski/tldextract",
-    packages=['tldextract', 'tldextract.tests'],
+    packages=['tldextract'],
     include_package_data=True,
     long_description=LONG_DESCRIPTION,
     classifiers=[
@@ -43,6 +43,5 @@ setup(
         'console_scripts': [
             'tldextract = tldextract.tldextract:main', ]
     },
-    test_suite='tldextract.tests.all.test_suite',
     install_requires=INSTALL_REQUIRES,
 )

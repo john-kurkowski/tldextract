@@ -84,15 +84,3 @@ class PylintTestMeta(type):
 
 
 PylintTest = PylintTestMeta(str('PylintTest'), (unittest.TestCase,), {}) # pylint: disable=invalid-name
-
-
-def run_tests(stream=sys.stderr):
-    suite = unittest.TestSuite([
-        unittest.TestLoader().loadTestsFromTestCase(PylintTest)
-    ])
-    result = unittest.TextTestRunner(stream).run(suite)
-    sys.exit(not result.wasSuccessful())
-
-
-if __name__ == '__main__':
-    run_tests()

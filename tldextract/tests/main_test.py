@@ -2,16 +2,13 @@
 
 '''Run all tldextract test cases.'''
 
-import doctest
 import logging
 import os
-import sys
 import tempfile
 import traceback
 import unittest
 
 import tldextract
-import tldextract.tests.lint
 
 
 def _temporary_file():
@@ -262,26 +259,3 @@ class ExtractTestAsDict(TldextractTestCase):
                          'domain' : 'google',
                          'suffix' : 'com'}
         self.assertEquals(result._asdict(), expected_dict)
-
-
-def test_suite():
-    logging.basicConfig()
-
-    return unittest.TestSuite([
-        doctest.DocTestSuite(tldextract.tldextract),
-        unittest.TestLoader().loadTestsFromTestCase(IntegrationTest),
-        unittest.TestLoader().loadTestsFromTestCase(ExtractTest),
-        unittest.TestLoader().loadTestsFromTestCase(ExtractTestUsingCustomSuffixListFile),
-        unittest.TestLoader().loadTestsFromTestCase(ExtractTestUsingExtraSuffixes),
-        unittest.TestLoader().loadTestsFromModule(tldextract.tests.lint),
-    ])
-
-
-def run_tests(stream=sys.stderr):
-    suite = test_suite()
-    result = unittest.TextTestRunner(stream).run(suite)
-    sys.exit(not result.wasSuccessful())
-
-
-if __name__ == "__main__":
-    run_tests()

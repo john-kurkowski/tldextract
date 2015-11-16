@@ -5,5 +5,7 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
-install: pip install -r requirements.txt
+install:
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.6* ]]; then export PYTEST_ADDOPTS='-p no:pylint'; fi
+  - pip install -r requirements.txt
 script: py.test

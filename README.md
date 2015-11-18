@@ -180,7 +180,7 @@ You probably want to set up a [virtualenv](http://virtualenv.readthedocs.org/en/
 Run all tests against your current Python version:
 
 ```zsh
-python -m tldextract.tests.all
+py.test
 ```
 
 Or against all supported Python versions:

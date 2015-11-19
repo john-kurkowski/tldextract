@@ -1,0 +1,4 @@
+engines:
+    pep8:
+        enabled: true
+    radon: true

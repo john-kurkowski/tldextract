@@ -3,6 +3,19 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 1.7.2 (2015-11-28)
+
+* Bugfixes
+    * Domain parsing fails with trailing spaces - #75
+    * Update to latest, direct PSL links - #77
+* Misc.
+    * Update bundled PSL snapshot
+    * Require requirements.txt for local development
+    * Enforce linting via the test suite - #79
+    * Switch to py.test runner - #80
+    * No longer distribute tests. No mention of `test_suite` in setup.py. CI is
+      handled centrally now, on this project's GitHub.
+
 ## 1.7.1 (2015-08-22)
 
 Fix publishing mistake with 1.7.0.

@@ -435,12 +435,15 @@ def main():
 
     logging.basicConfig()
 
-    distribution = pkg_resources.get_distribution('tldextract')
+    try:
+        __version__ = pkg_resources.get_distribution('tldextract').version # pylint: disable=no-member
+    except pkg_resources.DistributionNotFound as _:
+        __version__ = '(local)'
 
     parser = argparse.ArgumentParser(
         description='Parse hostname from a url or fqdn')
 
-    parser.add_argument('--version', action='version', version='%(prog)s ' + distribution.version) # pylint: disable=no-member
+    parser.add_argument('--version', action='version', version='%(prog)s ' + __version__) # pylint: disable=no-member
     parser.add_argument('input', metavar='fqdn|url',
                         type=unicode, nargs='*', help='fqdn or url')
 

@@ -38,7 +38,7 @@ import re
 import socket
 import warnings
 
-import idna.codec
+import idna
 
 try:
     import pkg_resources
@@ -202,7 +202,7 @@ class TLDExtract(object):
         for label in labels:
             if label.startswith("xn--"):
                 try:
-                    translation = label.encode('ascii').decode('idna')
+                    translation = idna.decode(label.encode('ascii'))
                 except UnicodeError:
                     translation = label
             else:

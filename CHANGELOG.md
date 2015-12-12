@@ -6,7 +6,7 @@ After upgrading, update your cache file by deleting it or via `tldextract
 ## 1.7.3 (2015-12-12)
 
 * Bugfixes
-    * Support IDNA2008 - [#83](https://github.com/john-kurkowski/tldextract/pull/82)
+    * Support IDNA2008 - [#82](https://github.com/john-kurkowski/tldextract/pull/82)
 * Misc.
     * Ease running scripts during local development
 

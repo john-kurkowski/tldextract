@@ -3,6 +3,13 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 1.7.3 (2015-12-12)
+
+* Bugfixes
+    * Support IDNA2008 - #83
+* Misc.
+    * Ease running scripts during local development
+
 ## 1.7.2 (2015-11-28)
 
 * Bugfixes

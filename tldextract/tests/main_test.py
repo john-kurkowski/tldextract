@@ -108,6 +108,28 @@ def test_punycode():
     )
 
 
+def test_invalid_puny_with_puny():
+    assert_extract(
+        'xn--zckzap6140b352by.blog', 'so-net', 'xn--wcvs22d.hk',
+        'http://xn--zckzap6140b352by.blog.so-net.xn--wcvs22d.hk'
+    )
+
+
+def test_puny_with_non_puny():
+    assert_extract(
+        'xn--zckzap6140b352by.blog', 'so-net', u'教育.hk',
+        u'http://xn--zckzap6140b352by.blog.so-net.教育.hk'
+    )
+
+
+def test_idna_2008():
+    """ Python supports IDNA 2003.  The IDNA library adds 2008 support for characters like ß. """
+    assert_extract(
+        '', 'xn--gieen46ers-73a', 'de',
+        'xn--gieen46ers-73a.de'
+    )
+
+
 def test_empty():
     assert_extract('', '', '', 'http://')
 
@@ -150,26 +172,13 @@ def test_tld_is_a_website_too():
     # assert_extract('www', 'net', 'cn', 'http://www.net.cn') # This is unhandled by the
     # PSL. Or is it?
 
+
 def test_dns_root_label():
     assert_extract('www', 'example', 'com', 'http://www.example.com./')
 
 
 def test_private_domains():
     assert_extract('waiterrant', 'blogspot', 'com', 'http://waiterrant.blogspot.com')
-
-
-def test_invalid_puny_with_puny():
-    assert_extract(
-        'xn--zckzap6140b352by.blog', 'so-net', 'xn--wcvs22d.hk',
-        'http://xn--zckzap6140b352by.blog.so-net.xn--wcvs22d.hk'
-    )
-
-
-def test_puny_with_non_puny():
-    assert_extract(
-        'xn--zckzap6140b352by.blog', 'so-net', u'教育.hk',
-        u'http://xn--zckzap6140b352by.blog.so-net.教育.hk'
-    )
 
 
 def test_result_as_dict():

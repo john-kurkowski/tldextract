@@ -28,7 +28,6 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-import codecs
 import collections
 from contextlib import closing
 import errno
@@ -39,6 +38,7 @@ import re
 import socket
 import warnings
 
+import idna
 
 try:
     import pkg_resources
@@ -202,7 +202,7 @@ class TLDExtract(object):
         for label in labels:
             if label.startswith("xn--"):
                 try:
-                    translation = codecs.decode(label.encode('ascii'), 'idna')
+                    translation = idna.decode(label.encode('ascii'))
                 except UnicodeError:
                     translation = label
             else:

@@ -6,20 +6,20 @@ After upgrading, update your cache file by deleting it or via `tldextract
 ## 1.7.3 (2015-12-12)
 
 * Bugfixes
-    * Support IDNA2008 - #83
+    * Support IDNA2008 - [#83](https://github.com/john-kurkowski/tldextract/pull/82)
 * Misc.
     * Ease running scripts during local development
 
 ## 1.7.2 (2015-11-28)
 
 * Bugfixes
-    * Domain parsing fails with trailing spaces - #75
-    * Update to latest, direct PSL links - #77
+    * Domain parsing fails with trailing spaces - [#75](https://github.com/john-kurkowski/tldextract/pull/75)
+    * Update to latest, direct PSL links - [#77](https://github.com/john-kurkowski/tldextract/pull/77)
 * Misc.
     * Update bundled PSL snapshot
     * Require requirements.txt for local development
-    * Enforce linting via the test suite - #79
-    * Switch to py.test runner - #80
+    * Enforce linting via the test suite - [#79](https://github.com/john-kurkowski/tldextract/pull/79)
+    * Switch to py.test runner - [#80](https://github.com/john-kurkowski/tldextract/pull/80)
     * No longer distribute tests. No mention of `test_suite` in setup.py. CI is
       handled centrally now, on this project's GitHub.
 
@@ -56,7 +56,7 @@ Fix publishing mistake with 1.7.0.
 ## 1.5 (2014-09-08)
 
 * Bugfixes
-    * Exclude PSL's private domains by default - #19
+    * Exclude PSL's private domains by default - [#19](https://github.com/john-kurkowski/tldextract/pull/19)
         * This is a **BREAKING** bugfix if you relied on the PSL's private
           domains
         * Revert to old behavior by setting `include_psl_private_domains=True`

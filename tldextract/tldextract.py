@@ -305,7 +305,7 @@ class TLDExtract(object):
     def _cache_tlds(self, tlds):
         '''Logs a diff of the new TLDs and caches them on disk, according to
         settings passed to __init__.'''
-        LOG.info("computed TLDs: [%s, ...]", ', '.join(list(tlds)[:10]))
+        LOG.debug("computed TLDs")
         if LOG.isEnabledFor(logging.DEBUG):
             import difflib
             snapshot_stream = pkg_resources.resource_stream(__name__, '.tld_set_snapshot')

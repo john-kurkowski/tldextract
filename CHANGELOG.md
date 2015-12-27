@@ -3,6 +3,11 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 1.7.4 (2015-12-26)
+
+* Bugfixes
+    * Fix potential for `UnicodeEncodeError` with info log - [#85](https://github.com/john-kurkowski/tldextract/pull/85)
+
 ## 1.7.3 (2015-12-12)
 
 * Bugfixes

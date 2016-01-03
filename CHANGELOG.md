@@ -3,6 +3,14 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 2.0
+
+* Breaking Changes
+    * Remove deprecated `fetch` param to `TLDExtract`. To disable live HTTP
+      requests for the latest PSL, instead pass `suffix_list_url=None`.
+    * Remove deprecated `ExtractResult.tld` property. Use
+      `ExtractResult.suffix` instead.
+
 ## 1.7.4 (2015-12-26)
 
 * Bugfixes

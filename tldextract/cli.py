@@ -4,7 +4,6 @@
 import logging
 import pkg_resources
 
-from .tldextract import extract
 from .tldextract import TLDExtract
 
 try:
@@ -52,4 +51,4 @@ def main():
         exit(1)
 
     for i in args.input:
-        print(' '.join(extract(i))) # pylint: disable=superfluous-parens
+        print(' '.join(tld_extract(i))) # pylint: disable=superfluous-parens

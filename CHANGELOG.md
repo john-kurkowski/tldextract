@@ -6,10 +6,18 @@ After upgrading, update your cache file by deleting it or via `tldextract
 ## 2.0
 
 * Breaking Changes
-    * Remove deprecated `fetch` param to `TLDExtract`. To disable live HTTP
-      requests for the latest PSL, instead pass `suffix_list_url=None`.
-    * Remove deprecated `ExtractResult.tld` property. Use
-      `ExtractResult.suffix` instead.
+    * Remove deprecated code
+        * `TLDExtract`'s `fetch` param. To disable live HTTP requests for the
+          latest PSL, instead pass `suffix_list_url=None`.
+        * `ExtractResult.tld` property. Use `ExtractResult.suffix` instead.
+    * Moved code
+        * Split `tldextract.tldextract` into a few files.
+            * The official public interface of this package comes via `import
+              tldextract`. But if you were relying on direct import from
+              `tldextract.tldextract` anyway, those imports may have moved.
+            * You can run the package `python -m tldextract` for the same
+              effect as the included `tldextract` console script. This used to
+              be `python -m tldextract.tldextract`.
 
 ## 1.7.4 (2015-12-26)
 

@@ -74,6 +74,8 @@ PUBLIC_SUFFIX_LIST_URLS = (
     'https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat',
 )
 
+PUBLIC_SUFFIX_RE = re.compile(r'^(?P<suffix>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
+
 
 class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain suffix')):
     '''namedtuple of a URL's subdomain, domain, and suffix.'''
@@ -331,8 +333,7 @@ def get_tlds_from_raw_suffix_list_data(suffix_list_source, include_psl_private_d
     else:
         text, _, _ = suffix_list_source.partition('// ===BEGIN PRIVATE DOMAINS===')
 
-    tld_finder = re.compile(r'^(?P<suffix>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
-    tld_iter = (m.group('suffix') for m in tld_finder.finditer(text))
+    tld_iter = (m.group('suffix') for m in PUBLIC_SUFFIX_RE.finditer(text))
     return frozenset(tld_iter)
 
 

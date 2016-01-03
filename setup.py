@@ -62,7 +62,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'tldextract = tldextract.tldextract:main', ]
+            'tldextract = tldextract.cli:main', ]
     },
     install_requires=INSTALL_REQUIRES,
 )

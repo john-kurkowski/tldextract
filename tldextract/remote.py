@@ -5,7 +5,7 @@ import logging
 import re
 import socket
 
-# pylint: disable=import-error,invalid-name,no-name-in-module,redefined-builtin
+# pylint: disable=import-error,no-name-in-module
 try:  # pragma: no cover
     # Python 2
     from urllib2 import urlopen
@@ -14,8 +14,12 @@ except ImportError:  # pragma: no cover
     # Python 3
     from urllib.request import urlopen
     from urllib.parse import scheme_chars
-    unicode = str
-# pylint: enable=import-error,invalid-name,no-name-in-module,redefined-builtin
+# pylint: enable=import-error,no-name-in-module
+
+try:
+    unicode
+except NameError:
+    unicode = str # pylint: disable=invalid-name,redefined-builtin
 
 
 IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$') # pylint: disable=line-too-long

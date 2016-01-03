@@ -34,7 +34,7 @@ def assert_extract(
         ext = fun(url)
         assert expected_subdomain == ext.subdomain
         assert expected_domain == ext.domain
-        assert expected_tld == ext.tld
+        assert expected_tld == ext.suffix
 
 
 def test_american():

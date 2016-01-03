@@ -30,12 +30,3 @@ def test_bad_kwargs():
         tldextract.TLDExtract(
             cache_file=False, suffix_list_url=False, fallback_to_snapshot=False
         )
-
-
-def test_fetch_and_suffix_list_conflict():
-    """ Make sure we support both fetch and suffix_list_url kwargs for this version.
-
-    GitHub issue #41.
-    """
-    extractor = tldextract.TLDExtract(suffix_list_url='foo', fetch=False)
-    assert not extractor.suffix_list_urls

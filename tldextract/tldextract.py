@@ -36,7 +36,6 @@ import logging
 import os
 import re
 import socket
-import warnings
 
 import idna
 
@@ -95,11 +94,6 @@ class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain su
     __slots__ = ()
 
     @property
-    def tld(self):
-        warnings.warn('This use of tld is misleading. Use `suffix` instead.', DeprecationWarning)
-        return self.suffix
-
-    @property
     def registered_domain(self):
         """
         Joins the domain and suffix fields with a dot, if they're both set.
@@ -119,7 +113,7 @@ class TLDExtract(object):
     a URL.'''
 
     # TODO: Agreed with Pylint: too-many-arguments
-    def __init__(self, cache_file=CACHE_FILE, suffix_list_url=PUBLIC_SUFFIX_LIST_URLS, fetch=True, # pylint: disable=too-many-arguments
+    def __init__(self, cache_file=CACHE_FILE, suffix_list_url=PUBLIC_SUFFIX_LIST_URLS, # pylint: disable=too-many-arguments
                  fallback_to_snapshot=True, include_psl_private_domains=False, extra_suffixes=None):
         """
         Constructs a callable for extracting subdomain, domain, and suffix
@@ -152,12 +146,8 @@ class TLDExtract(object):
 
         You can pass additional suffixed in `extra_suffixes` argument without changing list URL
         """
-        if not fetch:
-            LOG.warning("The 'fetch' argument is deprecated. Instead of specifying fetch, "
-                        "you should specify suffix_list_url. The equivalent of fetch=False would "
-                        "be suffix_list_url=None.")
         self.suffix_list_urls = ()
-        if suffix_list_url and fetch:
+        if suffix_list_url:
             if isinstance(suffix_list_url, STRING_TYPE):
                 self.suffix_list_urls = (suffix_list_url,)
             else:
@@ -214,13 +204,13 @@ class TLDExtract(object):
         suffix_index = self._get_tld_extractor().suffix_index(translations)
 
         registered_domain = ".".join(labels[:suffix_index])
-        tld = ".".join(labels[suffix_index:])
+        suffix = ".".join(labels[suffix_index:])
 
-        if not tld and netloc and looks_like_ip(netloc):
+        if not suffix and netloc and looks_like_ip(netloc):
             return ExtractResult('', netloc, '')
 
         subdomain, _, domain = registered_domain.rpartition('.')
-        return ExtractResult(subdomain, domain, tld)
+        return ExtractResult(subdomain, domain, suffix)
 
     def update(self, fetch_now=False):
         if os.path.exists(self.cache_file):
@@ -353,8 +343,8 @@ def get_tlds_from_raw_suffix_list_data(suffix_list_source, include_psl_private_d
     else:
         text, _, _ = suffix_list_source.partition('// ===BEGIN PRIVATE DOMAINS===')
 
-    tld_finder = re.compile(r'^(?P<tld>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
-    tld_iter = (m.group('tld') for m in tld_finder.finditer(text))
+    tld_finder = re.compile(r'^(?P<suffix>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
+    tld_iter = (m.group('suffix') for m in tld_finder.finditer(text))
     return frozenset(tld_iter)
 
 
@@ -375,7 +365,7 @@ def fetch_file(urls):
 
     LOG.error(
         'No Public Suffix List found. Consider using a mirror or constructing '
-        'your TLDExtract with `fetch=False`.'
+        'your TLDExtract with `suffix_list_url=None`.'
     )
     return unicode('')
 

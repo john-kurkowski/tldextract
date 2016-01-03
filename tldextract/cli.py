@@ -25,6 +25,7 @@ def main():
         __version__ = '(local)'
 
     parser = argparse.ArgumentParser(
+        prog='tldextract',
         description='Parse hostname from a url or fqdn')
 
     parser.add_argument('--version', action='version', version='%(prog)s ' + __version__) # pylint: disable=no-member

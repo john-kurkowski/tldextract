@@ -372,8 +372,8 @@ def fetch_file(urls):
             response = urlopen(url)
             if response.info().get('Content-Encoding') == 'gzip':
                 buf = StringIO(response.read())
-                f = gzip.GzipFile(fileobj=buf)
-                test = f.read()
+                gzip_response = gzip.GzipFile(fileobj=buf)
+                text = gzip_response.read()
             else:
                 text = response.read()
         except IOError as ioe:

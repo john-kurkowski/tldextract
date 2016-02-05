@@ -37,6 +37,7 @@ import os
 import re
 import socket
 import warnings
+import gzip
 
 import idna
 
@@ -67,10 +68,12 @@ try:  # pragma: no cover
     # Python 2
     from urllib2 import urlopen
     from urlparse import scheme_chars
+    from StringIO import StringIO
 except ImportError:  # pragma: no cover
     # Python 3
     from urllib.request import urlopen
     from urllib.parse import scheme_chars
+    from io import StringIO
     unicode = str
 # pylint: enable=import-error,invalid-name,no-name-in-module,redefined-builtin
 
@@ -366,8 +369,13 @@ def fetch_file(urls):
 
     for url in urls:
         try:
-            conn = urlopen(url)
-            text = conn.read()
+            response = urlopen(url)
+            if response.info().get('Content-Encoding') == 'gzip':
+                buf = StringIO(response.read())
+                f = gzip.GzipFile(fileobj=buf)
+                test = f.read()
+            else:
+                text = response.read()
         except IOError as ioe:
             LOG.error('Exception reading Public Suffix List url ' + url + ' - ' + str(ioe) + '.')
         else:

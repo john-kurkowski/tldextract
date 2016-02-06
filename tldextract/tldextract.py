@@ -37,9 +37,10 @@ import os
 import re
 import socket
 import warnings
-import gzip
 
 import idna
+import requests
+from requests_file import FileAdapter
 
 try:
     import pkg_resources
@@ -66,14 +67,10 @@ except NameError:
 # pylint: disable=import-error,invalid-name,no-name-in-module,redefined-builtin
 try:  # pragma: no cover
     # Python 2
-    from urllib2 import urlopen
     from urlparse import scheme_chars
-    from StringIO import StringIO
 except ImportError:  # pragma: no cover
     # Python 3
-    from urllib.request import urlopen
     from urllib.parse import scheme_chars
-    from io import StringIO
     unicode = str
 # pylint: enable=import-error,invalid-name,no-name-in-module,redefined-builtin
 
@@ -369,15 +366,11 @@ def fetch_file(urls):
 
     for url in urls:
         try:
-            response = urlopen(url)
-            if response.info().get('Content-Encoding') == 'gzip':
-                buf = StringIO(response.read())
-                gzip_response = gzip.GzipFile(fileobj=buf)
-                text = gzip_response.read()
-            else:
-                text = response.read()
-        except IOError as ioe:
-            LOG.error('Exception reading Public Suffix List url ' + url + ' - ' + str(ioe) + '.')
+            session = requests.Session()
+            session.mount('file://', FileAdapter())
+            text = session.get(url).text
+        except requests.exceptions.RequestException as ree:
+            LOG.error('Exception reading Public Suffix List url ' + url + ' - ' + str(ree) + '.')
         else:
             return _decode_utf8(text)
 
@@ -393,7 +386,10 @@ def _decode_utf8(text):
 
     The suffix list, wherever its origin, should be UTF-8 encoded.
     """
-    return unicode(text, 'utf-8')
+    if not isinstance(text, unicode):
+        return unicode(text, 'utf-8')
+    else:
+        return text
 
 
 class _PublicSuffixListTLDExtractor(object):

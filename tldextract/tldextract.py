@@ -24,14 +24,11 @@ top-level domain) from the registered domain and subdomains of a URL.
 """
 
 
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 import collections
 from contextlib import closing
 import errno
 from functools import wraps
+import json
 import logging
 import os
 import re
@@ -109,7 +106,7 @@ class TLDExtract(object):
         Constructs a callable for extracting subdomain, domain, and suffix
         components from a URL.
 
-        Upon calling it, it first checks for a Python-pickled `cache_file`.
+        Upon calling it, it first checks for a JSON `cache_file`.
         By default, the `cache_file` will live in the tldextract directory.
 
         You can disable the caching functionality of this module  by setting `cache_file` to False.
@@ -250,21 +247,21 @@ class TLDExtract(object):
         return self._extractor
 
     def _get_cached_tld_extractor(self):
-        '''Unpickles the local TLD cache file. Returns None on IOError or other
-        unpickling error, or if this object is not set to use the cache
+        '''Read the local TLD cache file. Returns None on IOError or other
+        error, or if this object is not set to use the cache
         file.'''
         if not self.cache_file:
             return
 
         try:
-            with open(self.cache_file, 'rb') as cache_file:
+            with open(self.cache_file) as cache_file:
                 try:
-                    suffixes = pickle.load(cache_file)
-                except Exception as myriad_unpickling_errors: # pylint: disable=broad-except
+                    suffixes = frozenset(json.loads(cache_file.read()))
+                except (IOError, ValueError) as exc:
                     LOG.error(
                         "error reading TLD cache file %s: %s",
                         self.cache_file,
-                        myriad_unpickling_errors
+                        exc
                     )
                 else:
                     return _PublicSuffixListTLDExtractor(
@@ -279,7 +276,9 @@ class TLDExtract(object):
         snapshot_stream = pkg_resources.resource_stream(__name__, '.tld_set_snapshot')
         with closing(snapshot_stream) as snapshot_file:
             return _PublicSuffixListTLDExtractor(
-                self._add_extra_suffixes(pickle.load(snapshot_file))
+                self._add_extra_suffixes(
+                    frozenset(json.loads(snapshot_file.read().decode('utf-8')))
+                )
             )
 
     def _cache_tlds(self, tlds):
@@ -289,7 +288,9 @@ class TLDExtract(object):
             import difflib
             snapshot_stream = pkg_resources.resource_stream(__name__, '.tld_set_snapshot')
             with closing(snapshot_stream) as snapshot_file:
-                snapshot = sorted(pickle.load(snapshot_file))
+                snapshot = sorted(
+                    frozenset(json.loads(snapshot_file.read().decode('utf-8')))
+                )
             new = sorted(tlds)
             LOG.debug('computed TLD diff:\n' + '\n'.join(difflib.unified_diff(
                 snapshot,
@@ -300,8 +301,8 @@ class TLDExtract(object):
 
         if self.cache_file:
             try:
-                with open(self.cache_file, 'wb') as cache_file:
-                    pickle.dump(tlds, cache_file)
+                with open(self.cache_file, 'w') as cache_file:
+                    json.dump(list(tlds), cache_file)
             except IOError as ioe:
                 LOG.warn("unable to cache TLDs in file %s: %s", self.cache_file, ioe)
 

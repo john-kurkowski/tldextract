@@ -5,21 +5,18 @@ import logging
 import re
 import socket
 
-# pylint: disable=import-error,no-name-in-module
+import requests
+from requests_file import FileAdapter
+
+# pylint: disable=import-error,invalid-name,no-name-in-module,redefined-builtin
 try:  # pragma: no cover
     # Python 2
-    from urllib2 import urlopen
     from urlparse import scheme_chars
 except ImportError:  # pragma: no cover
     # Python 3
-    from urllib.request import urlopen
     from urllib.parse import scheme_chars
-# pylint: enable=import-error,no-name-in-module
-
-try:
-    unicode
-except NameError:
-    unicode = str # pylint: disable=invalid-name,redefined-builtin
+    unicode = str
+# pylint: enable=import-error,invalid-name,no-name-in-module,redefined-builtin
 
 
 IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$') # pylint: disable=line-too-long
@@ -36,10 +33,11 @@ def find_first_response(urls):
 
     for url in urls:
         try:
-            conn = urlopen(url)
-            text = conn.read()
-        except IOError as ioe:
-            LOG.error('Exception reading Public Suffix List url ' + url + ' - ' + str(ioe) + '.')
+            session = requests.Session()
+            session.mount('file://', FileAdapter())
+            text = session.get(url).text
+        except requests.exceptions.RequestException as ree:
+            LOG.error('Exception reading Public Suffix List url ' + url + ' - ' + str(ree) + '.')
         else:
             return _decode_utf8(text)
 
@@ -55,7 +53,10 @@ def _decode_utf8(text):
 
     The suffix list, wherever its origin, should be UTF-8 encoded.
     """
-    return unicode(text, 'utf-8')
+    if not isinstance(text, unicode):
+        return unicode(text, 'utf-8')
+    else:
+        return text
 
 
 def looks_like_ip(maybe_ip):

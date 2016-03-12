@@ -11,6 +11,11 @@ After upgrading, update your cache file by deleting it or via `tldextract
       `suffix_list_urls` only takes an iterable. This better communicates that
       it tries a _sequence_ of URLs, in order. To only try 1 URL, pass an
       iterable with exactly 1 URL `str`.
+    * Serialize the local cache of the remote PSL as JSON, no longer `pickle` - [#81](https://github.com/john-kurkowski/tldextract/issues/81)
+        * This should be a transparent upgrade for most users.
+        * However, if you're configured to _only_ read from your local cache
+          file, no other sources or fallbacks, the new version will be unable
+          to read the old cache format, and an error will be raised.
     * Remove deprecated code
         * `TLDExtract`'s `fetch` param. To disable live HTTP requests for the
           latest PSL, instead pass `suffix_list_urls=None`.

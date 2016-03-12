@@ -29,5 +29,5 @@ def test_log_snapshot_diff(mocker):
 def test_bad_kwargs():
     with pytest.raises(ValueError):
         tldextract.TLDExtract(
-            cache_file=False, suffix_list_url=False, fallback_to_snapshot=False
+            cache_file=False, suffix_list_urls=False, fallback_to_snapshot=False
         )

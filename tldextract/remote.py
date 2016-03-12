@@ -43,7 +43,7 @@ def find_first_response(urls):
 
     LOG.error(
         'No Public Suffix List found. Consider using a mirror or constructing '
-        'your TLDExtract with `suffix_list_url=None`.'
+        'your TLDExtract with `suffix_list_urls=None`.'
     )
     return unicode('')
 

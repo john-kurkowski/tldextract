@@ -86,7 +86,7 @@ cache_file path in TLDExtract initialization.
 
 ```python
 # extract callable that falls back to the included TLD snapshot, no live HTTP fetching
-no_fetch_extract = tldextract.TLDExtract(suffix_list_url=None)
+no_fetch_extract = tldextract.TLDExtract(suffix_list_urls=None)
 no_fetch_extract('http://www.google.com')
 
 # extract callable that reads/writes the updated TLD set to a different path
@@ -119,7 +119,7 @@ You can specify your own input data in place of the default Mozilla Public Suffi
 
 ```python
 extract = tldextract.TLDExtract(
-    suffix_list_url="http://foo.bar.baz",
+    suffix_list_urls=["http://foo.bar.baz"],
     # Recommended: Specify your own cache file, to minimize ambiguities about where
     # tldextract is getting its data, or cached data, from.
     cache_file='/path/to/your/cache/file')
@@ -132,12 +132,12 @@ If you want to use input data from your local filesystem, just use the `file://`
 
 ```python
 extract = tldextract.TLDExtract(
-    suffix_list_url="file://absolute/path/to/your/local/suffix/list/file",
+    suffix_list_urls=["file://absolute/path/to/your/local/suffix/list/file"],
     cache_file='/path/to/your/cache/file')
 ```
 
-Use an absolute path when specifying the `suffix_list_url` keyword argument. `os.path` is your
-friend.
+Use an absolute path when specifying the `suffix_list_urls` keyword argument.
+`os.path` is your friend.
 
 ### FAQ
 

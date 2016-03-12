@@ -6,9 +6,14 @@ After upgrading, update your cache file by deleting it or via `tldextract
 ## 2.0
 
 * Breaking Changes
+    * Renamed/changed the type of `TLDExtract` constructor param
+      `suffix_list_url`. It used to take a `str` or iterable. Its replacement,
+      `suffix_list_urls` only takes an iterable. This better communicates that
+      it tries a _sequence_ of URLs, in order. To only try 1 URL, pass an
+      iterable with exactly 1 URL `str`.
     * Remove deprecated code
         * `TLDExtract`'s `fetch` param. To disable live HTTP requests for the
-          latest PSL, instead pass `suffix_list_url=None`.
+          latest PSL, instead pass `suffix_list_urls=None`.
         * `ExtractResult.tld` property. Use `ExtractResult.suffix` instead.
     * Moved code
         * Split `tldextract.tldextract` into a few files.

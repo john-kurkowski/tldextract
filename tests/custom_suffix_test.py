@@ -16,15 +16,15 @@ EXTRA_SUFFIXES = ['foo1', 'bar1', 'baz1']
 # pylint: disable=invalid-name
 extract_using_fake_suffix_list = tldextract.TLDExtract(
     cache_file=temporary_file(),
-    suffix_list_url=FAKE_SUFFIX_LIST_URL
+    suffix_list_urls=[FAKE_SUFFIX_LIST_URL]
 )
 extract_using_fake_suffix_list_no_cache = tldextract.TLDExtract(
     cache_file=None,
-    suffix_list_url=FAKE_SUFFIX_LIST_URL
+    suffix_list_urls=[FAKE_SUFFIX_LIST_URL]
 )
 extract_using_extra_suffixes = tldextract.TLDExtract(
     cache_file=None,
-    suffix_list_url=FAKE_SUFFIX_LIST_URL,
+    suffix_list_urls=[FAKE_SUFFIX_LIST_URL],
     extra_suffixes=EXTRA_SUFFIXES
 )
 # pylint: enable=invalid-name

@@ -12,7 +12,7 @@ extract_using_real_local_suffix_list = tldextract.TLDExtract(cache_file=temporar
 extract_using_real_local_suffix_list_no_cache = tldextract.TLDExtract(cache_file=False)
 extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
     cache_file=None,
-    suffix_list_url=None
+    suffix_list_urls=None
 )
 # pylint: enable=invalid-name
 

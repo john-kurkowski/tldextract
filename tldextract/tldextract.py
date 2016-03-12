@@ -100,7 +100,7 @@ class TLDExtract(object):
     a URL.'''
 
     # TODO: Agreed with Pylint: too-many-arguments
-    def __init__(self, cache_file=CACHE_FILE, suffix_list_url=PUBLIC_SUFFIX_LIST_URLS, # pylint: disable=too-many-arguments
+    def __init__(self, cache_file=CACHE_FILE, suffix_list_urls=PUBLIC_SUFFIX_LIST_URLS, # pylint: disable=too-many-arguments
                  fallback_to_snapshot=True, include_psl_private_domains=False, extra_suffixes=()):
         """
         Constructs a callable for extracting subdomain, domain, and suffix
@@ -111,17 +111,16 @@ class TLDExtract(object):
 
         You can disable the caching functionality of this module  by setting `cache_file` to False.
 
-        If the `cache_file` does not exist (such as on the first run), a live HTTP request
-        will be made to obtain the data at the `suffix_list_url` -- unless `suffix_list_url`
-        evaluates to `False`. Therefore you can deactivate the HTTP request functionality
-        by setting this argument to `False` or `None`, like `suffix_list_url=None`.
+        If the `cache_file` does not exist (such as on the first run), HTTP request the URLs in
+        `suffix_list_urls` in order, until one returns public suffix list data. To disable HTTP
+        requests, set this to something falsy.
 
-        The default URL points to the latest version of the Mozilla Public Suffix List, but any
-        similar document could be specified.
+        The default list of URLs point to the latest version of the Mozilla Public Suffix List and
+        its mirror, but any similar document could be specified.
 
         Local files can be specified by using the `file://` protocol. (See `urllib2` documentation.)
 
-        If there is no `cache_file` loaded and no data is found from the `suffix_list_url`,
+        If there is no `cache_file` loaded and no data is found from the `suffix_list_urls`,
         the module will fall back to the included TLD set snapshot. If you do not want
         this behavior, you may set `fallback_to_snapshot` to False, and an exception will be
         raised instead.
@@ -133,15 +132,8 @@ class TLDExtract(object):
 
         You can pass additional suffixes in `extra_suffixes` argument without changing list URL
         """
-        self.suffix_list_urls = ()
-        if suffix_list_url:
-            if isinstance(suffix_list_url, STRING_TYPE):
-                self.suffix_list_urls = (suffix_list_url,)
-            else:
-                # TODO: kwarg suffix_list_url can actually be a sequence of URL
-                #       strings. Document this.
-                self.suffix_list_urls = suffix_list_url
-        self.suffix_list_urls = tuple(url.strip() for url in self.suffix_list_urls if url.strip())
+        suffix_list_urls = suffix_list_urls or ()
+        self.suffix_list_urls = tuple(url.strip() for url in suffix_list_urls if url.strip())
 
         self.cache_file = os.path.expanduser(cache_file or '')
         self.fallback_to_snapshot = fallback_to_snapshot

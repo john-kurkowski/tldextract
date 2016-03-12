@@ -101,7 +101,7 @@ class TLDExtract(object):
 
     # TODO: Agreed with Pylint: too-many-arguments
     def __init__(self, cache_file=CACHE_FILE, suffix_list_url=PUBLIC_SUFFIX_LIST_URLS, # pylint: disable=too-many-arguments
-                 fallback_to_snapshot=True, include_psl_private_domains=False, extra_suffixes=None):
+                 fallback_to_snapshot=True, include_psl_private_domains=False, extra_suffixes=()):
         """
         Constructs a callable for extracting subdomain, domain, and suffix
         components from a URL.
@@ -131,7 +131,7 @@ class TLDExtract(object):
         suffix, so these domains are excluded by default. If you'd like them
         included instead, set `include_psl_private_domains` to True.
 
-        You can pass additional suffixed in `extra_suffixes` argument without changing list URL
+        You can pass additional suffixes in `extra_suffixes` argument without changing list URL
         """
         self.suffix_list_urls = ()
         if suffix_list_url:
@@ -222,12 +222,12 @@ class TLDExtract(object):
         if self._extractor:
             return self._extractor
 
-        self._extractor = self._get_cached_tld_extractor()
-        if self._extractor:
+        tlds = self._get_cached_tlds()
+        if tlds:
+            tlds.extend(self.extra_suffixes)
+            self._extractor = _PublicSuffixListTLDExtractor(tlds)
             return self._extractor
-
-        tlds = frozenset()
-        if self.suffix_list_urls:
+        elif self.suffix_list_urls:
             raw_suffix_list_data = find_first_response(self.suffix_list_urls)
             tlds = get_tlds_from_raw_suffix_list_data(
                 raw_suffix_list_data,
@@ -235,7 +235,9 @@ class TLDExtract(object):
             )
 
         if not tlds and self.fallback_to_snapshot:
-            self._extractor = self._get_snapshot_tld_extractor()
+            tlds = self._get_snapshot_tld_extractor()
+            tlds.extend(self.extra_suffixes)
+            self._extractor = _PublicSuffixListTLDExtractor(tlds)
             return self._extractor
         elif not tlds:
             raise Exception("tlds is empty, but fallback_to_snapshot is set"
@@ -243,10 +245,11 @@ class TLDExtract(object):
 
         self._cache_tlds(tlds)
 
-        self._extractor = _PublicSuffixListTLDExtractor(self._add_extra_suffixes(tlds))
+        tlds.extend(self.extra_suffixes)
+        self._extractor = _PublicSuffixListTLDExtractor(tlds)
         return self._extractor
 
-    def _get_cached_tld_extractor(self):
+    def _get_cached_tlds(self):
         '''Read the local TLD cache file. Returns None on IOError or other
         error, or if this object is not set to use the cache
         file.'''
@@ -256,30 +259,23 @@ class TLDExtract(object):
         try:
             with open(self.cache_file) as cache_file:
                 try:
-                    suffixes = frozenset(json.loads(cache_file.read()))
+                    return json.loads(cache_file.read())
                 except (IOError, ValueError) as exc:
                     LOG.error(
                         "error reading TLD cache file %s: %s",
                         self.cache_file,
                         exc
                     )
-                else:
-                    return _PublicSuffixListTLDExtractor(
-                        self._add_extra_suffixes(suffixes)
-                    )
         except IOError as ioe:
             file_not_found = ioe.errno == errno.ENOENT
             if not file_not_found:
                 LOG.error("error reading TLD cache file %s: %s", self.cache_file, ioe)
 
-    def _get_snapshot_tld_extractor(self):
+    @staticmethod
+    def _get_snapshot_tld_extractor():
         snapshot_stream = pkg_resources.resource_stream(__name__, '.tld_set_snapshot')
         with closing(snapshot_stream) as snapshot_file:
-            return _PublicSuffixListTLDExtractor(
-                self._add_extra_suffixes(
-                    frozenset(json.loads(snapshot_file.read().decode('utf-8')))
-                )
-            )
+            return json.loads(snapshot_file.read().decode('utf-8'))
 
     def _cache_tlds(self, tlds):
         '''Logs a diff of the new TLDs and caches them on disk, according to
@@ -289,7 +285,7 @@ class TLDExtract(object):
             snapshot_stream = pkg_resources.resource_stream(__name__, '.tld_set_snapshot')
             with closing(snapshot_stream) as snapshot_file:
                 snapshot = sorted(
-                    frozenset(json.loads(snapshot_file.read().decode('utf-8')))
+                    json.loads(snapshot_file.read().decode('utf-8'))
                 )
             new = sorted(tlds)
             LOG.debug('computed TLD diff:\n' + '\n'.join(difflib.unified_diff(
@@ -305,14 +301,6 @@ class TLDExtract(object):
                     json.dump(list(tlds), cache_file)
             except IOError as ioe:
                 LOG.warn("unable to cache TLDs in file %s: %s", self.cache_file, ioe)
-
-    def _add_extra_suffixes(self, suffixes):
-        if self.extra_suffixes:
-            suffixes = set(suffixes)
-            for extra_suffix in self.extra_suffixes:
-                suffixes.add(extra_suffix)
-            return frozenset(suffixes)
-        return suffixes
 
 
 TLD_EXTRACTOR = TLDExtract()
@@ -334,14 +322,14 @@ def get_tlds_from_raw_suffix_list_data(suffix_list_source, include_psl_private_d
     else:
         text, _, _ = suffix_list_source.partition('// ===BEGIN PRIVATE DOMAINS===')
 
-    tld_iter = (m.group('suffix') for m in PUBLIC_SUFFIX_RE.finditer(text))
-    return frozenset(tld_iter)
+    tlds = [m.group('suffix') for m in PUBLIC_SUFFIX_RE.finditer(text)]
+    return tlds
 
 
 class _PublicSuffixListTLDExtractor(object):
 
     def __init__(self, tlds):
-        self.tlds = tlds
+        self.tlds = frozenset(tlds)
 
     def suffix_index(self, lower_spl):
         """Returns the index of the first suffix label.

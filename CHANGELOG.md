@@ -28,6 +28,8 @@ After upgrading, update your cache file by deleting it or via `tldextract
             * You can run the package `python -m tldextract` for the same
               effect as the included `tldextract` console script. This used to
               be `python -m tldextract.tldextract`.
+* Misc.
+    * Use `requests` instead of `urllib` - [#89](https://github.com/john-kurkowski/tldextract/issues/89)
 
 ## 1.7.5 (2016-02-07)
 

@@ -29,6 +29,11 @@ After upgrading, update your cache file by deleting it or via `tldextract
               effect as the included `tldextract` console script. This used to
               be `python -m tldextract.tldextract`.
 
+## 1.7.5 (2016-02-07)
+
+* Bugfixes
+    * Support possible gzipped PSL response - [#88](https://github.com/john-kurkowski/tldextract/pull/88)
+
 ## 1.7.4 (2015-12-26)
 
 * Bugfixes

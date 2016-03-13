@@ -290,7 +290,7 @@ class TLDExtract(object):
         if self.cache_file:
             try:
                 with open(self.cache_file, 'w') as cache_file:
-                    json.dump(list(tlds), cache_file)
+                    json.dump(tlds, cache_file)
             except IOError as ioe:
                 LOG.warn("unable to cache TLDs in file %s: %s", self.cache_file, ioe)
 

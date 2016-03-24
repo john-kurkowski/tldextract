@@ -73,7 +73,7 @@ except ImportError:  # pragma: no cover
     # Python 3
     from urllib.request import urlopen
     from urllib.parse import scheme_chars
-    from io import StringIO
+    from io import BytesIO
     unicode = str
 # pylint: enable=import-error,invalid-name,no-name-in-module,redefined-builtin
 
@@ -371,7 +371,13 @@ def fetch_file(urls):
         try:
             response = urlopen(url)
             if response.info().get('Content-Encoding') == 'gzip':
-                buf = StringIO(response.read())
+                response_data = response.read()
+                try:
+                    # Python 3
+                    buf = BytesIO(response_data)
+                except NameError:
+                    # Python 2
+                    buf = StringIO(response_data)
                 gzip_response = gzip.GzipFile(fileobj=buf)
                 text = gzip_response.read()
             else:

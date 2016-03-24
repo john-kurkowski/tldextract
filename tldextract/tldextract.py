@@ -32,6 +32,7 @@ import collections
 from contextlib import closing
 import errno
 from functools import wraps
+from io import BytesIO
 import logging
 import os
 import re
@@ -68,12 +69,10 @@ try:  # pragma: no cover
     # Python 2
     from urllib2 import urlopen
     from urlparse import scheme_chars
-    from StringIO import StringIO
 except ImportError:  # pragma: no cover
     # Python 3
     from urllib.request import urlopen
     from urllib.parse import scheme_chars
-    from io import StringIO
     unicode = str
 # pylint: enable=import-error,invalid-name,no-name-in-module,redefined-builtin
 
@@ -371,7 +370,7 @@ def fetch_file(urls):
         try:
             response = urlopen(url)
             if response.info().get('Content-Encoding') == 'gzip':
-                buf = StringIO(response.read())
+                buf = BytesIO(response.read())
                 gzip_response = gzip.GzipFile(fileobj=buf)
                 text = gzip_response.read()
             else:

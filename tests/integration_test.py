@@ -2,8 +2,9 @@
 
 import logging
 import os
-import pytest
 import traceback
+
+import pytest
 
 import tldextract
 
@@ -28,14 +29,5 @@ def test_log_snapshot_diff(mocker):
 def test_bad_kwargs():
     with pytest.raises(ValueError):
         tldextract.TLDExtract(
-            cache_file=False, suffix_list_url=False, fallback_to_snapshot=False
+            cache_file=False, suffix_list_urls=False, fallback_to_snapshot=False
         )
-
-
-def test_fetch_and_suffix_list_conflict():
-    """ Make sure we support both fetch and suffix_list_url kwargs for this version.
-
-    GitHub issue #41.
-    """
-    extractor = tldextract.TLDExtract(suffix_list_url='foo', fetch=False)
-    assert not extractor.suffix_list_urls

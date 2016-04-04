@@ -5,13 +5,16 @@ After upgrading, update your cache file by deleting it or via `tldextract
 
 ## 2.0
 
+This release focuses on shedding confusing code branches & deprecated cruft.
+
 * Breaking Changes
     * Renamed/changed the type of `TLDExtract` constructor param
-      `suffix_list_url`. It used to take a `str` or iterable. Its replacement,
-      `suffix_list_urls` only takes an iterable. This better communicates that
-      it tries a _sequence_ of URLs, in order. To only try 1 URL, pass an
-      iterable with exactly 1 URL `str`.
-    * Serialize the local cache of the remote PSL as JSON, no longer `pickle` - [#81](https://github.com/john-kurkowski/tldextract/issues/81)
+      `suffix_list_url`
+        * It used to take a `str` or iterable. Its replacement,
+          `suffix_list_urls` only takes an iterable. This better communicates
+          that it tries a _sequence_ of URLs, in order. To only try 1 URL, pass
+          an iterable with exactly 1 URL `str`.
+    * Serialize the local cache of the remote PSL as JSON (no more `pickle`) - [#81](https://github.com/john-kurkowski/tldextract/issues/81)
         * This should be a transparent upgrade for most users.
         * However, if you're configured to _only_ read from your local cache
           file, no other sources or fallbacks, the new version will be unable
@@ -30,6 +33,7 @@ After upgrading, update your cache file by deleting it or via `tldextract
               be `python -m tldextract.tldextract`.
 * Misc.
     * Use `requests` instead of `urllib` - [#89](https://github.com/john-kurkowski/tldextract/issues/89)
+        * As a side-effect, this fixes [#93](https://github.com/john-kurkowski/tldextract/pull/93).
 
 ## 1.7.5 (2016-02-07)
 

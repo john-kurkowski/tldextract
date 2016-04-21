@@ -3,7 +3,11 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
-## 2.0
+## 2.0.0 (2016-04-21)
+
+No changes since 2.0rc1.
+
+## 2.0rc1 (2016-04-04)
 
 This release focuses on shedding confusing code branches & deprecated cruft.
 

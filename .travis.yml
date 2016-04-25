@@ -1,6 +1,6 @@
 language: python
 env:
-  - REQUESTS_VERSION=2.2.1
+  - REQUESTS_VERSION=2.1.0
   - REQUESTS_VERSION=2.8.1
   - REQUESTS_VERSION=2.9.1
 python:

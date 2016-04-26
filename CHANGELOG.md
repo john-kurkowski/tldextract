@@ -3,6 +3,13 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 2.0.1 (2016-04-25)
+
+* Bugfixes
+    * Relax required `requests` version: >= 2.1 ([#98](https://github.com/john-kurkowski/tldextract/issues/98))
+* Misc.
+    * Include tests in release source tarball ([#97](https://github.com/john-kurkowski/tldextract/issues/97))
+
 ## 2.0.0 (2016-04-21)
 
 No changes since 2.0rc1.

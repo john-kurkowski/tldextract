@@ -1,4 +1,8 @@
 language: python
+env:
+  - REQUESTS_VERSION=2.1.0
+  - REQUESTS_VERSION=2.8.1
+  - REQUESTS_VERSION=2.9.1
 python:
   - "2.6"
   - "2.7"
@@ -8,4 +12,5 @@ python:
 install:
   - if [[ $TRAVIS_PYTHON_VERSION == 2.6* ]]; then export PYTEST_ADDOPTS='-p no:pylint'; fi
   - pip install -r requirements.txt
+  - pip install --upgrade --force-reinstall requests==$REQUESTS_VERSION
 script: py.test

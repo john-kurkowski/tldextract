@@ -31,7 +31,7 @@ from setuptools import setup
 LONG_DESCRIPTION_MD = __doc__
 LONG_DESCRIPTION = re.sub(r'(?s)\[(.*?)\]\((http.*?)\)', r'\1', LONG_DESCRIPTION_MD)
 
-INSTALL_REQUIRES = ["setuptools", "idna", "requests>=2.9.1,<3", "requests-file>=1.4"]
+INSTALL_REQUIRES = ["setuptools", "idna", "requests>=2.1.0", "requests-file>=1.4"]
 if (2, 7) > sys.version_info:
     INSTALL_REQUIRES.append("argparse>=1.2.1")
 

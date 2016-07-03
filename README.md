@@ -21,10 +21,13 @@ country code.
 
 ```python
 >>> import tldextract
+
 >>> tldextract.extract('http://forums.news.cnn.com/')
 ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
+
 >>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
 ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
+
 >>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
 ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
 ```
@@ -49,8 +52,10 @@ subdomain or a valid suffix.
 ```python
 >>> tldextract.extract('google.com')
 ExtractResult(subdomain='', domain='google', suffix='com')
+
 >>> tldextract.extract('google.notavalidsuffix')
 ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='')
+
 >>> tldextract.extract('http://127.0.0.1:8080/deployed/')
 ExtractResult(subdomain='', domain='127.0.0.1', suffix='')
 ```

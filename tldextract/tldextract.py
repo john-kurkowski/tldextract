@@ -21,6 +21,27 @@ top-level domain) from the registered domain and subdomains of a URL.
     >>> # a common alias
     >>> ext.registered_domain
     'bbc.co.uk'
+
+Note subdomain and suffix are _optional_. Not all URL-like inputs have a
+subdomain or a valid suffix.
+
+    >>> tldextract.extract('google.com')
+    ExtractResult(subdomain='', domain='google', suffix='com')
+    >>> tldextract.extract('google.notavalidsuffix')
+    ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='')
+    >>> tldextract.extract('http://127.0.0.1:8080/deployed/')
+    ExtractResult(subdomain='', domain='127.0.0.1', suffix='')
+
+If you want to rejoin the whole namedtuple, regardless of whether a subdomain
+or suffix were found:
+
+    >>> ext = tldextract.extract('http://127.0.0.1:8080/deployed/')
+    >>> # this has unwanted dots
+    >>> '.'.join(ext)
+    '.127.0.0.1.'
+    >>> # join part only if truthy
+    >>> '.'.join(part for part in ext if part)
+    '127.0.0.1'
 """
 
 

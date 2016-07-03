@@ -43,6 +43,31 @@ ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
 'bbc.co.uk'
 ```
 
+Note subdomain and suffix are _optional_. Not all URL-like inputs have a
+subdomain or a valid suffix.
+
+```python
+>>> tldextract.extract('google.com')
+ExtractResult(subdomain='', domain='google', suffix='com')
+>>> tldextract.extract('google.notavalidsuffix')
+ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='')
+>>> tldextract.extract('http://127.0.0.1:8080/deployed/')
+ExtractResult(subdomain='', domain='127.0.0.1', suffix='')
+```
+
+If you want to rejoin the whole namedtuple, regardless of whether a subdomain
+or suffix were found:
+
+```python
+>>> ext = tldextract.extract('http://127.0.0.1:8080/deployed/')
+>>> # this has unwanted dots
+>>> '.'.join(ext)
+'.127.0.0.1.'
+>>> # join each part only if it's truthy
+>>> '.'.join(part for part in ext if part)
+'127.0.0.1'
+```
+
 This module started by implementing the chosen answer from [this StackOverflow question on
 getting the "domain name" from a URL](http://stackoverflow.com/questions/569137/how-to-get-domain-name-from-url/569219#569219).
 However, the proposed regex solution doesn't address many country codes like

@@ -100,7 +100,7 @@ tldextract http://forums.bbc.co.uk
 # forums bbc co.uk
 ```
 
-### Note About Caching & Advanced Usage
+### Note About Caching
 
 Beware when first running the module, it updates its TLD list with a live HTTP
 request. This updated TLD set is cached indefinitely in
@@ -142,6 +142,8 @@ env TLDEXTRACT_CACHE="~/tldextract.cache" tldextract --update
 ```
 
 It is also recommended to delete the file after upgrading this lib.
+
+### Advanced Usage
 
 #### Specifying your own URL or file for the Suffix List data
 

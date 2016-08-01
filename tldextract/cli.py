@@ -9,7 +9,7 @@ from .tldextract import TLDExtract
 try:
     unicode
 except NameError:
-    unicode = str # pylint: disable=invalid-name,redefined-builtin
+    unicode = str  # pylint: disable=invalid-name,redefined-builtin
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
     logging.basicConfig()
 
     try:
-        __version__ = pkg_resources.get_distribution('tldextract').version # pylint: disable=no-member
+        __version__ = pkg_resources.get_distribution('tldextract').version  # pylint: disable=no-member
     except pkg_resources.DistributionNotFound as _:
         __version__ = '(local)'
 
@@ -27,7 +27,7 @@ def main():
         prog='tldextract',
         description='Parse hostname from a url or fqdn')
 
-    parser.add_argument('--version', action='version', version='%(prog)s ' + __version__) # pylint: disable=no-member
+    parser.add_argument('--version', action='version', version='%(prog)s ' + __version__)  # pylint: disable=no-member
     parser.add_argument('input', metavar='fqdn|url',
                         type=unicode, nargs='*', help='fqdn or url')
 
@@ -51,4 +51,4 @@ def main():
         exit(1)
 
     for i in args.input:
-        print(' '.join(tld_extract(i))) # pylint: disable=superfluous-parens
+        print(' '.join(tld_extract(i)))  # pylint: disable=superfluous-parens

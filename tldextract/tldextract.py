@@ -64,7 +64,7 @@ import idna
 try:
     import pkg_resources
 except ImportError:
-    class pkg_resources(object): # pylint: disable=invalid-name
+    class pkg_resources(object):  # pylint: disable=invalid-name
 
         """Fake pkg_resources interface which falls back to getting resources
         inside `tldextract`'s directory.
@@ -126,7 +126,7 @@ class TLDExtract(object):
     a URL.'''
 
     # TODO: Agreed with Pylint: too-many-arguments
-    def __init__(self, cache_file=CACHE_FILE, suffix_list_urls=PUBLIC_SUFFIX_LIST_URLS, # pylint: disable=too-many-arguments
+    def __init__(self, cache_file=CACHE_FILE, suffix_list_urls=PUBLIC_SUFFIX_LIST_URLS,  # pylint: disable=too-many-arguments
                  fallback_to_snapshot=True, include_psl_private_domains=False, extra_suffixes=()):
         """
         Constructs a callable for extracting subdomain, domain, and suffix

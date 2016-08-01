@@ -318,7 +318,7 @@ class TLDExtract(object):
                 with open(self.cache_file, 'w') as cache_file:
                     json.dump(tlds, cache_file)
             except IOError as ioe:
-                LOG.warn("unable to cache TLDs in file %s: %s", self.cache_file, ioe)
+                LOG.warning("unable to cache TLDs in file %s: %s", self.cache_file, ioe)
 
 
 TLD_EXTRACTOR = TLDExtract()

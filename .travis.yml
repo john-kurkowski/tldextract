@@ -1,26 +1,14 @@
 sudo: false
 language: python
 env:
-    - TOXENV=py27-requests
-    - TOXENV=py27-requests2.1.0
-    - TOXENV=py27-requests2.8.1
-    - TOXENV=py27-requests2.9.1
-    - TOXENV=py33-requests
-    - TOXENV=py33-requests2.1.0
-    - TOXENV=py33-requests2.8.1
-    - TOXENV=py33-requests2.9.1
-    - TOXENV=py34-requests
-    - TOXENV=py34-requests2.1.0
-    - TOXENV=py34-requests2.8.1
-    - TOXENV=py34-requests2.9.1
-    - TOXENV=py35-requests
-    - TOXENV=py35-requests2.1.0
-    - TOXENV=py35-requests2.8.1
-    - TOXENV=py35-requests2.9.1
-    - TOXENV=pypy-requests
-    - TOXENV=pypy-requests2.1.0
-    - TOXENV=pypy-requests2.8.1
-    - TOXENV=pypy-requests2.9.1
+    - TOXENV=py27-requests-current
+    - TOXENV=py33-requests-current
+    - TOXENV=py34-requests-current
+    - TOXENV=py35-requests-current
+    - TOXENV=py35-requests-2.1.0
+    - TOXENV=py35-requests-2.8.1
+    - TOXENV=py35-requests-2.9.1
+    - TOXENV=pypy-requests-current
     - TOXENV=codestyle
 python: 3.5
 install: pip install tox

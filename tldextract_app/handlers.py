@@ -15,7 +15,7 @@ URLS = (
 
 class Extract(object):
 
-    def GET(self): # pylint: disable=invalid-name,no-self-use
+    def GET(self):  # pylint: disable=invalid-name,no-self-use
         url = web.input(url='').url
         if not url:
             return web.webapi.badrequest()
@@ -27,7 +27,7 @@ class Extract(object):
 
 class TLDSet(object):
 
-    def GET(self): # pylint: disable=invalid-name,no-self-use
+    def GET(self):  # pylint: disable=invalid-name,no-self-use
         web.header('Content-Type', 'text/html; charset=utf-8')
         return '<br/>'.join(sorted(tldextract.tldextract.TLD_EXTRACTOR.tlds))
 

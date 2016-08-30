@@ -199,24 +199,25 @@ curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar
 
 ## Contribute
 
-### Installation
-
-You probably want to set up a [virtualenv](http://virtualenv.readthedocs.org/en/latest/index.html).
+### Setting up
 
 1. `git clone` this repository.
 2. Change into the new directory.
-3. `pip install -r requirements.txt`
+3. `pip install tox`
+
+Alternatively you can install `detox` instead of `tox` to run tests in parallel.
 
 ### Running the Test Suite
 
-Run all tests against your current Python version:
-
-```zsh
-py.test
-```
-
-Or against all supported Python versions:
+Run all tests against all supported Python versions:
 
 ```zsh
 tox
+```
+
+Run all tests against a specific Python environment configuration:
+
+```zsh
+tox -l
+tox -e py35-requests-2.9.1
 ```

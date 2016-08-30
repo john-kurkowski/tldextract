@@ -1,2 +1,3 @@
 include tldextract/.tld_set_snapshot
+include LICENSE
 recursive-include tests *.py *.dat

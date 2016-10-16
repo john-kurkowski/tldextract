@@ -3,6 +3,12 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 2.0.2 (2016-10-16)
+
+* Misc.
+    * Release as a universal wheel ([#110](https://github.com/john-kurkowski/tldextract/issues/110))
+    * Consolidate test suite running with tox ([#104](https://github.com/john-kurkowski/tldextract/issues/104))
+
 ## 2.0.1 (2016-04-25)
 
 * Bugfixes

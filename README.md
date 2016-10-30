@@ -145,6 +145,36 @@ It is also recommended to delete the file after upgrading this lib.
 
 ### Advanced Usage
 
+#### Public vs. Private Domains
+
+[The Public Suffix List](https://publicsuffix.org/list/) maintains a concept of
+"private" domains.
+
+> PRIVATE domains are amendments submitted by the domain holder, as an
+> expression of how they operate their domain security policy. … While some
+> applications, such as browsers when considering cookie-setting, treat all
+> entries the same, other applications may wish to treat ICANN domains and
+> PRIVATE domains differently.
+
+By default, `tldextract` treats public and private domains the same. It's the
+more common case when people mentally parse a URL.
+
+```python
+>>> extract = tldextract.TLDExtract()
+>>> extract('waiterrant.blogspot.com')
+ExtractResult(subdomain='waiterrant', domain='blogspot', suffix='com')
+```
+
+But you can distinguish the Public Suffix List's private domains too, if you
+want.
+
+```python
+>>> extract = tldextract.TLDExtract(include_psl_private_domains=True)
+>>> extract.update() # necessary until #66 is fixed
+>>> extract('waiterrant.blogspot.com')
+ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com')
+```
+
 #### Specifying your own URL or file for the Suffix List data
 
 You can specify your own input data in place of the default Mozilla Public Suffix List:

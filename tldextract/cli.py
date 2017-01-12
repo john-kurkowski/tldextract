@@ -37,6 +37,8 @@ def main():
                         help='use an alternate TLD definition file')
     parser.add_argument('-p', '--private_domains', default=False, action='store_true',
                         help='Include private domains')
+    parser.add_argument('-d', '--domain', default=False, action='store_true',
+                        help='print only domain')
 
     args = parser.parse_args()
     tld_extract = TLDExtract(include_psl_private_domains=args.private_domains)
@@ -49,6 +51,14 @@ def main():
     elif len(args.input) is 0:
         parser.print_usage()
         exit(1)
+    elif args.domain:
+        for i in args.input:
+            ext = tld_extract(i)
+            if ext.suffix:
+                print(ext.registered_domain)
+            else:
+                print('.'.join([ext.subdomain.split('.')[-1], ext.domain]))
+        exit(0)
 
     for i in args.input:
         print(' '.join(tld_extract(i)))  # pylint: disable=superfluous-parens

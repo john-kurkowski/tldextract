@@ -120,6 +120,16 @@ class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain su
             return self.domain + '.' + self.suffix
         return ''
 
+    @property
+    def fqdn(self):
+        """
+        Returns a Fully Qualified Domain Name.
+
+        >>> extract('http://forums.bbc.co.uk/path/to/file').fqdn
+        'forums.bbc.co.uk'
+        """
+        return '.'.join([i for i in [self.subdomain, self.domain, self.suffix] if i])
+
 
 class TLDExtract(object):
     '''A callable for extracting, subdomain, domain, and suffix components from

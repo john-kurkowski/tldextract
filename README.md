@@ -73,6 +73,9 @@ or suffix were found:
 '127.0.0.1'
 ```
 
+By default, this package supports the public ICANN TLDs and their exceptions.
+You can optionally support the Public Suffix List's private domains as well.
+
 This module started by implementing the chosen answer from [this StackOverflow question on
 getting the "domain name" from a URL](http://stackoverflow.com/questions/569137/how-to-get-domain-name-from-url/569219#569219).
 However, the proposed regex solution doesn't address many country codes like

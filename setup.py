@@ -20,6 +20,9 @@ top-level domain) from the registered domain and subdomains of a URL.
     >>> # a common alias
     >>> ext.registered_domain
     'bbc.co.uk'
+
+By default, this package supports the public ICANN TLDs and their exceptions.
+You can optionally support the Public Suffix List's private domains as well.
 """
 
 import re
@@ -40,8 +43,11 @@ setup(
     version="2.0.2",
     author="John Kurkowski",
     author_email="john.kurkowski@gmail.com",
-    description=("Accurately separate the TLD from the registered domain and"
-                 "subdomains of a URL, using the Public Suffix List."),
+    description=("Accurately separate the TLD from the registered domain and "
+                 "subdomains of a URL, using the Public Suffix List. By"
+                 "default, this includes the public ICANN TLDs and their"
+                 "exceptions. You can optionally support the Public Suffix"
+                 "List's private domains as well."),
     license="BSD License",
     keywords="tld domain subdomain url parse extract urlparse urlsplit public suffix list",
     url="https://github.com/john-kurkowski/tldextract",

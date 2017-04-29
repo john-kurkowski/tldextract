@@ -1,3 +1,9 @@
+addons:
+  apt:
+    sources:
+      - deadsnakes
+    packages:
+      - python3.5
 sudo: false
 language: python
 env:

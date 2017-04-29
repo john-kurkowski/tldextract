@@ -5,11 +5,12 @@ env:
     - TOXENV=py33-requests-current
     - TOXENV=py34-requests-current
     - TOXENV=py35-requests-current
-    - TOXENV=py35-requests-2.1.0
-    - TOXENV=py35-requests-2.8.1
-    - TOXENV=py35-requests-2.9.1
+    - TOXENV=py36-requests-current
+    - TOXENV=py36-requests-2.1.0
+    - TOXENV=py36-requests-2.8.1
+    - TOXENV=py36-requests-2.9.1
     - TOXENV=pypy-requests-current
     - TOXENV=codestyle
-python: 3.5
+python: 3.6
 install: pip install tox
 script: tox

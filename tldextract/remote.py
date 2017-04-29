@@ -4,16 +4,15 @@
 import logging
 import re
 import socket
+import sys
 
 import requests
 from requests_file import FileAdapter
 
 # pylint: disable=import-error,invalid-name,no-name-in-module,redefined-builtin
-try:  # pragma: no cover
-    # Python 2
+if sys.version_info < (3,):  # pragma: no cover
     from urlparse import scheme_chars
-except ImportError:  # pragma: no cover
-    # Python 3
+else:  # pragma: no cover
     from urllib.parse import scheme_chars
     unicode = str
 # pylint: enable=import-error,invalid-name,no-name-in-module,redefined-builtin

@@ -193,19 +193,16 @@ class TLDExtract(object):
             .rstrip(".")
 
         labels = netloc.split(".")
-        translations = []
-        for label in labels:
+
+        def decode_punycode(label):
             if label.startswith("xn--"):
                 try:
-                    translation = idna.decode(label.encode('ascii'))
+                    return idna.decode(label.encode('ascii'))
                 except UnicodeError:
-                    translation = label
-            else:
-                translation = label
-            translation = translation.lower()
+                    pass
+            return label
 
-            translations.append(translation)
-
+        translations = [decode_punycode(label).lower() for label in labels]
         suffix_index = self._get_tld_extractor().suffix_index(translations)
 
         registered_domain = ".".join(labels[:suffix_index])

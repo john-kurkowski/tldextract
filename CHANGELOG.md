@@ -3,6 +3,14 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 2.0.3 (2017-05-20)
+
+* Bugfixes
+    * Switch to explicit Python version check ([#124](https://github.com/john-kurkowski/tldextract/issues/124))
+* Misc.
+    * Document public vs. private domains
+    * Document support for Python 3.6
+
 ## 2.0.2 (2016-10-16)
 
 * Misc.

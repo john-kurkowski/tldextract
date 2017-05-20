@@ -44,9 +44,9 @@ setup(
     author="John Kurkowski",
     author_email="john.kurkowski@gmail.com",
     description=("Accurately separate the TLD from the registered domain and "
-                 "subdomains of a URL, using the Public Suffix List. By"
-                 "default, this includes the public ICANN TLDs and their"
-                 "exceptions. You can optionally support the Public Suffix"
+                 "subdomains of a URL, using the Public Suffix List. By "
+                 "default, this includes the public ICANN TLDs and their "
+                 "exceptions. You can optionally support the Public Suffix "
                  "List's private domains as well."),
     license="BSD License",
     keywords="tld domain subdomain url parse extract urlparse urlsplit public suffix list",

@@ -132,7 +132,7 @@ class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain su
         """
         if self.domain and self.suffix:
             # self is the namedtuple (subdomain domain suffix)
-            return '.'.join([i for i in self if i])
+            return '.'.join(i for i in self if i)
         return ''
 
 

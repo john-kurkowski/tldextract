@@ -148,10 +148,8 @@ class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain su
         >>> extract('http://256.1.1.1').ipv4
         ''
         """
-        if not self.suffix and not self.subdomain:
-            if IP_RE.match(self.domain):
-                return self.domain
-            return ''
+        if not (self.suffix or self.subdomain) and IP_RE.match(self.domain):
+            return self.domain
         return ''
 
 

@@ -19,7 +19,8 @@ extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
 
 def assert_extract(
         url,
-        expected,
+        expected_domain_data,
+        expected_ip_data='',
         funs=(
             extract,
             extract_no_cache,
@@ -30,13 +31,14 @@ def assert_extract(
     (expected_fqdn,
      expected_subdomain,
      expected_domain,
-     expected_tld) = expected
+     expected_tld) = expected_domain_data
     for fun in funs:
         ext = fun(url)
         assert expected_fqdn == ext.fqdn
         assert expected_subdomain == ext.subdomain
         assert expected_domain == ext.domain
         assert expected_tld == ext.suffix
+        assert expected_ip_data == ext.ipv4
 
 
 def test_american():
@@ -81,7 +83,9 @@ def test_qualified_local_host():
 
 
 def test_ip():
-    assert_extract('http://216.22.0.192/', ('', '', '216.22.0.192', ''))
+    assert_extract('http://216.22.0.192/',
+                   ('', '', '216.22.0.192', ''),
+                   expected_ip_data='216.22.0.192',)
     assert_extract('http://216.22.project.coop/',
                    ('216.22.project.coop', '216.22', 'project', 'coop'))
 
@@ -183,6 +187,24 @@ def test_dns_root_label():
 def test_private_domains():
     assert_extract('http://waiterrant.blogspot.com',
                    ('waiterrant.blogspot.com', 'waiterrant', 'blogspot', 'com'))
+
+
+def test_ipv4():
+    assert_extract('http://127.0.0.1/foo/bar',
+                   ('', '', '127.0.0.1', ''),
+                   expected_ip_data='127.0.0.1')
+
+
+def test_ipv4_bad():
+    assert_extract('http://256.256.256.256/foo/bar',
+                   ('', '256.256.256', '256', ''),
+                   expected_ip_data='')
+
+
+def test_ipv4_lookalike():
+    assert_extract('http://127.0.0.1.9/foo/bar',
+                   ('', '127.0.0.1', '9', ''),
+                   expected_ip_data='')
 
 
 def test_result_as_dict():

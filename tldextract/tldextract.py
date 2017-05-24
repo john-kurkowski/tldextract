@@ -78,6 +78,7 @@ except ImportError:
 from .remote import find_first_response
 from .remote import looks_like_ip
 from .remote import SCHEME_RE
+from .remote import IP_RE
 
 # pylint: disable=invalid-name,undefined-variable
 try:
@@ -133,6 +134,22 @@ class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain su
         if self.domain and self.suffix:
             # self is the namedtuple (subdomain domain suffix)
             return '.'.join(i for i in self if i)
+        return ''
+
+    @property
+    def ipv4(self):
+        """
+        Returns the ipv4 if that is what the presented domain/url is
+
+        >>> extract('http://127.0.0.1/path/to/file').ipv4
+        '127.0.0.1'
+        >>> extract('http://127.0.0.1.1/path/to/file').ipv4
+        ''
+        >>> extract('http://256.1.1.1').ipv4
+        ''
+        """
+        if not (self.suffix or self.subdomain) and IP_RE.match(self.domain):
+            return self.domain
         return ''
 
 

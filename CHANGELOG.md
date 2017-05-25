@@ -3,6 +3,12 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 2.1.0 (2017-05-24)
+
+* Features
+    * Add `fqdn` convenience property ([#129](https://github.com/john-kurkowski/tldextract/issues/129))
+    * Add `ipv4` convenience property ([#126](https://github.com/john-kurkowski/tldextract/issues/126))
+
 ## 2.0.3 (2017-05-20)
 
 * Bugfixes

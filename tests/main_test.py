@@ -216,3 +216,19 @@ def test_result_as_dict():
                      'domain': 'google',
                      'suffix': 'com'}
     assert result._asdict() == expected_dict
+
+
+def test_punycode_extended():
+    """
+    "narrow python" builds may break on certain unicode characters
+    see https://github.com/john-kurkowski/tldextract/issues/122
+    """
+    # this one breaks on narrow python, needs the bypass
+    assert_extract('xn--vi8hiv.ws',
+                   ('xn--vi8hiv.ws', '', 'xn--vi8hiv', 'ws'))
+
+    # these two are the same domain, different representations
+    assert_extract(u'http://➡.ws/♥',
+                   (u'➡.ws', '', u'\u27a1', 'ws'))
+    assert_extract('http://\xe2\x9e\xa1.ws/\xe2\x99\xa5',
+                   ('\xe2\x9e\xa1.ws', '', '\xe2\x9e\xa1', 'ws'))

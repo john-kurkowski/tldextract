@@ -58,8 +58,10 @@ import json
 import logging
 import os
 import re
+import warnings
 
 import idna
+
 
 try:
     import pkg_resources
@@ -227,11 +229,19 @@ class TLDExtract(object):
         labels = netloc.split(".")
 
         def decode_punycode(label):
+            """helper function"""
             if label.startswith("xn--"):
                 try:
                     return idna.decode(label.encode('ascii'))
                 except UnicodeError:
                     pass
+                except ValueError as exc:
+                    # see https://github.com/john-kurkowski/tldextract/issues/122
+                    if "narrow Python build" in exc.args[0]:
+                        warnings.warn("can not decode punycode: %s" % exc.args[0],
+                                      UnicodeWarning, stacklevel=2)
+                        return label
+                    raise
             return label
 
         translations = [decode_punycode(label).lower() for label in labels]

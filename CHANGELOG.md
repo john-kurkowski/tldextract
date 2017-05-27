@@ -3,6 +3,11 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 2.1.1 (?)
+
+* Bugfixes
+    * Basic support for 'narrow' Python2 builds ([#122](https://github.com/john-kurkowski/tldextract/issues/122))
+
 ## 2.1.0 (2017-05-24)
 
 * Features

@@ -229,7 +229,7 @@ class TLDExtract(object):
         labels = netloc.split(".")
 
         def decode_punycode(label):
-            """helper function"""
+            """helper function; decodes a section of the netloc from punycode."""
             if label.startswith("xn--"):
                 try:
                     return idna.decode(label.encode('ascii'))

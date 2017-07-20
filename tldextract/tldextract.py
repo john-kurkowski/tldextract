@@ -110,7 +110,7 @@ class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain su
     @property
     def registered_domain(self):
         """
-        Creates a new string, containing the the domain (in lowercase), a dot and 
+        Creates a new string, containing the the domain (in lowercase), a dot and
         the suffix (in lowercase) when both domain and suffix are set. Returns an
         empty string otherwise
 

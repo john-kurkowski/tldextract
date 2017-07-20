@@ -110,15 +110,19 @@ class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain su
     @property
     def registered_domain(self):
         """
-        Joins the domain and suffix fields with a dot, if they're both set.
+        Creates a new string, containing the the domain (in lowercase), a dot and
+        the suffix (in lowercase) when both domain and suffix are set. Returns an
+        empty string otherwise
 
         >>> extract('http://forums.bbc.co.uk').registered_domain
         'bbc.co.uk'
         >>> extract('http://localhost:8080').registered_domain
         ''
+        >>> extract('http://cdn.dev.BrwnPpr.com').registered_domain
+        'brwnppr.com'
         """
         if self.domain and self.suffix:
-            return self.domain + '.' + self.suffix
+            return '{domain}.{suffix}'.format(domain=self.domain, suffix=self.suffix, ).lower()
         return ''
 
     @property

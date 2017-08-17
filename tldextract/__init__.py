@@ -1,5 +1,7 @@
 """Export tldextract's public interface."""
 
+import os
+
 try:
     import pkg_resources
 except ImportError:

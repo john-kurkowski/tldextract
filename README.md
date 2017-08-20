@@ -206,6 +206,15 @@ Use an absolute path when specifying the `suffix_list_urls` keyword argument.
 
 ### FAQ
 
+#### Can you add suffix \_\_\_\_? Can you make an exception for domain \_\_\_\_?
+
+This project doesn't contain an actual list of public suffixes. That comes from
+[the Public Suffix List (PSL)](https://publicsuffix.org/). Submit amendments there.
+
+(In the meantime, you can tell tldextract about your exception by either
+forking the PSL and using your fork in the `suffix_list_urls` param, or adding
+your suffix piecemeal with the `additional_suffixes` param.)
+
 #### If I pass an invalid URL, I still get a result, no error. What gives?
 
 To keep `tldextract` light in LoC & overhead, and because there are plenty of

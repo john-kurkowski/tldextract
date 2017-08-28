@@ -3,6 +3,14 @@
 
 import logging
 
+try:
+    import pkg_resources
+    __version__ = pkg_resources.get_distribution('tldextract').version  # pylint: disable=no-member
+except ImportError:
+    __version__ = '(local)'
+except pkg_resources.DistributionNotFound:
+    __version__ = '(local)'
+
 from .tldextract import TLDExtract
 
 try:
@@ -16,14 +24,6 @@ def main():
     import argparse
 
     logging.basicConfig()
-
-    try:
-        import pkg_resources
-        __version__ = pkg_resources.get_distribution('tldextract').version  # pylint: disable=no-member
-    except ImportError:
-        __version__ = '(local)'
-    except pkg_resources.DistributionNotFound:
-        __version__ = '(local)'
 
     parser = argparse.ArgumentParser(
         prog='tldextract',

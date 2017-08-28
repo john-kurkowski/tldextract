@@ -11,4 +11,3 @@ except pkg_resources.DistributionNotFound:
     __version__ = '(local)'
 
 from .tldextract import extract, TLDExtract
-

@@ -1,10 +1,4 @@
 """Export tldextract's public interface."""
 
-import pkg_resources
-
+from .cli import __version__
 from .tldextract import extract, TLDExtract
-
-try:
-    __version__ = pkg_resources.get_distribution('tldextract').version  # pylint: disable=no-member
-except pkg_resources.DistributionNotFound as _:
-    __version__ = '(local)'

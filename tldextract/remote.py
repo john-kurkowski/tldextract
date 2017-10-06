@@ -24,19 +24,23 @@ SCHEME_RE = re.compile(r'^([' + scheme_chars + ']+:)?//')
 LOG = logging.getLogger('tldextract')
 
 
-def find_first_response(urls):
+def find_first_response(urls, cache_fetch_timeout=None):
     """ Decode the first successfully fetched URL, from UTF-8 encoding to
     Python unicode.
     """
     text = ''
 
+    session = requests.Session()
+    session.mount('file://', FileAdapter())
+
     for url in urls:
         try:
-            session = requests.Session()
-            session.mount('file://', FileAdapter())
-            text = session.get(url).text
-        except requests.exceptions.RequestException as ree:
-            LOG.error('Exception reading Public Suffix List url ' + url + ' - ' + str(ree) + '.')
+            text = session.get(url, timeout=cache_fetch_timeout).text
+        except requests.exceptions.RequestException:
+            LOG.exception(
+                'Exception reading Public Suffix List url %s',
+                url
+            )
         else:
             return _decode_utf8(text)
 

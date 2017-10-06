@@ -161,7 +161,7 @@ class TLDExtract(object):
     # TODO: Agreed with Pylint: too-many-arguments
     def __init__(self, cache_file=CACHE_FILE, suffix_list_urls=PUBLIC_SUFFIX_LIST_URLS,  # pylint: disable=too-many-arguments
                  fallback_to_snapshot=True, include_psl_private_domains=False, extra_suffixes=(),
-                 cache_fetch_timeout=None):
+                 cache_fetch_timeout=CACHE_TIMEOUT):
         """
         Constructs a callable for extracting subdomain, domain, and suffix
         components from a URL.
@@ -218,18 +218,17 @@ class TLDExtract(object):
         self.extra_suffixes = extra_suffixes
         self._extractor = None
 
-        self.cache_fetch_timeout = None
-        if CACHE_TIMEOUT is not None:
+        self.cache_fetch_timeout = cache_fetch_timeout
+        if not isinstance(self.cache_fetch_timeout, (tuple, float,)):
             try:
-                self.cache_fetch_timeout = float(CACHE_TIMEOUT)
-            except ValueError:
+                self.cache_fetch_timeout = float(self.cache_fetch_timeout)
+            except (ValueError, TypeError):
                 LOG.error(
-                    'EnvVar TLDEXTRACT_CACHE_TIMEOUT is not a float: %s.'
-                    ' Defaulting to no timeout.',
-                    CACHE_TIMEOUT
+                    'invalid cache timeout specified (%s). Defaulting to None',
+                    self.cache_fetch_timeout,
+                    exc_info=True
                 )
-        else:
-            self.cache_fetch_timeout = cache_fetch_timeout
+
 
     def __call__(self, url):
         """

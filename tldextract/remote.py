@@ -42,7 +42,9 @@ def find_first_response(urls, cache_fetch_timeout=None):
                 url
             )
         else:
-            return _decode_utf8(text)
+            ans = _decode_utf8(text)
+            session.close()
+            return ans
 
     LOG.error(
         'No Public Suffix List found. Consider using a mirror or constructing '

@@ -8,7 +8,6 @@ sudo: false
 language: python
 env:
     - TOXENV=py27-requests-current
-    - TOXENV=py33-requests-current
     - TOXENV=py34-requests-current
     - TOXENV=py35-requests-current
     - TOXENV=py36-requests-current

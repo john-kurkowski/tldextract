@@ -229,7 +229,6 @@ class TLDExtract(object):
                     exc_info=True
                 )
 
-
     def __call__(self, url):
         """
         Takes a string URL and splits it into its subdomain, domain, and

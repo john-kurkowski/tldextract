@@ -92,6 +92,7 @@ LOG = logging.getLogger("tldextract")
 
 CACHE_FILE_DEFAULT = os.path.join(os.path.dirname(__file__), '.tld_set')
 CACHE_FILE = os.path.expanduser(os.environ.get("TLDEXTRACT_CACHE", CACHE_FILE_DEFAULT))
+CACHE_TIMEOUT = os.environ.get('TLDEXTRACT_CACHE_TIMEOUT')
 
 PUBLIC_SUFFIX_LIST_URLS = (
     'https://publicsuffix.org/list/public_suffix_list.dat',
@@ -159,7 +160,8 @@ class TLDExtract(object):
 
     # TODO: Agreed with Pylint: too-many-arguments
     def __init__(self, cache_file=CACHE_FILE, suffix_list_urls=PUBLIC_SUFFIX_LIST_URLS,  # pylint: disable=too-many-arguments
-                 fallback_to_snapshot=True, include_psl_private_domains=False, extra_suffixes=()):
+                 fallback_to_snapshot=True, include_psl_private_domains=False, extra_suffixes=(),
+                 cache_fetch_timeout=CACHE_TIMEOUT):
         """
         Constructs a callable for extracting subdomain, domain, and suffix
         components from a URL.
@@ -189,6 +191,18 @@ class TLDExtract(object):
         included instead, set `include_psl_private_domains` to True.
 
         You can pass additional suffixes in `extra_suffixes` argument without changing list URL
+
+        cache_fetch_timeout is passed unmodified to the underlying request object
+        per the requests documentation here:
+        http://docs.python-requests.org/en/master/user/advanced/#timeouts
+
+        cache_fetch_timeout can also be set to a single value with the
+        environment variable TLDEXTRACT_CACHE_TIMEOUT, like so:
+
+        TLDEXTRACT_CACHE_TIMEOUT="1.2"
+
+        When set this way, the same timeout value will be used for both connect
+        and read timeouts
         """
         suffix_list_urls = suffix_list_urls or ()
         self.suffix_list_urls = tuple(url.strip() for url in suffix_list_urls if url.strip())
@@ -203,6 +217,10 @@ class TLDExtract(object):
         self.include_psl_private_domains = include_psl_private_domains
         self.extra_suffixes = extra_suffixes
         self._extractor = None
+
+        self.cache_fetch_timeout = cache_fetch_timeout
+        if isinstance(self.cache_fetch_timeout, STRING_TYPE):
+            self.cache_fetch_timeout = float(self.cache_fetch_timeout)
 
     def __call__(self, url):
         """
@@ -275,7 +293,10 @@ class TLDExtract(object):
             self._extractor = _PublicSuffixListTLDExtractor(tlds)
             return self._extractor
         elif self.suffix_list_urls:
-            raw_suffix_list_data = find_first_response(self.suffix_list_urls)
+            raw_suffix_list_data = find_first_response(
+                self.suffix_list_urls,
+                self.cache_fetch_timeout
+            )
             tlds = get_tlds_from_raw_suffix_list_data(
                 raw_suffix_list_data,
                 self.include_psl_private_domains

@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 '''Main tldextract unit tests.'''
 
+import sys
+
+import responses
 import tldextract
 from .helpers import temporary_file
+if sys.version_info >= (3,):  # pragma: no cover
+    unicode = str  # pylint: disable=invalid-name,redefined-builtin
 
 
 # pylint: disable=invalid-name
@@ -216,3 +221,15 @@ def test_result_as_dict():
                      'domain': 'google',
                      'suffix': 'com'}
     assert result._asdict() == expected_dict
+
+
+@responses.activate  # pylint: disable=no-member
+def test_cache_timeouts():
+    server = 'http://some-server.com'
+    responses.add(  # pylint: disable=no-member
+        responses.GET,  # pylint: disable=no-member
+        server,
+        status=408
+    )
+
+    assert tldextract.remote.find_first_response([server], 5) == unicode('')

@@ -219,15 +219,8 @@ class TLDExtract(object):
         self._extractor = None
 
         self.cache_fetch_timeout = cache_fetch_timeout
-        if not isinstance(self.cache_fetch_timeout, (tuple, float,)):
-            try:
-                self.cache_fetch_timeout = float(self.cache_fetch_timeout)
-            except (ValueError, TypeError):
-                LOG.error(
-                    'invalid cache timeout specified (%s). Defaulting to None',
-                    self.cache_fetch_timeout,
-                    exc_info=True
-                )
+        if isinstance(self.cache_fetch_timeout, STRING_TYPE):
+            self.cache_fetch_timeout = float(self.cache_fetch_timeout)
 
     def __call__(self, url):
         """

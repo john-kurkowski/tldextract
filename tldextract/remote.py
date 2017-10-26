@@ -28,23 +28,19 @@ def find_first_response(urls, cache_fetch_timeout=None):
     """ Decode the first successfully fetched URL, from UTF-8 encoding to
     Python unicode.
     """
-    text = ''
+    with requests.Session() as session:
+        session.mount('file://', FileAdapter())
 
-    session = requests.Session()
-    session.mount('file://', FileAdapter())
-
-    for url in urls:
-        try:
-            text = session.get(url, timeout=cache_fetch_timeout).text
-        except requests.exceptions.RequestException:
-            LOG.exception(
-                'Exception reading Public Suffix List url %s',
-                url
-            )
-        else:
-            ans = _decode_utf8(text)
-            session.close()
-            return ans
+        for url in urls:
+            try:
+                text = session.get(url, timeout=cache_fetch_timeout).text
+            except requests.exceptions.RequestException:
+                LOG.exception(
+                    'Exception reading Public Suffix List url %s',
+                    url
+                )
+            else:
+                return _decode_utf8(text)
 
     LOG.error(
         'No Public Suffix List found. Consider using a mirror or constructing '

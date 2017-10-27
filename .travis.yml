@@ -14,14 +14,10 @@ matrix:
       env: TOXENV=py34-requests-current
     - python: 3.5
       env: TOXENV=py35-requests-current
-    - python: 3.6
-      env: TOXENV=py36-requests-current
-    - python: 3.6
-      env: TOXENV=py36-requests-2.1.0
-    - python: 3.6
-      env: TOXENV=py36-requests-2.8.1
-    - python: 3.6
-      env: TOXENV=py36-requests-2.9.1
+    - env: TOXENV=py36-requests-current
+    - env: TOXENV=py36-requests-2.1.0
+    - env: TOXENV=py36-requests-2.8.1
+    - env: TOXENV=py36-requests-2.9.1
     - python: pypy
       env: TOXENV=pypy-requests-current
     - env: TOXENV=codestyle

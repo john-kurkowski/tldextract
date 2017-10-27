@@ -6,16 +6,25 @@ addons:
       - python3.5
 sudo: false
 language: python
-env:
-    - TOXENV=py27-requests-current
-    - TOXENV=py34-requests-current
-    - TOXENV=py35-requests-current
-    - TOXENV=py36-requests-current
-    - TOXENV=py36-requests-2.1.0
-    - TOXENV=py36-requests-2.8.1
-    - TOXENV=py36-requests-2.9.1
-    - TOXENV=pypy-requests-current
-    - TOXENV=codestyle
+matrix:
+  include:
+    - python: 2.7
+      env: TOXENV=py27-requests-current
+    - python: 3.4
+      env: TOXENV=py34-requests-current
+    - python: 3.5
+      env: TOXENV=py35-requests-current
+    - python: 3.6
+      env: TOXENV=py36-requests-current
+    - python: 3.6
+      env: TOXENV=py36-requests-2.1.0
+    - python: 3.6
+      env: TOXENV=py36-requests-2.8.1
+    - python: 3.6
+      env: TOXENV=py36-requests-2.9.1
+    - python: pypy
+      env: TOXENV=pypy-requests-current
+    - env: TOXENV=codestyle
 python: 3.6
 install: pip install tox
 script: tox

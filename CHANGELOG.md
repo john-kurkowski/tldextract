@@ -3,6 +3,14 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 2.2.0 (2017-10-26)
+
+* Features
+    * Add `cache_fetch_timeout` kwarg and `TLDEXTRACT_CACHE_TIMEOUT` env var ([#139](https://github.com/john-kurkowski/tldextract/issues/139))
+* Bugfixes
+    * Work around `pkg_resources` missing, again ([#137](https://github.com/john-kurkowski/tldextract/issues/137))
+    * Always close sessions ([#140](https://github.com/john-kurkowski/tldextract/issues/140))
+
 ## 2.1.0 (2017-05-24)
 
 * Features

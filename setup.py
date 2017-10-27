@@ -40,7 +40,7 @@ if (2, 7) > sys.version_info:
 
 setup(
     name="tldextract",
-    version="2.1.0",
+    version="2.2.0",
     author="John Kurkowski",
     author_email="john.kurkowski@gmail.com",
     description=("Accurately separate the TLD from the registered domain and "

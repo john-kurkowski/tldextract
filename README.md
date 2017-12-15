@@ -213,7 +213,7 @@ This project doesn't contain an actual list of public suffixes. That comes from
 
 (In the meantime, you can tell tldextract about your exception by either
 forking the PSL and using your fork in the `suffix_list_urls` param, or adding
-your suffix piecemeal with the `additional_suffixes` param.)
+your suffix piecemeal with the `extra_suffixes` param.)
 
 #### If I pass an invalid URL, I still get a result, no error. What gives?
 

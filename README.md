@@ -14,10 +14,9 @@ splitting method above will give you 'co' as the domain and 'uk' as the TLD,
 instead of 'bbc' and 'co.uk' respectively.
 
 `tldextract` on the other hand knows what all gTLDs and ccTLDs look like by
-looking up the currently living ones according to
-[the Public Suffix List](http://www.publicsuffix.org). So,
-given a URL, it knows its subdomain from its domain, and its domain from its
-country code.
+looking up the currently living ones according to [the Public Suffix List
+(PSL)](http://www.publicsuffix.org). So, given a URL, it knows its subdomain
+from its domain, and its domain from its country code.
 
 ```python
 >>> import tldextract
@@ -150,8 +149,8 @@ It is also recommended to delete the file after upgrading this lib.
 
 #### Public vs. Private Domains
 
-[The Public Suffix List](https://publicsuffix.org/list/) maintains a concept of
-"private" domains.
+The PSL [maintains a concept of "private"
+domains](https://publicsuffix.org/list/).
 
 > PRIVATE domains are amendments submitted by the domain holder, as an
 > expression of how they operate their domain security policy. … While some
@@ -159,8 +158,7 @@ It is also recommended to delete the file after upgrading this lib.
 > entries the same, other applications may wish to treat ICANN domains and
 > PRIVATE domains differently.
 
-By default, `tldextract` treats public and private domains the same. It's the
-more common case when people mentally parse a URL.
+By default, `tldextract` treats public and private domains the same.
 
 ```python
 >>> extract = tldextract.TLDExtract()
@@ -168,8 +166,7 @@ more common case when people mentally parse a URL.
 ExtractResult(subdomain='waiterrant', domain='blogspot', suffix='com')
 ```
 
-But you can distinguish the Public Suffix List's private domains too, if you
-want.
+The following overrides this.
 
 ```python
 >>> extract = tldextract.TLDExtract(include_psl_private_domains=True)
@@ -177,6 +174,11 @@ want.
 >>> extract('waiterrant.blogspot.com')
 ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com')
 ```
+
+The thinking behind the default is, it's the more common case when people
+mentally parse a URL. It doesn't assume familiarity with the PSL nor that the
+PSL makes such a distinction. Note this may run counter to the default parsing
+behavior of other, PSL-based libraries.
 
 #### Specifying your own URL or file for the Suffix List data
 

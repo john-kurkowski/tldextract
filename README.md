@@ -106,7 +106,7 @@ tldextract http://forums.bbc.co.uk
 
 Beware when first running the module, it updates its TLD list with a live HTTP
 request. This updated TLD set is cached indefinitely in
-`/path/to/tldextract/.tld_set`.
+`/path/to/tldextract/.suffix_cache`.
 
 (Arguably runtime bootstrapping like that shouldn't be the default behavior,
 like for production systems. But I want you to have the latest TLDs, especially
@@ -122,11 +122,11 @@ no_fetch_extract = tldextract.TLDExtract(suffix_list_urls=None)
 no_fetch_extract('http://www.google.com')
 
 # extract callable that reads/writes the updated TLD set to a different path
-custom_cache_extract = tldextract.TLDExtract(cache_file='/path/to/your/cache/file')
+custom_cache_extract = tldextract.TLDExtract(cache_dir='/path/to/your/cache/dir')
 custom_cache_extract('http://www.google.com')
 
 # extract callable that doesn't use caching
-no_cache_extract = tldextract.TLDExtract(cache_file=False)
+no_cache_extract = tldextract.TLDExtract(cache_dir=False)
 no_cache_extract('http://www.google.com')
 ```
 
@@ -169,9 +169,8 @@ ExtractResult(subdomain='waiterrant', domain='blogspot', suffix='com')
 The following overrides this.
 
 ```python
->>> extract = tldextract.TLDExtract(include_psl_private_domains=True)
->>> extract.update() # necessary until #66 is fixed
->>> extract('waiterrant.blogspot.com')
+>>> extract = tldextract.TLDExtract()
+>>> extract('waiterrant.blogspot.com', include_psl_private_domains=True)
 ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com')
 ```
 
@@ -185,11 +184,7 @@ behavior of other, PSL-based libraries.
 You can specify your own input data in place of the default Mozilla Public Suffix List:
 
 ```python
-extract = tldextract.TLDExtract(
-    suffix_list_urls=["http://foo.bar.baz"],
-    # Recommended: Specify your own cache file, to minimize ambiguities about where
-    # tldextract is getting its data, or cached data, from.
-    cache_file='/path/to/your/cache/file')
+extract = tldextract.TLDExtract(suffix_list_urls=["http://foo.bar.baz"])
 ```
 
 The above snippet will fetch from the URL *you* specified, upon first need to download the
@@ -198,9 +193,7 @@ suffix list (i.e. if the cache_file doesn't exist).
 If you want to use input data from your local filesystem, just use the `file://` protocol:
 
 ```python
-extract = tldextract.TLDExtract(
-    suffix_list_urls=["file://absolute/path/to/your/local/suffix/list/file"],
-    cache_file='/path/to/your/cache/file')
+extract = tldextract.TLDExtract(suffix_list_urls=["file://absolute/path/to/your/local/suffix/list/file"])
 ```
 
 Use an absolute path when specifying the `suffix_list_urls` keyword argument.

@@ -35,16 +35,11 @@ def main():
 
     parser.add_argument('-u', '--update', default=False, action='store_true',
                         help='force fetch the latest TLD definitions')
-    parser.add_argument('-c', '--cache_file',
-                        help='use an alternate TLD definition file')
     parser.add_argument('-p', '--private_domains', default=False, action='store_true',
                         help='Include private domains')
 
     args = parser.parse_args()
-    tld_extract = TLDExtract(include_psl_private_domains=args.private_domains)
-
-    if args.cache_file:
-        tld_extract.cache_file = args.cache_file
+    tld_extract = TLDExtract()
 
     if args.update:
         tld_extract.update(True)
@@ -53,4 +48,4 @@ def main():
         exit(1)
 
     for i in args.input:
-        print(' '.join(tld_extract(i)))  # pylint: disable=superfluous-parens
+        print(' '.join(tld_extract(i, include_psl_private_domains=args.private_domains)))  # pylint: disable=superfluous-parens

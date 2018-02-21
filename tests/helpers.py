@@ -19,7 +19,7 @@ def check_output(*popenargs, **kwargs):
     return output
 
 
-def temporary_file():
+def temporary_dir():
     """ Make a writable temporary file and return its absolute path.
     """
-    return tempfile.mkstemp()[1]
+    return tempfile.mkdtemp()

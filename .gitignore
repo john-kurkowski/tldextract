@@ -7,3 +7,5 @@ tldextract_app/tldextract
 tldextract_app/web
 tldextract.egg-info
 .tox
+tldextract/.suffix_cache/*
+.pytest_cache

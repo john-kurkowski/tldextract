@@ -7,6 +7,7 @@ import socket
 import sys
 
 import requests
+from pkg_resources import resource_filename
 from requests_file import FileAdapter
 
 # pylint: disable=import-error,invalid-name,no-name-in-module,redefined-builtin
@@ -33,7 +34,7 @@ def find_first_response(urls, cache_fetch_timeout=None):
 
         for url in urls:
             try:
-                text = session.get(url, timeout=cache_fetch_timeout).text
+                text = session.get(url, timeout=cache_fetch_timeout, verify=resource_filename('certifi', 'cacert.pem')).text
             except requests.exceptions.RequestException:
                 LOG.exception(
                     'Exception reading Public Suffix List url %s',

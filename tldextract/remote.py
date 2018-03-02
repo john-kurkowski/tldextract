@@ -34,7 +34,11 @@ def find_first_response(urls, cache_fetch_timeout=None):
 
         for url in urls:
             try:
-                text = session.get(url, timeout=cache_fetch_timeout, verify=resource_filename('certifi', 'cacert.pem')).text
+                text = session.get(
+                    url,
+                    timeout=cache_fetch_timeout,
+                    verify=resource_filename('certifi', 'cacert.pem')
+                ).text
             except requests.exceptions.RequestException:
                 LOG.exception(
                     'Exception reading Public Suffix List url %s',

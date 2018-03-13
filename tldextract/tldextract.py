@@ -58,6 +58,7 @@ import json
 import logging
 import os
 import re
+import threading
 
 import idna
 
@@ -208,6 +209,7 @@ class TLDExtract(object):
         self.suffix_list_urls = tuple(url.strip() for url in suffix_list_urls if url.strip())
 
         self.cache_file = os.path.expanduser(cache_file or '')
+        self.cache_file_lock = threading.Lock()
         self.fallback_to_snapshot = fallback_to_snapshot
         if not (self.suffix_list_urls or self.cache_file or self.fallback_to_snapshot):
             raise ValueError("The arguments you have provided disable all ways for tldextract "
@@ -286,8 +288,8 @@ class TLDExtract(object):
         4. Bundled PSL snapshot file'''
         if self._extractor:
             return self._extractor
-
-        tlds = self._get_cached_tlds()
+        with self.cache_file_lock:
+            tlds = self._get_cached_tlds()
         if tlds:
             tlds.extend(self.extra_suffixes)
             self._extractor = _PublicSuffixListTLDExtractor(tlds)
@@ -311,7 +313,8 @@ class TLDExtract(object):
             raise Exception("tlds is empty, but fallback_to_snapshot is set"
                             " to false. Cannot proceed without tlds.")
 
-        self._cache_tlds(tlds)
+        with self.cache_file_lock:
+            self._cache_tlds(tlds)
 
         tlds.extend(self.extra_suffixes)
         self._extractor = _PublicSuffixListTLDExtractor(tlds)

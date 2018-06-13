@@ -264,18 +264,18 @@ class TLDExtract(object):
         subdomain, _, domain = registered_domain.rpartition('.')
         return ExtractResult(subdomain, domain, suffix)
 
-    def update(self, fetch_now=False):
+    def update(self, fetch_now=False, proxies=None):
         if os.path.exists(self.cache_file):
             os.unlink(self.cache_file)
         self._extractor = None
         if fetch_now:
-            self._get_tld_extractor()
+            self._get_tld_extractor(proxies)
 
     @property
     def tlds(self):
         return self._get_tld_extractor().tlds
 
-    def _get_tld_extractor(self):
+    def _get_tld_extractor(self, proxies=None):
         '''Get or compute this object's TLDExtractor. Looks up the TLDExtractor
         in roughly the following order, based on the settings passed to
         __init__:
@@ -295,7 +295,8 @@ class TLDExtract(object):
         elif self.suffix_list_urls:
             raw_suffix_list_data = find_first_response(
                 self.suffix_list_urls,
-                self.cache_fetch_timeout
+                self.cache_fetch_timeout,
+                proxies=proxies
             )
             tlds = get_tlds_from_raw_suffix_list_data(
                 raw_suffix_list_data,

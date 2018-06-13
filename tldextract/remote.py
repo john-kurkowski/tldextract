@@ -24,7 +24,7 @@ SCHEME_RE = re.compile(r'^([' + scheme_chars + ']+:)?//')
 LOG = logging.getLogger('tldextract')
 
 
-def find_first_response(urls, cache_fetch_timeout=None):
+def find_first_response(urls, cache_fetch_timeout=None, proxies=None):
     """ Decode the first successfully fetched URL, from UTF-8 encoding to
     Python unicode.
     """
@@ -33,7 +33,7 @@ def find_first_response(urls, cache_fetch_timeout=None):
 
         for url in urls:
             try:
-                text = session.get(url, timeout=cache_fetch_timeout).text
+                text = session.get(url, timeout=cache_fetch_timeout, proxies=proxies).text
             except requests.exceptions.RequestException:
                 LOG.exception(
                     'Exception reading Public Suffix List url %s',

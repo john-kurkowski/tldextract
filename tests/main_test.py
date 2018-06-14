@@ -243,10 +243,10 @@ def test_update_proxies(mocker):
     # Without proxies
     extract_no_cache.update(fetch_now=True, proxies={})
     assert mock_request.call_count == 1
-    assert mock_request.call_args.proxies == {}
+    assert mock_request.call_args[1]['proxies'] == {}
 
     # With proxies
     proxies = {'https': 'https://www.example.proxy:123'}
     extract_no_cache.update(fetch_now=True, proxies=proxies)
     assert mock_request.call_count == 2
-    assert mock_request.call_args.proxies == proxies
+    assert mock_request.call_args[1]['proxies'] == proxies

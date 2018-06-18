@@ -25,12 +25,9 @@ By default, this package supports the public ICANN TLDs and their exceptions.
 You can optionally support the Public Suffix List's private domains as well.
 """
 
-import sys
 from setuptools import setup
 
 INSTALL_REQUIRES = ["setuptools", "idna", "requests>=2.1.0", "requests-file>=1.4"]
-if (2, 7) > sys.version_info:
-    INSTALL_REQUIRES.append("argparse>=1.2.1")
 
 setup(
     name="tldextract",
@@ -54,7 +51,6 @@ setup(
         "Topic :: Utilities",
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.4",

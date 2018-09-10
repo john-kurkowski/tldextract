@@ -4,6 +4,7 @@ import json
 import os.path
 from hashlib import md5
 
+from filelock import FileLock
 from six import wraps
 
 
@@ -22,12 +23,16 @@ def cache_to_jsonfile(path, ignore_kwargs=()):
 
             cache_path = path + '/' + key + '.json'
             cache_path = cache_path.replace('//', '/')
+            lock_path = cache_path + '.lock'
 
-            if not os.path.isfile(cache_path):
-                result = func(*args, **kwargs)
-                make_dir(cache_path)
-                with open(cache_path, 'w') as cache_file:
-                    json.dump(result, cache_file)
+            make_dir(cache_path)
+
+            # locking used to prevent concurrent writes, or reads of a partially written file
+            with FileLock(lock_path, timeout=20):
+                if not os.path.isfile(cache_path):
+                    result = func(*args, **kwargs)
+                    with open(cache_path, 'w') as cache_file:
+                        json.dump(result, cache_file)
 
             with open(cache_path) as cache_file:
                 return json.load(cache_file)

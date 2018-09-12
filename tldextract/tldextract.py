@@ -92,7 +92,7 @@ LOG = logging.getLogger("tldextract")
 
 CACHE_FILE_DEFAULT = os.path.join(os.path.dirname(__file__), '.tld_set')
 CACHE_FILE = os.path.expanduser(os.environ.get("TLDEXTRACT_CACHE", CACHE_FILE_DEFAULT))
-CACHE_TIMEOUT = os.environ.get('TLDEXTRACT_CACHE_TIMEOUT')
+CACHE_TIMEOUT = os.environ.get('TLDEXTRACT_CACHE_TIMEOUT', '1')
 
 PUBLIC_SUFFIX_LIST_URLS = (
     'https://publicsuffix.org/list/public_suffix_list.dat',

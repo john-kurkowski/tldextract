@@ -26,7 +26,13 @@ You can optionally support the Public Suffix List's private domains as well.
 """
 
 import re
+import sys
 from setuptools import setup
+
+if sys.version_info < (2, 7):
+    raise RuntimeError("Python 2.6 is EOL and no longer supported. "
+                       "Please upgrade your Python or use an older "
+                       "version of tldextract.")
 
 # I don't want to learn reStructuredText right now, so strip Markdown links
 # that make pip barf.

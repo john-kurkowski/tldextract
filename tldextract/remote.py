@@ -19,6 +19,9 @@ else:  # pragma: no cover
 
 
 IP_RE = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')  # pylint: disable=line-too-long
+
+PUNY_RE = re.compile(r'^xn--', re.IGNORECASE)
+
 SCHEME_RE = re.compile(r'^([' + scheme_chars + ']+:)?//')
 
 LOG = logging.getLogger('tldextract')

@@ -77,8 +77,9 @@ except ImportError:
 
 from .remote import find_first_response
 from .remote import looks_like_ip
-from .remote import SCHEME_RE
 from .remote import IP_RE
+from .remote import PUNY_RE
+from .remote import SCHEME_RE
 
 # pylint: disable=invalid-name,undefined-variable
 try:
@@ -245,7 +246,7 @@ class TLDExtract(object):
         labels = netloc.split(".")
 
         def decode_punycode(label):
-            if label.startswith("xn--"):
+            if PUNY_RE.match(label):
                 try:
                     return idna.decode(label.encode('ascii'))
                 except UnicodeError:

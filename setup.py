@@ -37,7 +37,7 @@ INSTALL_REQUIRES = ["setuptools", "idna", "requests>=2.1.0", "requests-file>=1.4
 
 setup(
     name="tldextract",
-    version="2.2.0",
+    version="2.2.1",
     author="John Kurkowski",
     author_email="john.kurkowski@gmail.com",
     description=("Accurately separate the TLD from the registered domain and "

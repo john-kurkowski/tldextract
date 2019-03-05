@@ -3,6 +3,13 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 2.2.1 (2019-03-05)
+
+* Bugfixes
+    * Ignore case on punycode prefix check ([#133](https://github.com/john-kurkowski/tldextract/issues/133))
+    * Drop support for EOL Python 2.6 ([#152](https://github.com/john-kurkowski/tldextract/issues/152))
+    * Improve sundry doc and README bits
+
 ## 2.2.0 (2017-10-26)
 
 * Features

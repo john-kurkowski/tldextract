@@ -51,29 +51,15 @@ or suffix were found:
 
 
 import collections
-from contextlib import closing
 import errno
 from functools import wraps
 import json
 import logging
 import os
+import pkgutil
 import re
 
 import idna
-
-try:
-    import pkg_resources
-except ImportError:
-    class pkg_resources(object):  # pylint: disable=invalid-name
-
-        """Fake pkg_resources interface which falls back to getting resources
-        inside `tldextract`'s directory.
-        """
-        @classmethod
-        def resource_stream(cls, _, resource_name):
-            moddir = os.path.dirname(__file__)
-            path = os.path.join(moddir, resource_name)
-            return open(path)
 
 from .remote import find_first_response
 from .remote import looks_like_ip
@@ -341,20 +327,16 @@ class TLDExtract(object):
 
     @staticmethod
     def _get_snapshot_tld_extractor():
-        snapshot_stream = pkg_resources.resource_stream(__name__, '.tld_set_snapshot')
-        with closing(snapshot_stream) as snapshot_file:
-            return json.loads(snapshot_file.read().decode('utf-8'))
+        snapshot_data = pkgutil.get_data(__name__, '.tld_set_snapshot')
+        return json.loads(snapshot_data.decode('utf-8'))
 
     def _cache_tlds(self, tlds):
         '''Logs a diff of the new TLDs and caches them on disk, according to
         settings passed to __init__.'''
         if LOG.isEnabledFor(logging.DEBUG):
             import difflib
-            snapshot_stream = pkg_resources.resource_stream(__name__, '.tld_set_snapshot')
-            with closing(snapshot_stream) as snapshot_file:
-                snapshot = sorted(
-                    json.loads(snapshot_file.read().decode('utf-8'))
-                )
+            snapshot_data = pkgutil.get_data(__name__, '.tld_set_snapshot')
+            snapshot = sorted(json.loads(snapshot_data.decode('utf-8')))
             new = sorted(tlds)
             LOG.debug('computed TLD diff:\n' + '\n'.join(difflib.unified_diff(
                 snapshot,

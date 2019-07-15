@@ -36,14 +36,15 @@ def find_first_response(urls, cache_fetch_timeout=None):
 
         for url in urls:
             try:
-                text = session.get(url, timeout=cache_fetch_timeout).text
+                resp = session.get(url, timeout=cache_fetch_timeout)
+                resp.raise_for_status()
             except requests.exceptions.RequestException:
                 LOG.exception(
                     'Exception reading Public Suffix List url %s',
                     url
                 )
             else:
-                return _decode_utf8(text)
+                return _decode_utf8(resp.text)
 
     LOG.error(
         'No Public Suffix List found. Consider using a mirror or constructing '

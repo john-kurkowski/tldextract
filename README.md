@@ -189,7 +189,8 @@ extract = tldextract.TLDExtract(
     suffix_list_urls=["http://foo.bar.baz"],
     # Recommended: Specify your own cache file, to minimize ambiguities about where
     # tldextract is getting its data, or cached data, from.
-    cache_file='/path/to/your/cache/file')
+    cache_file='/path/to/your/cache/file',
+    fallback_to_snapshot=False)
 ```
 
 The above snippet will fetch from the URL *you* specified, upon first need to download the
@@ -200,7 +201,8 @@ If you want to use input data from your local filesystem, just use the `file://`
 ```python
 extract = tldextract.TLDExtract(
     suffix_list_urls=["file://absolute/path/to/your/local/suffix/list/file"],
-    cache_file='/path/to/your/cache/file')
+    cache_file='/path/to/your/cache/file',
+    fallback_to_snapshot=False)
 ```
 
 Use an absolute path when specifying the `suffix_list_urls` keyword argument.

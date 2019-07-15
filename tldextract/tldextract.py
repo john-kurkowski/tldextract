@@ -177,9 +177,8 @@ class TLDExtract(object):
         requests, set this to something falsy.
 
         The default list of URLs point to the latest version of the Mozilla Public Suffix List and
-        its mirror, but any similar document could be specified.
-
-        Local files can be specified by using the `file://` protocol. (See `urllib2` documentation.)
+        its mirror, but any similar document could be specified. Local files can be specified by
+        using the `file://` protocol. (See `urllib2` documentation.)
 
         If there is no `cache_file` loaded and no data is found from the `suffix_list_urls`,
         the module will fall back to the included TLD set snapshot. If you do not want

@@ -33,7 +33,7 @@ if sys.version_info < (2, 7):
                        "Please upgrade your Python or use an older "
                        "version of tldextract.")
 
-INSTALL_REQUIRES = ["setuptools", "idna", "requests>=2.1.0", "requests-file>=1.4"]
+INSTALL_REQUIRES = ["setuptools", "requests>=2.1.0", "requests-file>=1.4"]
 
 setup(
     name="tldextract",

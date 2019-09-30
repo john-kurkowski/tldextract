@@ -229,17 +229,7 @@ class TLDExtract(object):
 
         labels = netloc.split(".")
 
-        def decode_punycode(label):
-            lowered = label.lower()
-            looks_like_puny = lowered.startswith('xn--')
-            if looks_like_puny:
-                try:
-                    return idna.decode(label.encode('ascii')).lower()
-                except UnicodeError:
-                    pass
-            return lowered
-
-        translations = [decode_punycode(label) for label in labels]
+        translations = [_decode_punycode(label) for label in labels]
         suffix_index = self._get_tld_extractor().suffix_index(translations)
 
         registered_domain = ".".join(labels[:suffix_index])
@@ -401,3 +391,14 @@ class _PublicSuffixListTLDExtractor(object):
                 return i
 
         return length
+
+
+def _decode_punycode(label):
+    lowered = label.lower()
+    looks_like_puny = lowered.startswith('xn--')
+    if looks_like_puny:
+        try:
+            return idna.decode(label.encode('ascii')).lower()
+        except UnicodeError:
+            pass
+    return lowered

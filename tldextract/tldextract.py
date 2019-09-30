@@ -64,7 +64,6 @@ import idna
 from .remote import find_first_response
 from .remote import looks_like_ip
 from .remote import IP_RE
-from .remote import PUNY_RE
 from .remote import SCHEME_RE
 
 # pylint: disable=invalid-name,undefined-variable
@@ -231,14 +230,16 @@ class TLDExtract(object):
         labels = netloc.split(".")
 
         def decode_punycode(label):
-            if PUNY_RE.match(label):
+            lowered = label.lower()
+            looks_like_puny = lowered.startswith('xn--')
+            if looks_like_puny:
                 try:
-                    return idna.decode(label.encode('ascii'))
+                    return idna.decode(label.encode('ascii')).lower()
                 except UnicodeError:
                     pass
-            return label
+            return lowered
 
-        translations = [decode_punycode(label).lower() for label in labels]
+        translations = [decode_punycode(label) for label in labels]
         suffix_index = self._get_tld_extractor().suffix_index(translations)
 
         registered_domain = ".".join(labels[:suffix_index])
@@ -385,7 +386,8 @@ class _PublicSuffixListTLDExtractor(object):
         """Returns the index of the first suffix label.
         Returns len(spl) if no suffix is found
         """
-        for i in range(len(lower_spl)):
+        length = len(lower_spl)
+        for i in range(length):
             maybe_tld = '.'.join(lower_spl[i:])
             exception_tld = '!' + maybe_tld
             if exception_tld in self.tlds:
@@ -398,4 +400,4 @@ class _PublicSuffixListTLDExtractor(object):
             if wildcard_tld in self.tlds:
                 return i
 
-        return len(lower_spl)
+        return length

@@ -71,6 +71,11 @@ def test_odd_but_possible():
     assert_extract('http://www.com', ('www.com', '', 'www', 'com'))
 
 
+def test_suffix():
+    assert_extract('com', ('', '', '', 'com'))
+    assert_extract('co.uk', ('', '', '', 'co.uk'))
+
+
 def test_local_host():
     assert_extract('http://internalunlikelyhostname/',
                    ('', '', 'internalunlikelyhostname', ''))

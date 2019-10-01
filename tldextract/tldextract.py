@@ -232,13 +232,12 @@ class TLDExtract(object):
         translations = [_decode_punycode(label) for label in labels]
         suffix_index = self._get_tld_extractor().suffix_index(translations)
 
-        registered_domain = ".".join(labels[:suffix_index])
         suffix = ".".join(labels[suffix_index:])
-
         if not suffix and netloc and looks_like_ip(netloc):
             return ExtractResult('', netloc, '')
 
-        subdomain, _, domain = registered_domain.rpartition('.')
+        subdomain = ".".join(labels[:suffix_index - 1]) if suffix_index else ""
+        domain = labels[suffix_index - 1] if suffix_index else ""
         return ExtractResult(subdomain, domain, suffix)
 
     def update(self, fetch_now=False):

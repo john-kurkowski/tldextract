@@ -22,6 +22,7 @@ extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
 # pylint: enable=invalid-name
 
 
+# pylint: disable=missing-docstring
 def assert_extract(
         url,
         expected_domain_data,
@@ -44,6 +45,7 @@ def assert_extract(
         assert expected_domain == ext.domain
         assert expected_tld == ext.suffix
         assert expected_ip_data == ext.ipv4
+# pylint: enable=missing-docstring
 
 
 def test_american():

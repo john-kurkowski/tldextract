@@ -260,6 +260,8 @@ class TLDExtract(object):
         2. Local system cache file
         3. Remote PSL, over HTTP
         4. Bundled PSL snapshot file'''
+        # pylint: disable=no-else-return
+
         if self._extractor:
             return self._extractor
 
@@ -298,7 +300,7 @@ class TLDExtract(object):
         error, or if this object is not set to use the cache
         file.'''
         if not self.cache_file:
-            return
+            return None
 
         try:
             with open(self.cache_file) as cache_file:
@@ -328,7 +330,7 @@ class TLDExtract(object):
             snapshot_data = pkgutil.get_data(__name__, '.tld_set_snapshot')
             snapshot = sorted(json.loads(snapshot_data.decode('utf-8')))
             new = sorted(tlds)
-            LOG.debug('computed TLD diff:\n' + '\n'.join(difflib.unified_diff(
+            LOG.debug('computed TLD diff:\n%s', '\n'.join(difflib.unified_diff(
                 snapshot,
                 new,
                 fromfile=".tld_set_snapshot",
@@ -367,6 +369,9 @@ def get_tlds_from_raw_suffix_list_data(suffix_list_source, include_psl_private_d
 
 
 class _PublicSuffixListTLDExtractor(object):
+    """Wrapper around this project's main algo for PSL
+    lookups.
+    """
 
     def __init__(self, tlds):
         self.tlds = frozenset(tlds)

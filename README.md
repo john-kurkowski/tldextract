@@ -265,5 +265,5 @@ Run all tests against a specific Python environment configuration:
 
 ```zsh
 tox -l
-tox -e py35-requests-2.9.1
+tox -e py37
 ```

@@ -58,8 +58,7 @@ def _decode_utf8(text):
     """
     if not isinstance(text, unicode):
         return unicode(text, 'utf-8')
-    else:
-        return text
+    return text
 
 
 def looks_like_ip(maybe_ip):

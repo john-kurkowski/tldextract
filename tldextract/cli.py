@@ -2,6 +2,7 @@
 
 
 import logging
+import sys
 
 try:
     import pkg_resources
@@ -50,7 +51,7 @@ def main():
         tld_extract.update(True)
     elif not args.input:
         parser.print_usage()
-        exit(1)
+        sys.exit(1)
         return
 
     for i in args.input:

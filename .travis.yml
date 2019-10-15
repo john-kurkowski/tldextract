@@ -3,18 +3,20 @@ language: python
 matrix:
   include:
     - python: 2.7
-      env: TOXENV=py27-requests-current
-    - python: 3.4
-      env: TOXENV=py34-requests-current
+      env: TOXENV=py27
     - python: 3.5
-      env: TOXENV=py35-requests-current
-    - env: TOXENV=py36-requests-current
-    - env: TOXENV=py36-requests-2.1.0
-    - env: TOXENV=py36-requests-2.8.1
-    - env: TOXENV=py36-requests-2.9.1
+      env: TOXENV=py35
+    - python: 3.6
+      env: TOXENV=py36
+    - python: 3.7
+      env: TOXENV=py37
+    - python: 3.8-dev
+      env: TOXENV=py38
     - python: pypy
-      env: TOXENV=pypy-requests-current
+      env: TOXENV=pypy
+    - python: pypy3
+      env: TOXENV=pypy3
     - env: TOXENV=codestyle
-python: 3.6
+python: 3.7
 install: pip install tox
 script: tox

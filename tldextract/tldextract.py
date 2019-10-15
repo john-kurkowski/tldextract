@@ -368,8 +368,10 @@ def get_tlds_from_raw_suffix_list_data(suffix_list_source, include_psl_private_d
     return tlds
 
 
-# pylint: disable=missing-docstring
 class _PublicSuffixListTLDExtractor(object):
+    """Wrapper around this project's main algo for PSL
+    lookups.
+    """
 
     def __init__(self, tlds):
         self.tlds = frozenset(tlds)
@@ -393,8 +395,6 @@ class _PublicSuffixListTLDExtractor(object):
                 return i
 
         return length
-
-# pylint: enable=missing-docstring
 
 
 def _decode_punycode(label):

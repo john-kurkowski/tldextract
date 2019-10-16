@@ -3,6 +3,21 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 2.2.2 (2019-10-15)
+
+* Bugfixes
+    * Catch file not found
+    * Use pkgutil instead of pkg_resources ([#163](https://github.com/john-kurkowski/tldextract/pull/163))
+    * Performance: avoid recomputes, a regex, and a partition
+* Misc.
+    * Update LICENSE from GitHub template
+    * Fix warning about literal comparison
+    * Modernize testing ([#177](https://github.com/john-kurkowski/tldextract/issues/177))
+        * Use the latest pylint that works in Python 2
+        * Appease pylint with the new rules
+        * Support Python 3.8-dev
+        * Drop support for EOL Python 3.4
+
 ## 2.2.1 (2019-03-05)
 
 * Bugfixes

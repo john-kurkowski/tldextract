@@ -28,10 +28,14 @@ You can optionally support the Public Suffix List's private domains as well.
 import sys
 from setuptools import setup
 
-if sys.version_info < (2, 7):
-    raise RuntimeError("Python 2.6 is EOL and no longer supported. "
-                       "Please upgrade your Python or use an older "
-                       "version of tldextract.")
+if sys.version_info < (3, 5) and not (
+    sys.version_info[0] == 2 and sys.version_info[1] == 7
+):
+    raise RuntimeError(
+        "Python %s.%s is EOL and no longer supported. "
+        "Please upgrade your Python or use an older "
+        "version of tldextract." % (sys.version_info[0], sys.version_info[1])
+    )
 
 INSTALL_REQUIRES = ["setuptools", "idna", "requests>=2.1.0", "requests-file>=1.4"]
 
@@ -40,17 +44,19 @@ setup(
     version="2.2.2",
     author="John Kurkowski",
     author_email="john.kurkowski@gmail.com",
-    description=("Accurately separate the TLD from the registered domain and "
-                 "subdomains of a URL, using the Public Suffix List. By "
-                 "default, this includes the public ICANN TLDs and their "
-                 "exceptions. You can optionally support the Public Suffix "
-                 "List's private domains as well."),
+    description=(
+        "Accurately separate the TLD from the registered domain and "
+        "subdomains of a URL, using the Public Suffix List. By "
+        "default, this includes the public ICANN TLDs and their "
+        "exceptions. You can optionally support the Public Suffix "
+        "List's private domains as well."
+    ),
     license="BSD License",
     keywords="tld domain subdomain url parse extract urlparse urlsplit public suffix list",
     url="https://github.com/john-kurkowski/tldextract",
-    packages=['tldextract'],
+    packages=["tldextract"],
     include_package_data=True,
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
+    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
     long_description=__doc__,
     long_description_content_type="text/markdown",
     classifiers=[
@@ -65,9 +71,6 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    entry_points={
-        'console_scripts': [
-            'tldextract = tldextract.cli:main', ]
-    },
+    entry_points={"console_scripts": ["tldextract = tldextract.cli:main",]},
     install_requires=INSTALL_REQUIRES,
 )

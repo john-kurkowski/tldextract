@@ -4,13 +4,7 @@
 import logging
 import sys
 
-try:
-    import pkg_resources
-    __version__ = pkg_resources.get_distribution('tldextract').version  # pylint: disable=no-member
-except ImportError:
-    __version__ = '(local)'
-except pkg_resources.DistributionNotFound:
-    __version__ = '(local)'
+__version__ = "2.2.2"
 
 from .tldextract import TLDExtract
 

@@ -37,7 +37,7 @@ if sys.version_info < (3, 5) and not (
         "version of tldextract." % (sys.version_info[0], sys.version_info[1])
     )
 
-INSTALL_REQUIRES = ["setuptools", "idna", "requests>=2.1.0", "requests-file>=1.4"]
+INSTALL_REQUIRES = ["setuptools", "idna<2.9", "requests>=2.1.0", "requests-file>=1.4"]
 
 setup(
     name="tldextract",

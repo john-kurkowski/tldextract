@@ -104,13 +104,20 @@ def test_looks_like_ip():
     assert_extract(u'1\xe9', ('', '', u'1\xe9', ''))
 
 
+def test_upper_case_folding():
+    assert_extract('http://www.GOOGLE.com',
+                   ('www.google.com', 'www', 'google', 'com'))
+    assert_extract("http://www.TheRegister.Co.Uk",
+                   ("www.theregister.co.uk", "www", "theregister", "co.uk"))
+
+
 def test_punycode():
     assert_extract('http://xn--h1alffa9f.xn--p1ai',
                    ('xn--h1alffa9f.xn--p1ai', '', 'xn--h1alffa9f', 'xn--p1ai'))
     assert_extract('http://xN--h1alffa9f.xn--p1ai',
-                   ('xN--h1alffa9f.xn--p1ai', '', 'xN--h1alffa9f', 'xn--p1ai'))
+                   ('xn--h1alffa9f.xn--p1ai', '', 'xn--h1alffa9f', 'xn--p1ai'))
     assert_extract('http://XN--h1alffa9f.xn--p1ai',
-                   ('XN--h1alffa9f.xn--p1ai', '', 'XN--h1alffa9f', 'xn--p1ai'))
+                   ('xn--h1alffa9f.xn--p1ai', '', 'xn--h1alffa9f', 'xn--p1ai'))
     # Entries that might generate UnicodeError exception
     # This subdomain generates UnicodeError 'IDNA does not round-trip'
     assert_extract('xn--tub-1m9d15sfkkhsifsbqygyujjrw602gk4li5qqk98aca0w.google.com',

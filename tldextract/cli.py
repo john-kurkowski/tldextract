@@ -2,7 +2,10 @@
 
 
 import logging
+import os.path
 import sys
+
+import pathlib
 
 try:
     import pkg_resources
@@ -36,6 +39,8 @@ def main():
 
     parser.add_argument('-u', '--update', default=False, action='store_true',
                         help='force fetch the latest TLD definitions')
+    parser.add_argument('--update_source', action='append', required=False,
+                        help='use an alternate URL for TLD definitions. Can be repeated for multiple sources')
     parser.add_argument('-c', '--cache_file',
                         help='use an alternate TLD definition file')
     parser.add_argument('-p', '--private_domains', default=False, action='store_true',
@@ -46,6 +51,17 @@ def main():
 
     if args.cache_file:
         tld_extract.cache_file = args.cache_file
+
+    if args.update_source is not None:
+        suffix_list_urls = []
+        for source in args.update_source:
+            if os.path.isfile(source):
+                as_path_uri = pathlib.Path(os.path.abspath(source)).as_uri()
+                suffix_list_urls.append(as_path_uri)
+            else:
+                suffix_list_urls.append(source)
+
+        tld_extract.suffix_list_urls = suffix_list_urls
 
     if args.update:
         tld_extract.update(True)

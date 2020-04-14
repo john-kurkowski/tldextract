@@ -208,6 +208,15 @@ extract = tldextract.TLDExtract(
 Use an absolute path when specifying the `suffix_list_urls` keyword argument.
 `os.path` is your friend.
 
+The command line update command can be used with a url or local file you specify:
+
+```zsh
+tldextract --update --update_source "http://foo.bar.baz"
+```
+
+This could be useful in production when you don't want the delay associated with updating the suffix
+list on first use, or if you are behind a complex firewall that prevents a simple update from working.
+
 ### FAQ
 
 #### Can you add suffix \_\_\_\_? Can you make an exception for domain \_\_\_\_?

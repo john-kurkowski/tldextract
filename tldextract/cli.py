@@ -40,7 +40,7 @@ def main():
     parser.add_argument('-u', '--update', default=False, action='store_true',
                         help='force fetch the latest TLD definitions')
     parser.add_argument('--update_source', action='append', required=False,
-                        help='use an alternate URL for TLD definitions. Can be repeated for multiple sources')
+                        help='use an alternate URL or local file for TLD definitions.')
     parser.add_argument('-c', '--cache_file',
                         help='use an alternate TLD definition file')
     parser.add_argument('-p', '--private_domains', default=False, action='store_true',

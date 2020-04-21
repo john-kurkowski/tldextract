@@ -403,6 +403,6 @@ def _decode_punycode(label):
     if looks_like_puny:
         try:
             return idna.decode(label.encode('ascii')).lower()
-        except UnicodeError:
+        except (UnicodeError, IndexError):
             pass
     return lowered

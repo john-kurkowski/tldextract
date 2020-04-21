@@ -127,6 +127,9 @@ def test_invalid_puny_with_puny():
     assert_extract('http://xn--zckzap6140b352by.blog.so-net.xn--wcvs22d.hk',
                    ('xn--zckzap6140b352by.blog.so-net.xn--wcvs22d.hk',
                     'xn--zckzap6140b352by.blog', 'so-net', 'xn--wcvs22d.hk'))
+    assert_extract('http://xn--&.so-net.com',
+                   ('xn--&.so-net.com',
+                    'xn--&', 'so-net', 'com'))
 
 
 def test_puny_with_non_puny():

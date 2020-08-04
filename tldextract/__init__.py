@@ -2,4 +2,4 @@
 
 from .tldextract import extract, TLDExtract
 
-__version__ = "2.2.2"
+from ._version import version as __version__

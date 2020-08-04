@@ -4,9 +4,8 @@
 import logging
 import sys
 
-__version__ = "2.2.2"
-
 from .tldextract import TLDExtract
+from ._version import version as __version__
 
 try:
     unicode
@@ -24,7 +23,7 @@ def main():
         prog='tldextract',
         description='Parse hostname from a url or fqdn')
 
-    parser.add_argument('--version', action='version', version='%(prog)s ' + __version__)  # pylint: disable=no-member
+    parser.add_argument('--version', action='version', version='%(prog)s ' + __version__)
     parser.add_argument('input', metavar='fqdn|url',
                         type=unicode, nargs='*', help='fqdn or url')
 

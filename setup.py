@@ -42,7 +42,6 @@ INSTALL_REQUIRES = ["idna", "requests>=2.1.0", "requests-file>=1.4"]
 
 setup(
     name="tldextract",
-    version="2.2.2",
     author="John Kurkowski",
     author_email="john.kurkowski@gmail.com",
     description=(
@@ -73,5 +72,7 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     entry_points={"console_scripts": ["tldextract = tldextract.cli:main",]},
+    setup_requires=["setuptools_scm"],
+    use_scm_version={"write_to": "tldextract/_version.py",},
     install_requires=INSTALL_REQUIRES,
 )

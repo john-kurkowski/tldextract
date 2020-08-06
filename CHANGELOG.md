@@ -3,6 +3,15 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 2.2.3 (2020-08-05)
+
+* Bugfixes
+    * Fix concurrent access to cache file when using tldextract in multiple threads ([#146](https://github.com/john-kurkowski/tldextract/pull/146))
+    * Relocate version number, to avoid costly imports ([#187](https://github.com/john-kurkowski/tldextract/pull/187))
+    * Catch `IndexError` caused by upstream punycode bug ([#200](https://github.com/john-kurkowski/tldextract/pull/200))
+    * Drop support for EOL Python 3.4 ([#186](https://github.com/john-kurkowski/tldextract/pull/186))
+    * Explain warning better
+
 ## 2.2.2 (2019-10-15)
 
 * Bugfixes
@@ -16,7 +25,6 @@ After upgrading, update your cache file by deleting it or via `tldextract
         * Use the latest pylint that works in Python 2
         * Appease pylint with the new rules
         * Support Python 3.8-dev
-        * Drop support for EOL Python 3.4
 
 ## 2.2.1 (2019-03-05)
 

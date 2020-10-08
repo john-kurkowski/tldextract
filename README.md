@@ -114,7 +114,7 @@ when I haven't kept this code up to date.)
 
 To avoid this fetch or control the cache's location, use your own extract
 callable by setting TLDEXTRACT_CACHE environment variable or by setting the
-cache_file path in TLDExtract initialization.
+cache_dir path in TLDExtract initialization.
 
 ```python
 # extract callable that falls back to the included TLD snapshot, no live HTTP fetching
@@ -122,11 +122,11 @@ no_fetch_extract = tldextract.TLDExtract(suffix_list_urls=None)
 no_fetch_extract('http://www.google.com')
 
 # extract callable that reads/writes the updated TLD set to a different path
-custom_cache_extract = tldextract.TLDExtract(cache_file='/path/to/your/cache/file')
+custom_cache_extract = tldextract.TLDExtract(cache_dir='/path/to/your/cache/')
 custom_cache_extract('http://www.google.com')
 
 # extract callable that doesn't use caching
-no_cache_extract = tldextract.TLDExtract(cache_file=False)
+no_cache_extract = tldextract.TLDExtract(cache_dir=False)
 no_cache_extract('http://www.google.com')
 ```
 
@@ -167,10 +167,15 @@ ExtractResult(subdomain='waiterrant', domain='blogspot', suffix='com')
 ```
 
 The following overrides this.
-
 ```python
->>> extract = tldextract.TLDExtract(include_psl_private_domains=True)
->>> extract.update() # necessary until #66 is fixed
+>>> extract = tldextract.TLDExtract()
+>>> extract('waiterrant.blogspot.com', include_psl_private_domains=True)
+ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com')
+```
+
+or to change the default for all extract calls,
+```python
+>>> extract = tldextract.TLDExtract( include_psl_private_domains=True)
 >>> extract('waiterrant.blogspot.com')
 ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com')
 ```
@@ -189,19 +194,19 @@ extract = tldextract.TLDExtract(
     suffix_list_urls=["http://foo.bar.baz"],
     # Recommended: Specify your own cache file, to minimize ambiguities about where
     # tldextract is getting its data, or cached data, from.
-    cache_file='/path/to/your/cache/file',
+    cache_dir='/path/to/your/cache/',
     fallback_to_snapshot=False)
 ```
 
 The above snippet will fetch from the URL *you* specified, upon first need to download the
-suffix list (i.e. if the cache_file doesn't exist).
+suffix list (i.e. if the cached version doesn't exist).
 
 If you want to use input data from your local filesystem, just use the `file://` protocol:
 
 ```python
 extract = tldextract.TLDExtract(
     suffix_list_urls=["file://absolute/path/to/your/local/suffix/list/file"],
-    cache_file='/path/to/your/cache/file',
+    cache_dir='/path/to/your/cache/',
     fallback_to_snapshot=False)
 ```
 

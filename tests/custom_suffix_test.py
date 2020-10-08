@@ -3,9 +3,7 @@
 import os
 
 import tldextract
-
-from .helpers import temporary_file
-
+from .helpers import temporary_dir
 
 FAKE_SUFFIX_LIST_URL = "file://" + os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -15,19 +13,29 @@ EXTRA_SUFFIXES = ['foo1', 'bar1', 'baz1']
 
 # pylint: disable=invalid-name
 extract_using_fake_suffix_list = tldextract.TLDExtract(
-    cache_file=temporary_file(),
+    cache_dir=temporary_dir(),
     suffix_list_urls=[FAKE_SUFFIX_LIST_URL]
 )
 extract_using_fake_suffix_list_no_cache = tldextract.TLDExtract(
-    cache_file=None,
+    cache_dir=None,
     suffix_list_urls=[FAKE_SUFFIX_LIST_URL]
 )
 extract_using_extra_suffixes = tldextract.TLDExtract(
-    cache_file=None,
+    cache_dir=None,
     suffix_list_urls=[FAKE_SUFFIX_LIST_URL],
     extra_suffixes=EXTRA_SUFFIXES
 )
 # pylint: enable=invalid-name
+
+
+def test_private_extraction():
+    tld = tldextract.TLDExtract(
+        cache_dir=temporary_dir(),
+        suffix_list_urls=[]
+    )
+
+    assert tld("foo.blogspot.com") == ('foo', 'blogspot', 'com')
+    assert tld("foo.blogspot.com", include_psl_private_domains=True) == ('', 'foo', 'blogspot.com')
 
 
 def test_suffix_which_is_not_in_custom_list():

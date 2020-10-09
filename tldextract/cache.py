@@ -13,10 +13,6 @@ try:
 except NameError:
     unicode = str  # pylint: disable=invalid-name,redefined-builtin
 
-
-# pylint: enable=import-error,invalid-name,no-name-in-module,redefined-builtin
-
-
 LOG = logging.getLogger(__name__)
 
 
@@ -87,16 +83,15 @@ class DiskCache(object):
                     os.unlink(os.path.join(root, filename))
 
     def _key_to_cachefile_path(self, namespace, key):
-        namespace_path = self.cache_dir + '/' + namespace + '/'
-        namespace_path = namespace_path.replace("//", "/")
+        namespace_path = os.path.join(self.cache_dir, namespace)
         hashed_key = _make_cache_key(key)
 
-        cache_path = namespace_path + '/' + hashed_key + self.file_ext
+        cache_path = os.path.join(namespace_path, hashed_key + self.file_ext)
 
         _make_dir(cache_path)
         return cache_path
 
-    def fetch_url(self, session, url, timeout):
+    def cached_fetch_url(self, session, url, timeout):
         """Get a url but cache the response"""
         try:
             text = self.get(namespace="urls", key=url)

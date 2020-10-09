@@ -31,7 +31,7 @@ def find_first_response(cache, urls, cache_fetch_timeout=None):
 
         for url in urls:
             try:
-                return cache.fetch_url(session=session, url=url, timeout=cache_fetch_timeout)
+                return cache.cached_fetch_url(session=session, url=url, timeout=cache_fetch_timeout)
             except requests.exceptions.RequestException:
                 LOG.exception(
                     'Exception reading Public Suffix List url %s',

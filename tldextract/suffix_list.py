@@ -16,6 +16,7 @@ if sys.version_info >= (3,):  # pragma: no cover
 LOG = logging.getLogger('tldextract')
 
 PUBLIC_SUFFIX_RE = re.compile(r'^(?P<suffix>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
+PUBLIC_PRIVATE_SUFFIX_SEPARATOR = '// ===BEGIN PRIVATE DOMAINS==='
 
 
 class SuffixListNotFound(LookupError):
@@ -44,7 +45,7 @@ def find_first_response(cache, urls, cache_fetch_timeout=None):
 
 
 def extract_tlds_from_suffix_list(suffix_list_text):
-    public_text, _, private_text = suffix_list_text.partition('// ===BEGIN PRIVATE DOMAINS===')
+    public_text, _, private_text = suffix_list_text.partition(PUBLIC_PRIVATE_SUFFIX_SEPARATOR)
 
     public_tlds = [m.group('suffix') for m in PUBLIC_SUFFIX_RE.finditer(public_text)]
     private_tlds = [m.group('suffix') for m in PUBLIC_SUFFIX_RE.finditer(private_text)]
@@ -53,20 +54,32 @@ def extract_tlds_from_suffix_list(suffix_list_text):
 
 def get_suffix_lists(cache, urls, cache_fetch_timeout, fallback_to_snapshot):
     """Fetch, parse, and cache the suffix lists"""
-    try:
-        public_tlds, private_tlds = cache.get(namespace="publicsuffix.org-tlds", key=urls)
-    except KeyError:
-        try:
-            text = find_first_response(cache, urls, cache_fetch_timeout=cache_fetch_timeout)
-        except SuffixListNotFound as exc:
-            if fallback_to_snapshot:
-                text = pkgutil.get_data('tldextract', '.tld_set_snapshot')
-                if not isinstance(text, unicode):
-                    text = unicode(text, 'utf-8')
-            else:
-                raise exc
+    return cache.run_and_cache(
+        func=_get_suffix_lists,
+        namespace="publicsuffix.org-tlds",
+        kwargs={
+            "cache": cache,
+            "urls": urls,
+            "cache_fetch_timeout": cache_fetch_timeout,
+            "fallback_to_snapshot": fallback_to_snapshot,
+        },
+        hashed_argnames=["urls", "fallback_to_snapshot"]
+    )
 
-        public_tlds, private_tlds = extract_tlds_from_suffix_list(text)
-        cache.set(namespace="publicsuffix.org-tlds", key=urls, value=(public_tlds, private_tlds))
+
+def _get_suffix_lists(cache, urls, cache_fetch_timeout, fallback_to_snapshot):
+    """Fetch, parse, and cache the suffix lists"""
+
+    try:
+        text = find_first_response(cache, urls, cache_fetch_timeout=cache_fetch_timeout)
+    except SuffixListNotFound as exc:
+        if fallback_to_snapshot:
+            text = pkgutil.get_data('tldextract', '.tld_set_snapshot')
+            if not isinstance(text, unicode):
+                text = unicode(text, 'utf-8')
+        else:
+            raise exc
+
+    public_tlds, private_tlds = extract_tlds_from_suffix_list(text)
 
     return public_tlds, private_tlds

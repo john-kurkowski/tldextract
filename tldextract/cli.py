@@ -7,6 +7,7 @@ import sys
 from .tldextract import TLDExtract
 from ._version import version as __version__
 
+
 def main():
     '''tldextract CLI main command.'''
     import argparse

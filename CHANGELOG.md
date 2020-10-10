@@ -13,7 +13,8 @@ After upgrading, update your cache file by deleting it or via `tldextract
     * Use filelocking to support multi-processing and multithreading environments
 * Bugfixes
     * Select public or private suffixes at runtime. Fixes [#66](https://github.com/john-kurkowski/tldextract/issues/66).
-
+* Removals
+    * Do not `debug` log the diff during update
 
 ## 2.2.3 (2020-08-05)
 

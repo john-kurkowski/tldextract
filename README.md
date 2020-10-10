@@ -235,19 +235,6 @@ of desensitizing users to the nuances of URLs. Who knows how much. But in the
 future, I would consider an overhaul. For example, users could opt into
 validation, either receiving exceptions or error metadata on results.
 
-## Public API
-
-I know it's just one method, but I've needed this functionality in a few
-projects and programming languages, so I've uploaded
-[`tldextract` to App Engine](http://tldextract.appspot.com/). It's there on
-GAE's free pricing plan until Google cuts it off. Just hit it with
-your favorite HTTP client with the URL you want parsed like so:
-
-```zsh
-curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar/baz.html"
-# {"domain": "bbc", "subdomain": "www", "suffix": "co.uk"}
-```
-
 ## Contribute
 
 ### Setting up

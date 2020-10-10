@@ -8,4 +8,6 @@ tldextract/_version.py
 tldextract_app/tldextract
 tldextract_app/web
 tldextract.egg-info
+tldextract/.suffix_cache/*
 .tox
+.pytest_cache

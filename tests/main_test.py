@@ -3,20 +3,23 @@
 
 import sys
 
+import pytest
 import responses
 import tldextract
-from .helpers import temporary_file
+from tldextract.cache import DiskCache
+from tldextract.suffix_list import SuffixListNotFound
+from .helpers import temporary_dir
 if sys.version_info >= (3,):  # pragma: no cover
     unicode = str  # pylint: disable=invalid-name,redefined-builtin
 
 
 # pylint: disable=invalid-name
-extract = tldextract.TLDExtract(cache_file=temporary_file())
-extract_no_cache = tldextract.TLDExtract(cache_file=False)
-extract_using_real_local_suffix_list = tldextract.TLDExtract(cache_file=temporary_file())
-extract_using_real_local_suffix_list_no_cache = tldextract.TLDExtract(cache_file=False)
+extract = tldextract.TLDExtract(cache_dir=temporary_dir())
+extract_no_cache = tldextract.TLDExtract(cache_dir=False)
+extract_using_real_local_suffix_list = tldextract.TLDExtract(cache_dir=temporary_dir())
+extract_using_real_local_suffix_list_no_cache = tldextract.TLDExtract(cache_dir=False)
 extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
-    cache_file=None,
+    cache_dir=None,
     suffix_list_urls=None
 )
 # pylint: enable=invalid-name
@@ -236,12 +239,14 @@ def test_result_as_dict():
 
 
 @responses.activate  # pylint: disable=no-member
-def test_cache_timeouts():
+def test_cache_timeouts(tmpdir):
     server = 'http://some-server.com'
     responses.add(  # pylint: disable=no-member
         responses.GET,  # pylint: disable=no-member
         server,
         status=408
     )
+    cache = DiskCache(tmpdir)
 
-    assert tldextract.remote.find_first_response([server], 5) == unicode('')
+    with pytest.raises(SuffixListNotFound):
+        tldextract.suffix_list.find_first_response(cache, [server], 5)

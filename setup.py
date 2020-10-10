@@ -29,9 +29,7 @@ import sys
 
 from setuptools import setup
 
-if sys.version_info < (3, 5) and not (
-    sys.version_info[0] == 2 and sys.version_info[1] == 7
-):
+if sys.version_info < (3, 5):
     raise RuntimeError(
         "Python %s.%s is EOL and no longer supported. "
         "Please upgrade your Python or use an older "
@@ -56,15 +54,13 @@ setup(
     url="https://github.com/john-kurkowski/tldextract",
     packages=["tldextract"],
     include_package_data=True,
-    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
+    python_requires=">=3.5",
     long_description=__doc__,
     long_description_content_type="text/markdown",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Topic :: Utilities",
         "License :: OSI Approved :: BSD License",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",

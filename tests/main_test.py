@@ -9,8 +9,6 @@ import tldextract
 from tldextract.cache import DiskCache
 from tldextract.suffix_list import SuffixListNotFound
 from .helpers import temporary_dir
-if sys.version_info >= (3,):  # pragma: no cover
-    unicode = str  # pylint: disable=invalid-name,redefined-builtin
 
 
 # pylint: disable=invalid-name

@@ -8,6 +8,7 @@ After upgrading, update your cache file by deleting it or via `tldextract
 * Breaking Changes
     * Rename `cache_file` to `cache_dir` as it is no longer a single file but a directory ([#207](https://github.com/john-kurkowski/tldextract/issues/207))
     * The CLI arg also changed from `--cache_file` to `--cache_dir`
+    * Remove Python 2.7 support
 * Features
     * Can pass `include_psl_private_domains` on call, not only on construction
     * Use filelocking to support multi-processing and multithreading environments

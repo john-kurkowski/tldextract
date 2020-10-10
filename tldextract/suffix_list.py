@@ -8,11 +8,6 @@ import sys
 import requests
 from requests_file import FileAdapter
 
-# pylint: disable=invalid-name,redefined-builtin
-if sys.version_info >= (3,):  # pragma: no cover
-    unicode = str
-# pylint: enable=invalid-name,redefined-builtin
-
 LOG = logging.getLogger('tldextract')
 
 PUBLIC_SUFFIX_RE = re.compile(r'^(?P<suffix>[.*!]*\w[\S]*)', re.UNICODE | re.MULTILINE)
@@ -75,8 +70,8 @@ def _get_suffix_lists(cache, urls, cache_fetch_timeout, fallback_to_snapshot):
     except SuffixListNotFound as exc:
         if fallback_to_snapshot:
             text = pkgutil.get_data('tldextract', '.tld_set_snapshot')
-            if not isinstance(text, unicode):
-                text = unicode(text, 'utf-8')
+            if not isinstance(text, str):
+                text = str(text, 'utf-8')
         else:
             raise exc
 

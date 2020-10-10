@@ -7,12 +7,6 @@ import sys
 from .tldextract import TLDExtract
 from ._version import version as __version__
 
-try:
-    unicode
-except NameError:
-    unicode = str  # pylint: disable=invalid-name,redefined-builtin
-
-
 def main():
     '''tldextract CLI main command.'''
     import argparse
@@ -25,7 +19,7 @@ def main():
 
     parser.add_argument('--version', action='version', version='%(prog)s ' + __version__)
     parser.add_argument('input', metavar='fqdn|url',
-                        type=unicode, nargs='*', help='fqdn or url')
+                        type=str, nargs='*', help='fqdn or url')
 
     parser.add_argument('-u', '--update', default=False, action='store_true',
                         help='force fetch the latest TLD definitions')

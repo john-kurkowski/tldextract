@@ -4,12 +4,7 @@ import re
 import socket
 import sys
 
-# pylint: disable=import-error,no-name-in-module
-if sys.version_info < (3,):  # pragma: no cover
-    from urlparse import scheme_chars
-else:  # pragma: no cover
-    from urllib.parse import scheme_chars
-# pylint: enable=import-error,no-name-in-module
+from urllib.parse import scheme_chars
 
 
 IP_RE = re.compile(

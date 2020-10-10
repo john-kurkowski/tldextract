@@ -60,15 +60,7 @@ from .cache import DiskCache
 from .remote import IP_RE
 from .remote import SCHEME_RE
 from .remote import looks_like_ip
-# pylint: disable=invalid-name,undefined-variable
 from .suffix_list import get_suffix_lists
-
-try:
-    STRING_TYPE = basestring
-except NameError:
-    STRING_TYPE = str
-# pylint: enable=invalid-name,undefined-variable
-
 
 LOG = logging.getLogger("tldextract")
 
@@ -200,7 +192,7 @@ class TLDExtract(object):
 
         self.cache_fetch_timeout = cache_fetch_timeout
         self._cache = DiskCache(cache_dir)
-        if isinstance(self.cache_fetch_timeout, STRING_TYPE):
+        if isinstance(self.cache_fetch_timeout, str):
             self.cache_fetch_timeout = float(self.cache_fetch_timeout)
 
     def __call__(self, url, include_psl_private_domains=None):

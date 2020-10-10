@@ -9,11 +9,6 @@ from hashlib import md5
 from filelock import FileLock
 
 try:
-    unicode
-except NameError:
-    unicode = str  # pylint: disable=invalid-name,redefined-builtin
-
-try:
     FileNotFoundError
 except NameError:
     class FileNotFoundError(Exception):
@@ -138,8 +133,8 @@ def _fetch_url(session, url, timeout):
     response.raise_for_status()
     text = response.text
 
-    if not isinstance(text, unicode):
-        text = unicode(text, 'utf-8')
+    if not isinstance(text, str):
+        text = str(text, 'utf-8')
 
     return text
 

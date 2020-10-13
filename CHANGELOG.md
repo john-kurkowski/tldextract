@@ -3,17 +3,21 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
-## Unreleased
+## 3.0.0.rc1 (2020-10-12)
+
+This release fixes the long standing bug that public and private suffixes were
+generated separately and could not be switched at runtime,
+[#66](https://github.com/john-kurkowski/tldextract/issues/66).
 
 * Breaking Changes
     * Rename `cache_file` to `cache_dir` as it is no longer a single file but a directory ([#207](https://github.com/john-kurkowski/tldextract/issues/207))
-    * The CLI arg also changed from `--cache_file` to `--cache_dir`
+    * Rename CLI arg also, from `--cache_file` to `--cache_dir`
     * Remove Python 2.7 support
 * Features
     * Can pass `include_psl_private_domains` on call, not only on construction
     * Use filelocking to support multi-processing and multithreading environments
 * Bugfixes
-    * Select public or private suffixes at runtime. Fixes [#66](https://github.com/john-kurkowski/tldextract/issues/66).
+    * Select public or private suffixes at runtime ([#66](https://github.com/john-kurkowski/tldextract/issues/66))
 * Removals
     * Do not `debug` log the diff during update
 

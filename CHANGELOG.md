@@ -3,6 +3,10 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.0.0 (2020-10-20)
+
+No changes since 3.0.0.rc1.
+
 ## 3.0.0.rc1 (2020-10-12)
 
 This release fixes the long standing bug that public and private suffixes were

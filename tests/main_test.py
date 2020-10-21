@@ -248,3 +248,17 @@ def test_cache_timeouts(tmpdir):
 
     with pytest.raises(SuffixListNotFound):
         tldextract.suffix_list.find_first_response(cache, [server], 5)
+
+
+def test_tlds_property():
+    extract_private = tldextract.TLDExtract(
+        cache_dir=None,
+        suffix_list_urls=None,
+        include_psl_private_domains=True
+    )
+    extract_public = tldextract.TLDExtract(
+        cache_dir=None,
+        suffix_list_urls=None,
+        include_psl_private_domains=False
+    )
+    assert len(extract_private.tlds) > len(extract_public.tlds)

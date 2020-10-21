@@ -206,8 +206,6 @@ class TLDExtract(object):
         >>> extract('http://forums.bbc.co.uk/')
         ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
         """
-        if include_psl_private_domains is None:
-            include_psl_private_domains = self.include_psl_private_domains
 
         netloc = SCHEME_RE.sub("", url) \
             .partition("/")[0] \
@@ -242,7 +240,12 @@ class TLDExtract(object):
 
     @property
     def tlds(self):
-        return self._get_tld_extractor().tlds
+        """
+        Returns the list of tld's used by default
+
+        This will vary based on `include_psl_private_domains` and `extra_suffixes`
+        """
+        return list(self._get_tld_extractor().tlds())
 
     def _get_tld_extractor(self):
         '''Get or compute this object's TLDExtractor. Looks up the TLDExtractor
@@ -271,7 +274,8 @@ class TLDExtract(object):
         self._extractor = _PublicSuffixListTLDExtractor(
             public_tlds=public_tlds,
             private_tlds=private_tlds,
-            extra_tlds=list(self.extra_suffixes)
+            extra_tlds=list(self.extra_suffixes),
+            include_psl_private_domains=self.include_psl_private_domains
         )
         return self._extractor
 
@@ -289,20 +293,30 @@ def update(*args, **kwargs):
     return TLD_EXTRACTOR.update(*args, **kwargs)
 
 
-class _PublicSuffixListTLDExtractor(object):
+class _PublicSuffixListTLDExtractor:
     """Wrapper around this project's main algo for PSL
     lookups.
     """
 
-    def __init__(self, public_tlds, private_tlds, extra_tlds):
+    def __init__(self, public_tlds, private_tlds, extra_tlds, include_psl_private_domains=False):
+        # set the default value
+        self.include_psl_private_domains = include_psl_private_domains
+        self.public_tlds = public_tlds
+        self.private_tlds = private_tlds
         self.tlds_incl_private = frozenset(public_tlds + private_tlds + extra_tlds)
         self.tlds_excl_private = frozenset(public_tlds + extra_tlds)
 
-    def suffix_index(self, lower_spl, include_psl_private_domains=False):
+    def tlds(self, include_psl_private_domains=None):
+        if include_psl_private_domains is None:
+            include_psl_private_domains = self.include_psl_private_domains
+
+        return self.tlds_incl_private if include_psl_private_domains else self.tlds_excl_private
+
+    def suffix_index(self, lower_spl, include_psl_private_domains=None):
         """Returns the index of the first suffix label.
         Returns len(spl) if no suffix is found
         """
-        tlds = self.tlds_incl_private if include_psl_private_domains else self.tlds_excl_private
+        tlds = self.tlds(include_psl_private_domains)
         length = len(lower_spl)
         for i in range(length):
             maybe_tld = '.'.join(lower_spl[i:])

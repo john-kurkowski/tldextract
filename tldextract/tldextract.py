@@ -284,8 +284,8 @@ TLD_EXTRACTOR = TLDExtract()
 
 
 @wraps(TLD_EXTRACTOR.__call__)
-def extract(url):
-    return TLD_EXTRACTOR(url)
+def extract(url, include_psl_private_domains=False):
+    return TLD_EXTRACTOR(url, include_psl_private_domains=include_psl_private_domains)
 
 
 @wraps(TLD_EXTRACTOR.update)

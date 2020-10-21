@@ -8,6 +8,7 @@ import responses
 import tldextract
 from tldextract.cache import DiskCache
 from tldextract.suffix_list import SuffixListNotFound
+from tldextract.tldextract import ExtractResult
 from .helpers import temporary_dir
 
 
@@ -262,3 +263,9 @@ def test_tlds_property():
         include_psl_private_domains=False
     )
     assert len(extract_private.tlds) > len(extract_public.tlds)
+
+
+def test_global_extract():
+    assert tldextract.extract("foo.blogspot.com") == ExtractResult(subdomain='foo', domain='blogspot', suffix='com')
+    assert tldextract.extract("foo.blogspot.com", include_psl_private_domains=True) == \
+           ExtractResult(subdomain='', domain='foo', suffix='blogspot.com')

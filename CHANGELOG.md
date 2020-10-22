@@ -3,6 +3,12 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.0.1 (2020-10-21)
+
+* Bugfixes
+    * Fix `tlds` property `AttributeError` ([#210](https://github.com/john-kurkowski/tldextract/issues/210))
+    * Allow `include_psl_private_domains` in global `extract` too ([#210](https://github.com/john-kurkowski/tldextract/issues/210))
+
 ## 3.0.0 (2020-10-20)
 
 No changes since 3.0.0.rc1.

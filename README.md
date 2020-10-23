@@ -243,14 +243,12 @@ validation, either receiving exceptions or error metadata on results.
 2. Change into the new directory.
 3. `pip install tox`
 
-Alternatively you can install `detox` instead of `tox` to run tests in parallel.
-
 ### Running the Test Suite
 
 Run all tests against all supported Python versions:
 
 ```zsh
-tox
+tox --parallel
 ```
 
 Run all tests against a specific Python environment configuration:

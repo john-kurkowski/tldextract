@@ -39,7 +39,7 @@ class DiskCache(object):
         try:
             with open(cache_filepath) as cache_file:
                 return json.load(cache_file)
-        except (IOError, ValueError) as exc:
+        except (OSError, ValueError) as exc:
             LOG.error(
                 "error reading TLD cache file %s: %s",
                 cache_filepath,
@@ -56,7 +56,7 @@ class DiskCache(object):
         try:
             with open(cache_filepath, 'w') as cache_file:
                 json.dump(value, cache_file)
-        except IOError as ioe:
+        except OSError as ioe:
             LOG.warning(
                 (
                     "unable to cache %s.%s in %s. This could refresh the "

@@ -266,7 +266,6 @@ class TLDExtract:
         2. Local system _cache file
         3. Remote PSL, over HTTP
         4. Bundled PSL snapshot file"""
-        # pylint: disable=no-else-return
 
         if self._extractor:
             return self._extractor

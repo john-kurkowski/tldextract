@@ -11,7 +11,6 @@ from tldextract.suffix_list import SuffixListNotFound
 from tldextract.tldextract import ExtractResult
 
 
-# pylint: disable=invalid-name
 extract = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp())
 extract_no_cache = tldextract.TLDExtract(cache_dir=False)
 extract_using_real_local_suffix_list = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp())
@@ -20,7 +19,6 @@ extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
     cache_dir=None,
     suffix_list_urls=None
 )
-# pylint: enable=invalid-name
 
 
 def assert_extract(  # pylint: disable=missing-docstring
@@ -236,11 +234,11 @@ def test_result_as_dict():
     assert result._asdict() == expected_dict
 
 
-@responses.activate  # pylint: disable=no-member
+@responses.activate
 def test_cache_timeouts(tmpdir):
     server = 'http://some-server.com'
-    responses.add(  # pylint: disable=no-member
-        responses.GET,  # pylint: disable=no-member
+    responses.add(
+        responses.GET,
         server,
         status=408
     )

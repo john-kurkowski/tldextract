@@ -11,7 +11,6 @@ FAKE_SUFFIX_LIST_URL = "file://" + os.path.join(
 )
 EXTRA_SUFFIXES = ['foo1', 'bar1', 'baz1']
 
-# pylint: disable=invalid-name
 extract_using_fake_suffix_list = tldextract.TLDExtract(
     cache_dir=tempfile.mkdtemp(),
     suffix_list_urls=[FAKE_SUFFIX_LIST_URL]
@@ -25,7 +24,6 @@ extract_using_extra_suffixes = tldextract.TLDExtract(
     suffix_list_urls=[FAKE_SUFFIX_LIST_URL],
     extra_suffixes=EXTRA_SUFFIXES
 )
-# pylint: enable=invalid-name
 
 
 def test_private_extraction():

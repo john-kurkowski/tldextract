@@ -1,6 +1,5 @@
 """Test the caching functionality"""
 import pytest
-
 from tldextract.cache import DiskCache
 
 

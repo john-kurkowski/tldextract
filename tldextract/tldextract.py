@@ -57,27 +57,25 @@ from functools import wraps
 import idna
 
 from .cache import DiskCache
-from .remote import IP_RE
-from .remote import SCHEME_RE
-from .remote import looks_like_ip
+from .remote import IP_RE, SCHEME_RE, looks_like_ip
 from .suffix_list import get_suffix_lists
 
 LOG = logging.getLogger("tldextract")
 
-CACHE_DIR_DEFAULT = os.path.join(os.path.dirname(__file__), '.suffix_cache/')
+CACHE_DIR_DEFAULT = os.path.join(os.path.dirname(__file__), ".suffix_cache/")
 CACHE_DIR = os.path.expanduser(os.environ.get("TLDEXTRACT_CACHE", CACHE_DIR_DEFAULT))
-CACHE_TIMEOUT = os.environ.get('TLDEXTRACT_CACHE_TIMEOUT')
+CACHE_TIMEOUT = os.environ.get("TLDEXTRACT_CACHE_TIMEOUT")
 
 PUBLIC_SUFFIX_LIST_URLS = (
-    'https://publicsuffix.org/list/public_suffix_list.dat',
-    'https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat',
+    "https://publicsuffix.org/list/public_suffix_list.dat",
+    "https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat",
 )
 
 CACHE = DiskCache(cache_dir=CACHE_DIR)
 
 
-class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain suffix')):
-    '''namedtuple of a URL's subdomain, domain, and suffix.'''
+class ExtractResult(collections.namedtuple("ExtractResult", "subdomain domain suffix")):
+    """namedtuple of a URL's subdomain, domain, and suffix."""
 
     # Necessary for __dict__ member to get populated in Python 3+
     __slots__ = ()
@@ -93,8 +91,8 @@ class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain su
         ''
         """
         if self.domain and self.suffix:
-            return self.domain + '.' + self.suffix
-        return ''
+            return self.domain + "." + self.suffix
+        return ""
 
     @property
     def fqdn(self):
@@ -108,8 +106,8 @@ class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain su
         """
         if self.domain and self.suffix:
             # self is the namedtuple (subdomain domain suffix)
-            return '.'.join(i for i in self if i)
-        return ''
+            return ".".join(i for i in self if i)
+        return ""
 
     @property
     def ipv4(self):
@@ -125,17 +123,23 @@ class ExtractResult(collections.namedtuple('ExtractResult', 'subdomain domain su
         """
         if not (self.suffix or self.subdomain) and IP_RE.match(self.domain):
             return self.domain
-        return ''
+        return ""
 
 
 class TLDExtract(object):
-    '''A callable for extracting, subdomain, domain, and suffix components from
-    a URL.'''
+    """A callable for extracting, subdomain, domain, and suffix components from
+    a URL."""
 
     # TODO: Agreed with Pylint: too-many-arguments
-    def __init__(self, cache_dir=CACHE_DIR, suffix_list_urls=PUBLIC_SUFFIX_LIST_URLS,  # pylint: disable=too-many-arguments
-                 fallback_to_snapshot=True, include_psl_private_domains=False, extra_suffixes=(),
-                 cache_fetch_timeout=CACHE_TIMEOUT):
+    def __init__(
+        self,
+        cache_dir=CACHE_DIR,
+        suffix_list_urls=PUBLIC_SUFFIX_LIST_URLS,  # pylint: disable=too-many-arguments
+        fallback_to_snapshot=True,
+        include_psl_private_domains=False,
+        extra_suffixes=(),
+        cache_fetch_timeout=CACHE_TIMEOUT,
+    ):
         """
         Constructs a callable for extracting subdomain, domain, and suffix
         components from a URL.
@@ -178,13 +182,17 @@ class TLDExtract(object):
         and read timeouts
         """
         suffix_list_urls = suffix_list_urls or ()
-        self.suffix_list_urls = tuple(url.strip() for url in suffix_list_urls if url.strip())
+        self.suffix_list_urls = tuple(
+            url.strip() for url in suffix_list_urls if url.strip()
+        )
 
         self.fallback_to_snapshot = fallback_to_snapshot
         if not (self.suffix_list_urls or cache_dir or self.fallback_to_snapshot):
-            raise ValueError("The arguments you have provided disable all ways for tldextract "
-                             "to obtain data. Please provide a suffix list data, a cache_dir, "
-                             "or set `fallback_to_snapshot` to `True`.")
+            raise ValueError(
+                "The arguments you have provided disable all ways for tldextract "
+                "to obtain data. Please provide a suffix list data, a cache_dir, "
+                "or set `fallback_to_snapshot` to `True`."
+            )
 
         self.include_psl_private_domains = include_psl_private_domains
         self.extra_suffixes = extra_suffixes
@@ -207,28 +215,29 @@ class TLDExtract(object):
         ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
         """
 
-        netloc = SCHEME_RE.sub("", url) \
-            .partition("/")[0] \
-            .partition("?")[0] \
-            .partition("#")[0] \
-            .split("@")[-1] \
-            .partition(":")[0] \
-            .strip() \
+        netloc = (
+            SCHEME_RE.sub("", url)
+            .partition("/")[0]
+            .partition("?")[0]
+            .partition("#")[0]
+            .split("@")[-1]
+            .partition(":")[0]
+            .strip()
             .rstrip(".")
+        )
 
         labels = netloc.split(".")
 
         translations = [_decode_punycode(label) for label in labels]
         suffix_index = self._get_tld_extractor().suffix_index(
-            translations,
-            include_psl_private_domains=include_psl_private_domains
+            translations, include_psl_private_domains=include_psl_private_domains
         )
 
         suffix = ".".join(labels[suffix_index:])
         if not suffix and netloc and looks_like_ip(netloc):
-            return ExtractResult('', netloc, '')
+            return ExtractResult("", netloc, "")
 
-        subdomain = ".".join(labels[:suffix_index - 1]) if suffix_index else ""
+        subdomain = ".".join(labels[: suffix_index - 1]) if suffix_index else ""
         domain = labels[suffix_index - 1] if suffix_index else ""
         return ExtractResult(subdomain, domain, suffix)
 
@@ -248,14 +257,14 @@ class TLDExtract(object):
         return list(self._get_tld_extractor().tlds())
 
     def _get_tld_extractor(self):
-        '''Get or compute this object's TLDExtractor. Looks up the TLDExtractor
+        """Get or compute this object's TLDExtractor. Looks up the TLDExtractor
         in roughly the following order, based on the settings passed to
         __init__:
 
         1. Memoized on `self`
         2. Local system _cache file
         3. Remote PSL, over HTTP
-        4. Bundled PSL snapshot file'''
+        4. Bundled PSL snapshot file"""
         # pylint: disable=no-else-return
 
         if self._extractor:
@@ -265,7 +274,7 @@ class TLDExtract(object):
             cache=self._cache,
             urls=self.suffix_list_urls,
             cache_fetch_timeout=self.cache_fetch_timeout,
-            fallback_to_snapshot=self.fallback_to_snapshot
+            fallback_to_snapshot=self.fallback_to_snapshot,
         )
 
         if not any([public_tlds, private_tlds, self.extra_suffixes]):
@@ -275,7 +284,7 @@ class TLDExtract(object):
             public_tlds=public_tlds,
             private_tlds=private_tlds,
             extra_tlds=list(self.extra_suffixes),
-            include_psl_private_domains=self.include_psl_private_domains
+            include_psl_private_domains=self.include_psl_private_domains,
         )
         return self._extractor
 
@@ -298,7 +307,9 @@ class _PublicSuffixListTLDExtractor:
     lookups.
     """
 
-    def __init__(self, public_tlds, private_tlds, extra_tlds, include_psl_private_domains=False):
+    def __init__(
+        self, public_tlds, private_tlds, extra_tlds, include_psl_private_domains=False
+    ):
         # set the default value
         self.include_psl_private_domains = include_psl_private_domains
         self.public_tlds = public_tlds
@@ -310,7 +321,11 @@ class _PublicSuffixListTLDExtractor:
         if include_psl_private_domains is None:
             include_psl_private_domains = self.include_psl_private_domains
 
-        return self.tlds_incl_private if include_psl_private_domains else self.tlds_excl_private
+        return (
+            self.tlds_incl_private
+            if include_psl_private_domains
+            else self.tlds_excl_private
+        )
 
     def suffix_index(self, lower_spl, include_psl_private_domains=None):
         """Returns the index of the first suffix label.
@@ -319,15 +334,15 @@ class _PublicSuffixListTLDExtractor:
         tlds = self.tlds(include_psl_private_domains)
         length = len(lower_spl)
         for i in range(length):
-            maybe_tld = '.'.join(lower_spl[i:])
-            exception_tld = '!' + maybe_tld
+            maybe_tld = ".".join(lower_spl[i:])
+            exception_tld = "!" + maybe_tld
             if exception_tld in tlds:
                 return i + 1
 
             if maybe_tld in tlds:
                 return i
 
-            wildcard_tld = '*.' + '.'.join(lower_spl[i + 1:])
+            wildcard_tld = "*." + ".".join(lower_spl[i + 1 :])
             if wildcard_tld in tlds:
                 return i
 
@@ -336,10 +351,10 @@ class _PublicSuffixListTLDExtractor:
 
 def _decode_punycode(label):
     lowered = label.lower()
-    looks_like_puny = lowered.startswith('xn--')
+    looks_like_puny = lowered.startswith("xn--")
     if looks_like_puny:
         try:
-            return idna.decode(label.encode('ascii')).lower()
+            return idna.decode(label.encode("ascii")).lower()
         except (UnicodeError, IndexError):
             pass
     return lowered

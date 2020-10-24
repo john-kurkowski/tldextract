@@ -11,8 +11,10 @@ from filelock import FileLock
 try:
     FileNotFoundError
 except NameError:
+
     class FileNotFoundError(Exception):
         pass
+
 
 LOG = logging.getLogger(__name__)
 
@@ -22,7 +24,7 @@ class DiskCache(object):
 
     def __init__(self, cache_dir, lock_timeout=20):
         self.enabled = bool(cache_dir)
-        self.cache_dir = os.path.expanduser(str(cache_dir) or '')
+        self.cache_dir = os.path.expanduser(str(cache_dir) or "")
         self.lock_timeout = lock_timeout
         # using a unique extension provides some safety that an incorrectly set cache_dir
         # combined with a call to `.clear()` wont wipe someones hard drive
@@ -40,11 +42,7 @@ class DiskCache(object):
             with open(cache_filepath) as cache_file:
                 return json.load(cache_file)
         except (OSError, ValueError) as exc:
-            LOG.error(
-                "error reading TLD cache file %s: %s",
-                cache_filepath,
-                exc
-            )
+            LOG.error("error reading TLD cache file %s: %s", cache_filepath, exc)
             raise KeyError("namespace: " + namespace + " key: " + repr(key))
 
     def set(self, namespace, key, value):
@@ -54,7 +52,7 @@ class DiskCache(object):
         cache_filepath = self._key_to_cachefile_path(namespace, key)
 
         try:
-            with open(cache_filepath, 'w') as cache_file:
+            with open(cache_filepath, "w") as cache_file:
                 json.dump(value, cache_file)
         except OSError as ioe:
             LOG.warning(
@@ -75,7 +73,9 @@ class DiskCache(object):
         """Clear the disk cache"""
         for root, _, files in os.walk(self.cache_dir):
             for filename in files:
-                if filename.endswith(self.file_ext) or filename.endswith(self.file_ext + ".lock"):
+                if filename.endswith(self.file_ext) or filename.endswith(
+                    self.file_ext + ".lock"
+                ):
                     try:
                         os.unlink(os.path.join(root, filename))
                     except FileNotFoundError:
@@ -102,8 +102,7 @@ class DiskCache(object):
 
         key_args = {k: v for k, v in kwargs.items() if k in hashed_argnames}
         cache_filepath = self._key_to_cachefile_path(namespace, key_args)
-        lock_path = cache_filepath + '.lock'
-        # print(lock_path)
+        lock_path = cache_filepath + ".lock"
         with FileLock(lock_path, timeout=self.lock_timeout):
             try:
                 result = self.get(namespace=namespace, key=key_args)
@@ -118,12 +117,8 @@ class DiskCache(object):
         return self.run_and_cache(
             func=_fetch_url,
             namespace="urls",
-            kwargs={
-                "session": session,
-                "url": url,
-                "timeout": timeout
-            },
-            hashed_argnames=["url"]
+            kwargs={"session": session, "url": url, "timeout": timeout},
+            hashed_argnames=["url"],
         )
 
 
@@ -134,7 +129,7 @@ def _fetch_url(session, url, timeout):
     text = response.text
 
     if not isinstance(text, str):
-        text = str(text, 'utf-8')
+        text = str(text, "utf-8")
 
     return text
 
@@ -144,7 +139,7 @@ def _make_cache_key(inputs):
     try:
         key = md5(key).hexdigest()
     except TypeError:
-        key = md5(key.encode('utf8')).hexdigest()
+        key = md5(key.encode("utf8")).hexdigest()
     return key
 
 

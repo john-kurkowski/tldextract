@@ -36,8 +36,8 @@ def _run_extractor(cache_dir):
 @responses.activate
 def test_cache_cleared_by_other_process(tmpdir, monkeypatch):
     """Simulate a file being deleted after we check for existence but before we try to delete it"""
-    responses.add(  # pylint: disable=no-member
-        responses.GET,  # pylint: disable=no-member
+    responses.add(
+        responses.GET,
         PUBLIC_SUFFIX_LIST_URLS[0],
         status=208,
         body="uk.com"

@@ -8,18 +8,10 @@ from hashlib import md5
 
 from filelock import FileLock
 
-try:
-    FileNotFoundError
-except NameError:
-
-    class FileNotFoundError(Exception):
-        pass
-
-
 LOG = logging.getLogger(__name__)
 
 
-class DiskCache(object):
+class DiskCache:
     """Disk _cache that only works for jsonable values"""
 
     def __init__(self, cache_dir, lock_timeout=20):
@@ -43,7 +35,9 @@ class DiskCache(object):
                 return json.load(cache_file)
         except (OSError, ValueError) as exc:
             LOG.error("error reading TLD cache file %s: %s", cache_filepath, exc)
-            raise KeyError("namespace: " + namespace + " key: " + repr(key))
+            raise KeyError(  # pylint: disable=raise-missing-from
+                "namespace: " + namespace + " key: " + repr(key)
+            )
 
     def set(self, namespace, key, value):
         """Set a value in the disk cache"""

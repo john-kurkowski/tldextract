@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 '''Main tldextract unit tests.'''
 
-import sys
-
 import pytest
 import responses
 import tldextract

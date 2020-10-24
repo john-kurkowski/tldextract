@@ -1,9 +1,9 @@
 '''tldextract unit tests with a custom suffix list.'''
 
 import os
+import tempfile
 
 import tldextract
-from .helpers import temporary_dir
 
 FAKE_SUFFIX_LIST_URL = "file://" + os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -13,7 +13,7 @@ EXTRA_SUFFIXES = ['foo1', 'bar1', 'baz1']
 
 # pylint: disable=invalid-name
 extract_using_fake_suffix_list = tldextract.TLDExtract(
-    cache_dir=temporary_dir(),
+    cache_dir=tempfile.mkdtemp(),
     suffix_list_urls=[FAKE_SUFFIX_LIST_URL]
 )
 extract_using_fake_suffix_list_no_cache = tldextract.TLDExtract(
@@ -30,7 +30,7 @@ extract_using_extra_suffixes = tldextract.TLDExtract(
 
 def test_private_extraction():
     tld = tldextract.TLDExtract(
-        cache_dir=temporary_dir(),
+        cache_dir=tempfile.mkdtemp(),
         suffix_list_urls=[]
     )
 

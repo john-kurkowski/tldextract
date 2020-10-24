@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''Main tldextract unit tests.'''
 
-import sys
+import tempfile
 
 import pytest
 import responses
@@ -9,13 +9,12 @@ import tldextract
 from tldextract.cache import DiskCache
 from tldextract.suffix_list import SuffixListNotFound
 from tldextract.tldextract import ExtractResult
-from .helpers import temporary_dir
 
 
 # pylint: disable=invalid-name
-extract = tldextract.TLDExtract(cache_dir=temporary_dir())
+extract = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp())
 extract_no_cache = tldextract.TLDExtract(cache_dir=False)
-extract_using_real_local_suffix_list = tldextract.TLDExtract(cache_dir=temporary_dir())
+extract_using_real_local_suffix_list = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp())
 extract_using_real_local_suffix_list_no_cache = tldextract.TLDExtract(cache_dir=False)
 extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
     cache_dir=None,
@@ -266,6 +265,8 @@ def test_tlds_property():
 
 
 def test_global_extract():
-    assert tldextract.extract("foo.blogspot.com") == ExtractResult(subdomain='foo', domain='blogspot', suffix='com')
+    assert tldextract.extract("foo.blogspot.com") == ExtractResult(
+        subdomain="foo", domain="blogspot", suffix="com"
+    )
     assert tldextract.extract("foo.blogspot.com", include_psl_private_domains=True) == \
            ExtractResult(subdomain='', domain='foo', suffix='blogspot.com')

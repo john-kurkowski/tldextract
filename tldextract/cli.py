@@ -1,6 +1,7 @@
 '''tldextract CLI'''
 
 
+import argparse
 import logging
 import sys
 
@@ -10,8 +11,6 @@ from ._version import version as __version__
 
 def main():
     '''tldextract CLI main command.'''
-    import argparse
-
     logging.basicConfig()
 
     parser = argparse.ArgumentParser(
@@ -43,4 +42,4 @@ def main():
         return
 
     for i in args.input:
-        print(' '.join(tld_extract(i)))  # pylint: disable=superfluous-parens
+        print(' '.join(tld_extract(i)))

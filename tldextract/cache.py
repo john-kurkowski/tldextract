@@ -18,6 +18,8 @@ except NameError:
 
 LOG = logging.getLogger(__name__)
 
+_DID_LOG_UNABLE_TO_CACHE = False
+
 
 class DiskCache(object):
     """Disk _cache that only works for jsonable values"""
@@ -52,21 +54,26 @@ class DiskCache(object):
         cache_filepath = self._key_to_cachefile_path(namespace, key)
 
         try:
+            _make_dir(cache_filepath)
             with open(cache_filepath, "w") as cache_file:
                 json.dump(value, cache_file)
         except OSError as ioe:
-            LOG.warning(
-                (
-                    "unable to cache %s.%s in %s. This could refresh the "
-                    "Public Suffix List over HTTP every app startup. "
-                    "Construct your `TLDExtract` with a writable `cache_dir` or "
-                    "set `cache_dir=False` to silence this warning. %s"
-                ),
-                namespace,
-                key,
-                cache_filepath,
-                ioe,
-            )
+            global _DID_LOG_UNABLE_TO_CACHE
+            if not _DID_LOG_UNABLE_TO_CACHE:
+                LOG.warning(
+                    (
+                        "unable to cache %s.%s in %s. This could refresh the "
+                        "Public Suffix List over HTTP every app startup. "
+                        "Construct your `TLDExtract` with a writable `cache_dir` or "
+                        "set `cache_dir=False` to silence this warning. %s"
+                    ),
+                    namespace,
+                    key,
+                    cache_filepath,
+                    ioe,
+                )
+                _DID_LOG_UNABLE_TO_CACHE = True
+
         return None
 
     def clear(self):
@@ -92,7 +99,6 @@ class DiskCache(object):
 
         cache_path = os.path.join(namespace_path, hashed_key + self.file_ext)
 
-        _make_dir(cache_path)
         return cache_path
 
     def run_and_cache(self, func, namespace, kwargs, hashed_argnames):
@@ -103,6 +109,27 @@ class DiskCache(object):
         key_args = {k: v for k, v in kwargs.items() if k in hashed_argnames}
         cache_filepath = self._key_to_cachefile_path(namespace, key_args)
         lock_path = cache_filepath + ".lock"
+        try:
+            _make_dir(cache_filepath)
+        except OSError as ioe:
+            global _DID_LOG_UNABLE_TO_CACHE
+            if not _DID_LOG_UNABLE_TO_CACHE:
+                LOG.warning(
+                    (
+                        "unable to cache %s.%s in %s. This could refresh the "
+                        "Public Suffix List over HTTP every app startup. "
+                        "Construct your `TLDExtract` with a writable `cache_dir` or "
+                        "set `cache_dir=False` to silence this warning. %s"
+                    ),
+                    namespace,
+                    key_args,
+                    cache_filepath,
+                    ioe,
+                )
+                _DID_LOG_UNABLE_TO_CACHE = True
+
+            return func(**kwargs)
+
         with FileLock(lock_path, timeout=self.lock_timeout):
             try:
                 result = self.get(namespace=namespace, key=key_args)

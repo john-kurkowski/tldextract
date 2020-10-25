@@ -3,6 +3,11 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.0.2 (2020-10-24)
+
+* Bugfixes
+    * Catch permission error when making cache dir, as well as cache file ([#211](https://github.com/john-kurkowski/tldextract/issues/211))
+
 ## 3.0.1 (2020-10-21)
 
 * Bugfixes

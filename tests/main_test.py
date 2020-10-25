@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 '''Main tldextract unit tests.'''
 
+import logging
+import os
 import tempfile
 
 import pytest
@@ -232,6 +234,31 @@ def test_result_as_dict():
                      'domain': 'google',
                      'suffix': 'com'}
     assert result._asdict() == expected_dict
+
+
+def test_cache_permission(mocker, monkeypatch, tmpdir):
+    """Emit a warning once that this can't cache the latest PSL."""
+
+    warning = mocker.patch.object(logging.getLogger("tldextract.cache"), "warning")
+
+    def no_permission_makedirs(*args, **kwargs):
+        raise PermissionError(
+            """[Errno 13] Permission denied:
+            '/usr/local/lib/python3.7/site-packages/tldextract/.suffix_cache"""
+        )
+
+    monkeypatch.setattr(os, "makedirs", no_permission_makedirs)
+
+    for _ in range(0, 2):
+        my_extract = tldextract.TLDExtract(cache_dir=tmpdir)
+        assert_extract(
+            "http://www.google.com",
+            ("www.google.com", "www", "google", "com"),
+            funs=(my_extract,),
+        )
+
+    assert warning.call_count == 1
+    assert warning.call_args[0][0].startswith("unable to cache")
 
 
 @responses.activate

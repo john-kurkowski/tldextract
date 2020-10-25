@@ -71,8 +71,6 @@ PUBLIC_SUFFIX_LIST_URLS = (
     "https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat",
 )
 
-CACHE = DiskCache(cache_dir=CACHE_DIR)
-
 
 class ExtractResult(collections.namedtuple("ExtractResult", "subdomain domain suffix")):
     """namedtuple of a URL's subdomain, domain, and suffix."""

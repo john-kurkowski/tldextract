@@ -8,20 +8,12 @@ from hashlib import md5
 
 from filelock import FileLock
 
-try:
-    FileNotFoundError
-except NameError:
-
-    class FileNotFoundError(Exception):
-        pass
-
-
 LOG = logging.getLogger(__name__)
 
 _DID_LOG_UNABLE_TO_CACHE = False
 
 
-class DiskCache(object):
+class DiskCache:
     """Disk _cache that only works for jsonable values"""
 
     def __init__(self, cache_dir, lock_timeout=20):
@@ -45,7 +37,9 @@ class DiskCache(object):
                 return json.load(cache_file)
         except (OSError, ValueError) as exc:
             LOG.error("error reading TLD cache file %s: %s", cache_filepath, exc)
-            raise KeyError("namespace: " + namespace + " key: " + repr(key))
+            raise KeyError(  # pylint: disable=raise-missing-from
+                "namespace: " + namespace + " key: " + repr(key)
+            )
 
     def set(self, namespace, key, value):
         """Set a value in the disk cache"""
@@ -58,7 +52,7 @@ class DiskCache(object):
             with open(cache_filepath, "w") as cache_file:
                 json.dump(value, cache_file)
         except OSError as ioe:
-            global _DID_LOG_UNABLE_TO_CACHE
+            global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement
             if not _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
                     (
@@ -112,7 +106,7 @@ class DiskCache(object):
         try:
             _make_dir(cache_filepath)
         except OSError as ioe:
-            global _DID_LOG_UNABLE_TO_CACHE
+            global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement
             if not _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
                     (

@@ -124,15 +124,15 @@ class ExtractResult(collections.namedtuple("ExtractResult", "subdomain domain su
         return ""
 
 
-class TLDExtract(object):
+class TLDExtract:
     """A callable for extracting, subdomain, domain, and suffix components from
     a URL."""
 
     # TODO: Agreed with Pylint: too-many-arguments
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         cache_dir=CACHE_DIR,
-        suffix_list_urls=PUBLIC_SUFFIX_LIST_URLS,  # pylint: disable=too-many-arguments
+        suffix_list_urls=PUBLIC_SUFFIX_LIST_URLS,
         fallback_to_snapshot=True,
         include_psl_private_domains=False,
         extra_suffixes=(),
@@ -240,6 +240,7 @@ class TLDExtract(object):
         return ExtractResult(subdomain, domain, suffix)
 
     def update(self, fetch_now=False):
+        """Force fetch the latest suffix list definitions."""
         self._extractor = None
         self._cache.clear()
         if fetch_now:
@@ -263,7 +264,6 @@ class TLDExtract(object):
         2. Local system _cache file
         3. Remote PSL, over HTTP
         4. Bundled PSL snapshot file"""
-        # pylint: disable=no-else-return
 
         if self._extractor:
             return self._extractor
@@ -291,12 +291,14 @@ TLD_EXTRACTOR = TLDExtract()
 
 
 @wraps(TLD_EXTRACTOR.__call__)
-def extract(url, include_psl_private_domains=False):
+def extract(
+    url, include_psl_private_domains=False
+):  # pylint: disable=missing-function-docstring
     return TLD_EXTRACTOR(url, include_psl_private_domains=include_psl_private_domains)
 
 
 @wraps(TLD_EXTRACTOR.update)
-def update(*args, **kwargs):
+def update(*args, **kwargs):  # pylint: disable=missing-function-docstring
     return TLD_EXTRACTOR.update(*args, **kwargs)
 
 
@@ -316,6 +318,7 @@ class _PublicSuffixListTLDExtractor:
         self.tlds_excl_private = frozenset(public_tlds + extra_tlds)
 
     def tlds(self, include_psl_private_domains=None):
+        """Get the currently filtered list of suffixes."""
         if include_psl_private_domains is None:
             include_psl_private_domains = self.include_psl_private_domains
 

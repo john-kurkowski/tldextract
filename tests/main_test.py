@@ -3,25 +3,24 @@
 
 import logging
 import os
+import tempfile
+
 import pytest
 import responses
 import tldextract
 from tldextract.cache import DiskCache
 from tldextract.suffix_list import SuffixListNotFound
 from tldextract.tldextract import ExtractResult
-from .helpers import temporary_dir
 
 
-# pylint: disable=invalid-name
-extract = tldextract.TLDExtract(cache_dir=temporary_dir())
+extract = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp())
 extract_no_cache = tldextract.TLDExtract(cache_dir=False)
-extract_using_real_local_suffix_list = tldextract.TLDExtract(cache_dir=temporary_dir())
+extract_using_real_local_suffix_list = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp())
 extract_using_real_local_suffix_list_no_cache = tldextract.TLDExtract(cache_dir=False)
 extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
     cache_dir=None,
     suffix_list_urls=None
 )
-# pylint: enable=invalid-name
 
 
 def assert_extract(  # pylint: disable=missing-docstring
@@ -244,7 +243,8 @@ def test_cache_permission(mocker, monkeypatch, tmpdir):
 
     def no_permission_makedirs(*args, **kwargs):
         raise PermissionError(
-            """[Errno 13] Permission denied: '/usr/local/lib/python3.7/site-packages/tldextract/.suffix_cache"""
+            """[Errno 13] Permission denied:
+            '/usr/local/lib/python3.7/site-packages/tldextract/.suffix_cache"""
         )
 
     monkeypatch.setattr(os, "makedirs", no_permission_makedirs)
@@ -261,11 +261,11 @@ def test_cache_permission(mocker, monkeypatch, tmpdir):
     assert warning.call_args[0][0].startswith("unable to cache")
 
 
-@responses.activate  # pylint: disable=no-member
+@responses.activate
 def test_cache_timeouts(tmpdir):
     server = 'http://some-server.com'
-    responses.add(  # pylint: disable=no-member
-        responses.GET,  # pylint: disable=no-member
+    responses.add(
+        responses.GET,
         server,
         status=408
     )
@@ -290,6 +290,8 @@ def test_tlds_property():
 
 
 def test_global_extract():
-    assert tldextract.extract("foo.blogspot.com") == ExtractResult(subdomain='foo', domain='blogspot', suffix='com')
+    assert tldextract.extract("foo.blogspot.com") == ExtractResult(
+        subdomain="foo", domain="blogspot", suffix="com"
+    )
     assert tldextract.extract("foo.blogspot.com", include_psl_private_domains=True) == \
            ExtractResult(subdomain='', domain='foo', suffix='blogspot.com')

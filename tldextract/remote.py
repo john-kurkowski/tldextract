@@ -2,7 +2,6 @@
 
 import re
 import socket
-import sys
 
 from urllib.parse import scheme_chars
 

@@ -56,14 +56,13 @@ from functools import wraps
 
 import idna
 
-from .cache import DiskCache
+from .cache import DiskCache, get_cache_dir
 from .remote import IP_RE, SCHEME_RE, looks_like_ip
 from .suffix_list import get_suffix_lists
 
 LOG = logging.getLogger("tldextract")
 
-CACHE_DIR_DEFAULT = os.path.join(os.path.dirname(__file__), ".suffix_cache/")
-CACHE_DIR = os.path.expanduser(os.environ.get("TLDEXTRACT_CACHE", CACHE_DIR_DEFAULT))
+
 CACHE_TIMEOUT = os.environ.get("TLDEXTRACT_CACHE_TIMEOUT")
 
 PUBLIC_SUFFIX_LIST_URLS = (
@@ -131,7 +130,7 @@ class TLDExtract:
     # TODO: Agreed with Pylint: too-many-arguments
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        cache_dir=CACHE_DIR,
+        cache_dir=get_cache_dir(),
         suffix_list_urls=PUBLIC_SUFFIX_LIST_URLS,
         fallback_to_snapshot=True,
         include_psl_private_domains=False,

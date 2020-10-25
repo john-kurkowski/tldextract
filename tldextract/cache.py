@@ -1,9 +1,11 @@
 """Helpers """
 import errno
+import hashlib
 import json
 import logging
 import os
 import os.path
+import sys
 from hashlib import md5
 
 from filelock import FileLock
@@ -11,6 +13,59 @@ from filelock import FileLock
 LOG = logging.getLogger(__name__)
 
 _DID_LOG_UNABLE_TO_CACHE = False
+
+
+def get_pkg_unique_identifier():
+    """
+    Generate an identifier unique to the python version, tldextract version, and python instance
+
+    This will prevent interference between virtualenvs and issues that might arise when installing
+    a new version of tldextract
+    """
+    try:
+        # pylint: disable=import-outside-toplevel
+        from tldextract._version import version
+    except ImportError:
+        version = "dev"
+
+    tldextract_version = "tldextract-" + version
+    python_env_name = os.path.basename(sys.prefix)
+    # just to handle the edge case of two identically named python environments
+    python_binary_path_short_hash = hashlib.md5(sys.prefix.encode("utf-8")).hexdigest()[:6]
+    python_version = ".".join([str(v) for v in sys.version_info[:-1]])
+    identifier_parts = [
+        python_version,
+        python_env_name,
+        python_binary_path_short_hash,
+        tldextract_version
+    ]
+    pkg_identifier = "__".join(identifier_parts)
+
+    return pkg_identifier
+
+
+def get_cache_dir():
+    """
+    Get a cache dir that we have permission to write to
+
+    Try to follow the XDG standard, but if that doesn't work fallback to the package directory
+    http://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+    """
+    cache_dir = os.environ.get("TLDEXTRACT_CACHE", None)
+    if cache_dir is not None:
+        return cache_dir
+
+    xdg_cache_home = os.getenv("XDG_CACHE_HOME", None)
+    if xdg_cache_home is None:
+        user_home = os.getenv("HOME", None)
+        if user_home:
+            xdg_cache_home = os.path.join(user_home, ".cache")
+
+    if xdg_cache_home is not None:
+        return os.path.join(xdg_cache_home, "python-tldextract", get_pkg_unique_identifier())
+
+    # fallback to trying to use package directory itself
+    return os.path.join(os.path.dirname(__file__), ".suffix_cache/")
 
 
 class DiskCache:

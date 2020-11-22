@@ -43,10 +43,14 @@ def main():
     )
 
     args = parser.parse_args()
-    tld_extract = TLDExtract(include_psl_private_domains=args.private_domains)
 
+    obj_kwargs = {
+        "include_psl_private_domains": args.private_domains,
+    }
     if args.cache_dir:
-        tld_extract.cache_file = args.cache_file
+        obj_kwargs["cache_dir"] = args.cache_dir
+
+    tld_extract = TLDExtract(**obj_kwargs)
 
     if args.update:
         tld_extract.update(True)

@@ -3,6 +3,13 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.1.0 (2020-11-22)
+
+* Features
+    * Prefer to cache in XDG cache directory in user folder, vs. in Python install folder ([#213](https://github.com/john-kurkowski/tldextract/issues/213))
+* Bugfixes
+    * Fix `AttributeError` on `--update` ([#215](https://github.com/john-kurkowski/tldextract/issues/215))
+
 ## 3.0.2 (2020-10-24)
 
 * Bugfixes

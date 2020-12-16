@@ -16,6 +16,7 @@ matrix:
     - env: TOXENV=lint
     #powerjobs
     - python: 3.8
+      arch: ppc64le
       env: TOXENV=py38
     - python: 3.7
       arch: ppc64le

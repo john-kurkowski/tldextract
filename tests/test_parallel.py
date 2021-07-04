@@ -12,9 +12,8 @@ from tldextract.tldextract import PUBLIC_SUFFIX_LIST_URLS
 def test_multiprocessing_makes_one_request(tmpdir):
     """Ensure there aren't duplicate download requests"""
     process_count = 3
-    pool = Pool(processes=process_count)
-
-    http_request_counts = pool.map(_run_extractor, [str(tmpdir)] * process_count)
+    with Pool(processes=process_count) as pool:
+        http_request_counts = pool.map(_run_extractor, [str(tmpdir)] * process_count)
     assert sum(http_request_counts) == 1
 
 

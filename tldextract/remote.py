@@ -24,4 +24,6 @@ def looks_like_ip(maybe_ip):
         if IP_RE.match(maybe_ip):
             return True
     except socket.error:
-        return False
+        pass
+
+    return False

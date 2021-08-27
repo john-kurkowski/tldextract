@@ -3,6 +3,12 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.1.1 (2021-08-27)
+
+* Bugfixes
+    * Support Python 3.9
+    * Drop support for EOL Python 3.5
+
 ## 3.1.0 (2020-11-22)
 
 * Features

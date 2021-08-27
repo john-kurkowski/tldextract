@@ -102,7 +102,7 @@ def test_ip():
 
 
 def test_looks_like_ip():
-    assert_extract(u'1\xe9', ('', '', u'1\xe9', ''))
+    assert_extract('1\xe9', ('', '', '1\xe9', ''))
 
 
 def test_punycode():
@@ -134,9 +134,9 @@ def test_invalid_puny_with_puny():
 
 
 def test_puny_with_non_puny():
-    assert_extract(u'http://xn--zckzap6140b352by.blog.so-net.教育.hk',
-                   (u'xn--zckzap6140b352by.blog.so-net.教育.hk',
-                    'xn--zckzap6140b352by.blog', 'so-net', u'教育.hk'))
+    assert_extract('http://xn--zckzap6140b352by.blog.so-net.教育.hk',
+                   ('xn--zckzap6140b352by.blog.so-net.教育.hk',
+                    'xn--zckzap6140b352by.blog', 'so-net', '教育.hk'))
 
 
 def test_idna_2008():

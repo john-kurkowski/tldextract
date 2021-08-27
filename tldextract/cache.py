@@ -31,13 +31,15 @@ def get_pkg_unique_identifier():
     tldextract_version = "tldextract-" + version
     python_env_name = os.path.basename(sys.prefix)
     # just to handle the edge case of two identically named python environments
-    python_binary_path_short_hash = hashlib.md5(sys.prefix.encode("utf-8")).hexdigest()[:6]
+    python_binary_path_short_hash = hashlib.md5(sys.prefix.encode("utf-8")).hexdigest()[
+        :6
+    ]
     python_version = ".".join([str(v) for v in sys.version_info[:-1]])
     identifier_parts = [
         python_version,
         python_env_name,
         python_binary_path_short_hash,
-        tldextract_version
+        tldextract_version,
     ]
     pkg_identifier = "__".join(identifier_parts)
 
@@ -62,7 +64,9 @@ def get_cache_dir():
             xdg_cache_home = os.path.join(user_home, ".cache")
 
     if xdg_cache_home is not None:
-        return os.path.join(xdg_cache_home, "python-tldextract", get_pkg_unique_identifier())
+        return os.path.join(
+            xdg_cache_home, "python-tldextract", get_pkg_unique_identifier()
+        )
 
     # fallback to trying to use package directory itself
     return os.path.join(os.path.dirname(__file__), ".suffix_cache/")
@@ -88,7 +92,7 @@ class DiskCache:
         if not os.path.isfile(cache_filepath):
             raise KeyError("namespace: " + namespace + " key: " + repr(key))
         try:
-            with open(cache_filepath) as cache_file:
+            with open(cache_filepath) as cache_file:  # pylint: disable=unspecified-encoding
                 return json.load(cache_file)
         except (OSError, ValueError) as exc:
             LOG.error("error reading TLD cache file %s: %s", cache_filepath, exc)
@@ -104,7 +108,7 @@ class DiskCache:
 
         try:
             _make_dir(cache_filepath)
-            with open(cache_filepath, "w") as cache_file:
+            with open(cache_filepath, "w") as cache_file:  # pylint: disable=unspecified-encoding
                 json.dump(value, cache_file)
         except OSError as ioe:
             global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement

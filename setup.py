@@ -54,7 +54,7 @@ setup(
     url="https://github.com/john-kurkowski/tldextract",
     packages=["tldextract"],
     include_package_data=True,
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     long_description=__doc__,
     long_description_content_type="text/markdown",
     classifiers=[
@@ -62,7 +62,6 @@ setup(
         "Topic :: Utilities",
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",

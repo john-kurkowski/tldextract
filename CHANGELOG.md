@@ -3,6 +3,11 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.1.2 (2021-09-01)
+
+* Misc.
+    * Only run pylint in Tox environments, i.e. CI, not by default in tests ([#230](https://github.com/john-kurkowski/tldextract/issues/230))
+
 ## 3.1.1 (2021-08-27)
 
 * Bugfixes

@@ -2,21 +2,23 @@
 
 ## Python Module [![PyPI version](https://badge.fury.io/py/tldextract.svg)](https://badge.fury.io/py/tldextract) [![Build Status](https://travis-ci.com/john-kurkowski/tldextract.svg?branch=master)](https://travis-ci.com/john-kurkowski/tldextract)
 
-`tldextract` accurately separates the gTLD or ccTLD (generic or country code
-top-level domain) from the registered domain and subdomains of a URL. For
-example, say you want just the 'google' part of 'http://www.google.com'.
+`tldextract` accurately separates an Effective TLD (eTLD) from the 
+registered domain and subdomains of a URL. Per Mozilla's docs, an eTLD is
+
+> the highest level at which a domain may be registered for a particular top-level domain
+
+This library will split 'http://www.google.co.uk' into domain 'google' and eTLD 'co.uk'.
 
 *Everybody gets this wrong.* Splitting on the '.' and taking the last 2
-elements goes a long way only if you're thinking of simple e.g. .com
-domains. Think parsing
-[http://forums.bbc.co.uk](http://forums.bbc.co.uk) for example: the naive
-splitting method above will give you 'co' as the domain and 'uk' as the TLD,
+elements goes a long way only if you're thinking of simple (e.g. .com
+domains). For example, the naive splitting method above applied to
+[http://forums.bbc.co.uk](http://forums.bbc.co.uk) will give you 'co' as the domain and 'uk' as the TLD,
 instead of 'bbc' and 'co.uk' respectively.
 
-`tldextract` on the other hand knows what all gTLDs and ccTLDs look like by
+`tldextract`, on the other hand, knows what all eTLDs look like by
 looking up the currently living ones according to [the Public Suffix List
-(PSL)](http://www.publicsuffix.org). So, given a URL, it knows its subdomain
-from its domain, and its domain from its country code.
+(PSL)](http://www.publicsuffix.org). So given a URL, it knows its subdomain
+from its domain, and its domain from its eTLD.
 
 ```python
 >>> import tldextract

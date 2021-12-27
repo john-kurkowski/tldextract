@@ -92,7 +92,8 @@ class DiskCache:
         if not os.path.isfile(cache_filepath):
             raise KeyError("namespace: " + namespace + " key: " + repr(key))
         try:
-            with open(cache_filepath) as cache_file:  # pylint: disable=unspecified-encoding
+            # pylint: disable-next=unspecified-encoding
+            with open(cache_filepath) as cache_file:
                 return json.load(cache_file)
         except (OSError, ValueError) as exc:
             LOG.error("error reading TLD cache file %s: %s", cache_filepath, exc)
@@ -108,7 +109,8 @@ class DiskCache:
 
         try:
             _make_dir(cache_filepath)
-            with open(cache_filepath, "w") as cache_file:  # pylint: disable=unspecified-encoding
+            # pylint: disable-next=unspecified-encoding
+            with open(cache_filepath, "w") as cache_file:
                 json.dump(value, cache_file)
         except OSError as ioe:
             global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement
@@ -183,6 +185,8 @@ class DiskCache:
 
             return func(**kwargs)
 
+        # Disable lint of 3rd party (see also https://github.com/tox-dev/py-filelock/issues/102)
+        # pylint: disable-next=abstract-class-instantiated
         with FileLock(lock_path, timeout=self.lock_timeout):
             try:
                 result = self.get(namespace=namespace, key=key_args)

@@ -105,7 +105,7 @@ tldextract http://forums.bbc.co.uk
 ### Note About Caching
 
 Beware when first running the module, it updates its TLD list with a live HTTP
-request. This updated TLD set is usually cached indefinitely in ``$HOME/.cache/python-tldextract`.
+request. This updated TLD set is usually cached indefinitely in `$HOME/.cache/python-tldextract`.
 To control the cache's location, set TLDEXTRACT_CACHE environment variable or set the
 cache_dir path in TLDExtract initialization.
 

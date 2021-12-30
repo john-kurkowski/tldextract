@@ -23,7 +23,7 @@ extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
 )
 
 
-def assert_extract(  # pylint: disable=missing-docstring
+def assert_extract(
     url,
     expected_domain_data,
     expected_ip_data="",
@@ -35,6 +35,9 @@ def assert_extract(  # pylint: disable=missing-docstring
         extract_using_fallback_to_snapshot_no_cache,
     ),
 ):
+    """Test helper to compare all the expected and actual attributes and
+    properties of an extraction. Runs the same comparison across several
+    permutations of tldextract instance configurations."""
     (
         expected_fqdn,
         expected_subdomain,

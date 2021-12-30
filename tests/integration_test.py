@@ -1,4 +1,4 @@
-'''tldextract integration tests.'''
+"""tldextract integration tests."""
 
 import pytest
 

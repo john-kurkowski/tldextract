@@ -20,12 +20,7 @@ def test_multiprocessing_makes_one_request(tmpdir):
 @responses.activate
 def _run_extractor(cache_dir):
     """run the extractor"""
-    responses.add(
-        responses.GET,
-        PUBLIC_SUFFIX_LIST_URLS[0],
-        status=208,
-        body="uk.co"
-    )
+    responses.add(responses.GET, PUBLIC_SUFFIX_LIST_URLS[0], status=208, body="uk.co")
     extract = TLDExtract(cache_dir=cache_dir)
 
     extract("bar.uk.com", include_psl_private_domains=True)
@@ -35,12 +30,7 @@ def _run_extractor(cache_dir):
 @responses.activate
 def test_cache_cleared_by_other_process(tmpdir, monkeypatch):
     """Simulate a file being deleted after we check for existence but before we try to delete it"""
-    responses.add(
-        responses.GET,
-        PUBLIC_SUFFIX_LIST_URLS[0],
-        status=208,
-        body="uk.com"
-    )
+    responses.add(responses.GET, PUBLIC_SUFFIX_LIST_URLS[0], status=208, body="uk.com")
 
     cache_dir = str(tmpdir)
     extract = TLDExtract(cache_dir=cache_dir)

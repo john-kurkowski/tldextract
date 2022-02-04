@@ -73,6 +73,7 @@ PUBLIC_SUFFIX_LIST_URLS = (
 
 class ExtractResult(NamedTuple):
     """namedtuple of a URL's subdomain, domain, and suffix."""
+
     subdomain: str
     domain: str
     suffix: str
@@ -102,9 +103,9 @@ class ExtractResult(NamedTuple):
         ''
         """
         if self.domain and self.suffix:
-            # self is the namedtuple (subdomain domain suffix)
-            # https://github.com/PyCQA/pylint/issues/2568
-            return ".".join(i for i in self if i)  # pylint: disable=not-an-iterable
+            # Disable bogus lint error (https://github.com/PyCQA/pylint/issues/2568)
+            # pylint: disable-next=not-an-iterable
+            return ".".join(i for i in self if i)
         return ""
 
     @property

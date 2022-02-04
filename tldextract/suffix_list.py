@@ -5,7 +5,7 @@ import pkgutil
 import re
 
 import requests
-from requests_file import FileAdapter
+from requests_file import FileAdapter  # type: ignore[import]
 
 LOG = logging.getLogger("tldextract")
 

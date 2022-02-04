@@ -49,10 +49,10 @@ or suffix were found:
     '127.0.0.1'
 """
 
-import collections
 import logging
 import os
 from functools import wraps
+from typing import List, NamedTuple, Optional, Sequence, Union
 
 import idna
 
@@ -71,14 +71,15 @@ PUBLIC_SUFFIX_LIST_URLS = (
 )
 
 
-class ExtractResult(collections.namedtuple("ExtractResult", "subdomain domain suffix")):
+class ExtractResult(NamedTuple):
     """namedtuple of a URL's subdomain, domain, and suffix."""
 
-    # Necessary for __dict__ member to get populated in Python 3+
-    __slots__ = ()
+    subdomain: str
+    domain: str
+    suffix: str
 
     @property
-    def registered_domain(self):
+    def registered_domain(self) -> str:
         """
         Joins the domain and suffix fields with a dot, if they're both set.
 
@@ -92,7 +93,7 @@ class ExtractResult(collections.namedtuple("ExtractResult", "subdomain domain su
         return ""
 
     @property
-    def fqdn(self):
+    def fqdn(self) -> str:
         """
         Returns a Fully Qualified Domain Name, if there is a proper domain/suffix.
 
@@ -102,12 +103,13 @@ class ExtractResult(collections.namedtuple("ExtractResult", "subdomain domain su
         ''
         """
         if self.domain and self.suffix:
-            # self is the namedtuple (subdomain domain suffix)
+            # Disable bogus lint error (https://github.com/PyCQA/pylint/issues/2568)
+            # pylint: disable-next=not-an-iterable
             return ".".join(i for i in self if i)
         return ""
 
     @property
-    def ipv4(self):
+    def ipv4(self) -> str:
         """
         Returns the ipv4 if that is what the presented domain/url is
 
@@ -130,13 +132,13 @@ class TLDExtract:
     # TODO: Agreed with Pylint: too-many-arguments
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        cache_dir=get_cache_dir(),
-        suffix_list_urls=PUBLIC_SUFFIX_LIST_URLS,
-        fallback_to_snapshot=True,
-        include_psl_private_domains=False,
-        extra_suffixes=(),
-        cache_fetch_timeout=CACHE_TIMEOUT,
-    ):
+        cache_dir: str = get_cache_dir(),
+        suffix_list_urls: Sequence[str] = PUBLIC_SUFFIX_LIST_URLS,
+        fallback_to_snapshot: bool = True,
+        include_psl_private_domains: bool = False,
+        extra_suffixes: Sequence[str] = (),
+        cache_fetch_timeout: Union[str, float, None] = CACHE_TIMEOUT,
+    ) -> None:
         """
         Constructs a callable for extracting subdomain, domain, and suffix
         components from a URL.
@@ -193,14 +195,18 @@ class TLDExtract:
 
         self.include_psl_private_domains = include_psl_private_domains
         self.extra_suffixes = extra_suffixes
-        self._extractor = None
+        self._extractor: Optional[_PublicSuffixListTLDExtractor] = None
 
-        self.cache_fetch_timeout = cache_fetch_timeout
+        self.cache_fetch_timeout = (
+            float(cache_fetch_timeout)
+            if isinstance(cache_fetch_timeout, str)
+            else cache_fetch_timeout
+        )
         self._cache = DiskCache(cache_dir)
-        if isinstance(self.cache_fetch_timeout, str):
-            self.cache_fetch_timeout = float(self.cache_fetch_timeout)
 
-    def __call__(self, url, include_psl_private_domains=None):
+    def __call__(
+        self, url: str, include_psl_private_domains: Optional[bool] = None
+    ) -> ExtractResult:
         """
         Takes a string URL and splits it into its subdomain, domain, and
         suffix (effective TLD, gTLD, ccTLD, etc.) component.
@@ -238,7 +244,7 @@ class TLDExtract:
         domain = labels[suffix_index - 1] if suffix_index else ""
         return ExtractResult(subdomain, domain, suffix)
 
-    def update(self, fetch_now=False):
+    def update(self, fetch_now: bool = False) -> None:
         """Force fetch the latest suffix list definitions."""
         self._extractor = None
         self._cache.clear()
@@ -246,7 +252,7 @@ class TLDExtract:
             self._get_tld_extractor()
 
     @property
-    def tlds(self):
+    def tlds(self) -> List[str]:
         """
         Returns the list of tld's used by default
 
@@ -254,7 +260,7 @@ class TLDExtract:
         """
         return list(self._get_tld_extractor().tlds())
 
-    def _get_tld_extractor(self):
+    def _get_tld_extractor(self) -> "_PublicSuffixListTLDExtractor":
         """Get or compute this object's TLDExtractor. Looks up the TLDExtractor
         in roughly the following order, based on the settings passed to
         __init__:
@@ -290,9 +296,9 @@ TLD_EXTRACTOR = TLDExtract()
 
 
 @wraps(TLD_EXTRACTOR.__call__)
-def extract(
-    url, include_psl_private_domains=False
-):  # pylint: disable=missing-function-docstring
+def extract(  # pylint: disable=missing-function-docstring
+    url: str, include_psl_private_domains: Optional[bool] = False
+) -> ExtractResult:
     return TLD_EXTRACTOR(url, include_psl_private_domains=include_psl_private_domains)
 
 

@@ -15,7 +15,7 @@ LOG = logging.getLogger(__name__)
 _DID_LOG_UNABLE_TO_CACHE = False
 
 
-def get_pkg_unique_identifier():
+def get_pkg_unique_identifier() -> str:
     """
     Generate an identifier unique to the python version, tldextract version, and python instance
 
@@ -46,7 +46,7 @@ def get_pkg_unique_identifier():
     return pkg_identifier
 
 
-def get_cache_dir():
+def get_cache_dir() -> str:
     """
     Get a cache dir that we have permission to write to
 

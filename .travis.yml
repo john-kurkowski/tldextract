@@ -14,6 +14,7 @@ matrix:
       env: TOXENV=pypy3
     - env: TOXENV=codestyle
     - env: TOXENV=lint
+    - env: TOXENV=typecheck
 python: 3.9
 install: pip install tox
 script: tox

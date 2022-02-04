@@ -103,6 +103,7 @@ class ExtractResult(NamedTuple):
         """
         if self.domain and self.suffix:
             # self is the namedtuple (subdomain domain suffix)
+            # https://github.com/PyCQA/pylint/issues/2568
             return ".".join(i for i in self if i)  # pylint: disable=not-an-iterable
         return ""
 

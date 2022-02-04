@@ -2,4 +2,5 @@
 
 from .tldextract import extract, TLDExtract
 
-from ._version import version as __version__
+from . import _version
+__version__: str = _version.version

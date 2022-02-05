@@ -4,7 +4,6 @@ import os.path
 from multiprocessing import Pool
 
 import responses
-
 from tldextract import TLDExtract
 from tldextract.tldextract import PUBLIC_SUFFIX_LIST_URLS
 

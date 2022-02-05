@@ -132,7 +132,7 @@ class TLDExtract:
     # TODO: Agreed with Pylint: too-many-arguments
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        cache_dir: str = get_cache_dir(),
+        cache_dir: Optional[str] = get_cache_dir(),
         suffix_list_urls: Sequence[str] = PUBLIC_SUFFIX_LIST_URLS,
         fallback_to_snapshot: bool = True,
         include_psl_private_domains: bool = False,
@@ -143,14 +143,13 @@ class TLDExtract:
         Constructs a callable for extracting subdomain, domain, and suffix
         components from a URL.
 
-        Upon calling it, it first checks for a JSON in `cache_dir`.
-        By default, the `cache_dir` will live in the tldextract directory.
-
-        You can disable the caching functionality of this module  by setting `cache_dir` to False.
+        Upon calling it, it first checks for a JSON in `cache_dir`. By default,
+        the `cache_dir` will live in the tldextract directory. You can disable
+        the caching functionality of this module by setting `cache_dir` to `None`.
 
         If the cached version does not exist (such as on the first run), HTTP request the URLs in
         `suffix_list_urls` in order, until one returns public suffix list data. To disable HTTP
-        requests, set this to something falsy.
+        requests, set this to an empty sequence.
 
         The default list of URLs point to the latest version of the Mozilla Public Suffix List and
         its mirror, but any similar document could be specified. Local files can be specified by

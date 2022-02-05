@@ -13,13 +13,13 @@ from tldextract.suffix_list import SuffixListNotFound
 from tldextract.tldextract import ExtractResult
 
 extract = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp())
-extract_no_cache = tldextract.TLDExtract(cache_dir=False)
+extract_no_cache = tldextract.TLDExtract(cache_dir=None)
 extract_using_real_local_suffix_list = tldextract.TLDExtract(
     cache_dir=tempfile.mkdtemp()
 )
-extract_using_real_local_suffix_list_no_cache = tldextract.TLDExtract(cache_dir=False)
+extract_using_real_local_suffix_list_no_cache = tldextract.TLDExtract(cache_dir=None)
 extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
-    cache_dir=None, suffix_list_urls=None
+    cache_dir=None, suffix_list_urls=()
 )
 
 

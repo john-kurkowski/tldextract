@@ -11,6 +11,7 @@ matrix:
     - python: "3.10"
       env: TOXENV=py310
     - python: pypy3.7
+      dist: xenial
       env: TOXENV=pypy3
     - env: TOXENV=codestyle
     - env: TOXENV=lint

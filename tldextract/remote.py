@@ -2,9 +2,7 @@
 
 import re
 import socket
-
 from urllib.parse import scheme_chars
-
 
 IP_RE = re.compile(
     # pylint: disable-next=line-too-long

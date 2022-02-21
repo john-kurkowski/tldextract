@@ -58,8 +58,14 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
     ],
-    entry_points={"console_scripts": ["tldextract = tldextract.cli:main", ]},
+    entry_points={
+        "console_scripts": [
+            "tldextract = tldextract.cli:main",
+        ]
+    },
     setup_requires=["setuptools_scm"],
-    use_scm_version={"write_to": "tldextract/_version.py", },
+    use_scm_version={
+        "write_to": "tldextract/_version.py",
+    },
     install_requires=INSTALL_REQUIRES,
 )

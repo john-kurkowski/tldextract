@@ -3,6 +3,16 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.2.0 (2022-02-20)
+
+* Features
+    * Add types to the public API ([#244](https://github.com/john-kurkowski/tldextract/issues/244))
+* Bugfixes
+    * Add support for Python 3.10 ([#246](https://github.com/john-kurkowski/tldextract/issues/246))
+    * Drop support for EOL Python 3.6 ([#246](https://github.com/john-kurkowski/tldextract/issues/246))
+    * Remove py2 tag from wheel ([#245](https://github.com/john-kurkowski/tldextract/issues/245))
+    * Remove extra backtick in README ([#240](https://github.com/john-kurkowski/tldextract/issues/240))
+
 ## 3.1.2 (2021-09-01)
 
 * Misc.

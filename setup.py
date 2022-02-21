@@ -25,16 +25,7 @@ By default, this package supports the public ICANN TLDs and their exceptions.
 You can optionally support the Public Suffix List's private domains as well.
 """
 
-import sys
-
 from setuptools import setup
-
-if sys.version_info < (3, 7):
-    raise RuntimeError(
-        "Python %s.%s is EOL and no longer supported. "
-        "Please upgrade your Python or use an older "
-        "version of tldextract." % (sys.version_info[0], sys.version_info[1])
-    )
 
 INSTALL_REQUIRES = ["idna", "requests>=2.1.0", "requests-file>=1.4", "filelock>=3.0.8"]
 

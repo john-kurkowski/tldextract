@@ -23,7 +23,7 @@ def looks_like_ip(maybe_ip):
     except (AttributeError, UnicodeError):
         if IP_RE.match(maybe_ip):
             return True
-    except socket.error:
+    except OSError:
         pass
 
     return False

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """`tldextract` accurately separates the gTLD or ccTLD (generic or country code
 top-level domain) from the registered domain and subdomains of a URL.
 

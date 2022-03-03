@@ -81,7 +81,7 @@ However, the proposed regex solution doesn't address many country codes like
 com.au, or the exceptions to country codes like the registered domain
 parliament.uk. The Public Suffix List does, and so does this package.
 
-## Installation
+## Install
 
 Latest release on PyPI:
 
@@ -102,7 +102,7 @@ tldextract http://forums.bbc.co.uk
 # forums bbc co.uk
 ```
 
-## Note About Caching
+## Note about caching
 
 Beware when first calling `tldextract`, it updates its TLD list with a live HTTP
 request. This updated TLD set is usually cached indefinitely in `$HOME/.cache/python-tldextract`.
@@ -143,9 +143,9 @@ env TLDEXTRACT_CACHE="~/tldextract.cache" tldextract --update
 
 It is also recommended to delete the file after upgrading this lib.
 
-## Advanced Usage
+## Advanced usage
 
-### Public vs. Private Domains
+### Public vs. private domains
 
 The PSL [maintains a concept of "private"
 domains](https://publicsuffix.org/list/).
@@ -183,7 +183,7 @@ mentally parse a URL. It doesn't assume familiarity with the PSL nor that the
 PSL makes such a distinction. Note this may run counter to the default parsing
 behavior of other, PSL-based libraries.
 
-### Specifying your own URL or file for the Suffix List data
+### Specifying your own URL or file for Public Suffix List data
 
 You can specify your own input data in place of the default Mozilla Public Suffix List:
 
@@ -241,7 +241,7 @@ validation, either receiving exceptions or error metadata on results.
 2. Change into the new directory.
 3. `pip install tox`
 
-### Running the Test Suite
+### Running the test suite
 
 Run all tests against all supported Python versions:
 

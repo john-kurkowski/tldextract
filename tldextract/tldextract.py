@@ -1,5 +1,5 @@
-"""`tldextract` accurately separates the gTLD or ccTLD (generic or country code
-top-level domain) from the registered domain and subdomains of a URL.
+""" `tldextract` accurately separates a URL's subdomain, domain, and public suffix,
+using the Public Suffix List (PSL).
 
     >>> import tldextract
 

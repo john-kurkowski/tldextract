@@ -2,21 +2,23 @@
 
 ## Python Module [![PyPI version](https://badge.fury.io/py/tldextract.svg)](https://badge.fury.io/py/tldextract) [![Build Status](https://travis-ci.com/john-kurkowski/tldextract.svg?branch=master)](https://app.travis-ci.com/github/john-kurkowski/tldextract)
 
-`tldextract` accurately separates the gTLD or ccTLD (generic or country code
-top-level domain) from the registered domain and subdomains of a URL. For
-example, say you want just the 'google' part of 'http://www.google.com'.
+`tldextract` accurately separates a URL's subdomain, domain, and public suffix,
+using [the Public Suffix List (PSL)](https://publicsuffix.org).
 
-*Everybody gets this wrong.* Splitting on the '.' and taking the last 2
-elements goes a long way only if you're thinking of simple e.g. .com
-domains. Think parsing
-[http://forums.bbc.co.uk](http://forums.bbc.co.uk) for example: the naive
-splitting method above will give you 'co' as the domain and 'uk' as the TLD,
-instead of 'bbc' and 'co.uk' respectively.
+Say you want just the "google" part of https://www.google.com. *Everybody gets
+this wrong.* Splitting on the "." and taking the 2nd-to-last element only works
+for simple domains, e.g. .com. Consider
+[http://forums.bbc.co.uk](http://forums.bbc.co.uk): the naive splitting method
+will give you "co" as the domain, instead of "bbc". Rather than juggle TLDs,
+gTLDs, or ccTLDs  yourself, `tldextract` extracts the currently living public
+suffixes according to [the Public Suffix List](https://publicsuffix.org).
 
-`tldextract` on the other hand knows what all gTLDs and ccTLDs look like by
-looking up the currently living ones according to [the Public Suffix List
-(PSL)](http://www.publicsuffix.org). So, given a URL, it knows its subdomain
-from its domain, and its domain from its country code.
+> A "public suffix" is one under which Internet users can directly register
+> names.
+
+A public suffix is also sometimes called an effective TLD (eTLD).
+
+### Usage
 
 ```python
 >>> import tldextract

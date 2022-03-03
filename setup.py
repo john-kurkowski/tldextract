@@ -1,5 +1,5 @@
-"""`tldextract` accurately separates the gTLD or ccTLD (generic or country code
-top-level domain) from the registered domain and subdomains of a URL.
+""" `tldextract` accurately separates a URL's subdomain, domain, and public suffix,
+using the Public Suffix List (PSL).
 
     >>> import tldextract
     >>> tldextract.extract('http://forums.news.cnn.com/')
@@ -34,14 +34,14 @@ setup(
     author="John Kurkowski",
     author_email="john.kurkowski@gmail.com",
     description=(
-        "Accurately separate the TLD from the registered domain and "
-        "subdomains of a URL, using the Public Suffix List. By "
+        "Accurately separates a URL's subdomain, domain, and public suffix, "
+        "using the Public Suffix List (PSL). By "
         "default, this includes the public ICANN TLDs and their "
         "exceptions. You can optionally support the Public Suffix "
         "List's private domains as well."
     ),
     license="BSD License",
-    keywords="tld domain subdomain url parse extract urlparse urlsplit public suffix list",
+    keywords="tld domain subdomain url parse extract urlparse urlsplit public suffix list publicsuffix publicsuffixlist",
     url="https://github.com/john-kurkowski/tldextract",
     packages=["tldextract"],
     include_package_data=True,

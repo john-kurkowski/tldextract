@@ -192,6 +192,10 @@ def test_idna_2008():
         "xn--gieen46ers-73a.de",
         ("xn--gieen46ers-73a.de", "", "xn--gieen46ers-73a", "de"),
     )
+    assert_extract(
+        "angelinablog。com.de",
+        ("angelinablog.com.de", "angelinablog", "com", "de"),
+    )
 
 
 def test_empty():

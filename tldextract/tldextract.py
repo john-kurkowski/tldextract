@@ -366,7 +366,7 @@ def _decode_punycode(label: str) -> str:
     looks_like_puny = lowered.startswith("xn--")
     if looks_like_puny:
         try:
-            return idna.decode(lowered.encode("ascii"))
+            return idna.decode(lowered)
         except (UnicodeError, IndexError):
             pass
     return lowered

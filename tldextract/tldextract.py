@@ -50,6 +50,7 @@ or suffix were found:
 
 import logging
 import os
+import re
 from functools import wraps
 from typing import FrozenSet, List, NamedTuple, Optional, Sequence, Union
 
@@ -68,6 +69,8 @@ PUBLIC_SUFFIX_LIST_URLS = (
     "https://publicsuffix.org/list/public_suffix_list.dat",
     "https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat",
 )
+
+_UNICODE_DOTS_RE = re.compile("[\u002e\u3002\uff0e\uff61]")
 
 
 class ExtractResult(NamedTuple):
@@ -227,7 +230,7 @@ class TLDExtract:
             .rstrip(".")
         )
 
-        labels = netloc.split(".")
+        labels = _UNICODE_DOTS_RE.split(netloc)
 
         translations = [_decode_punycode(label) for label in labels]
         suffix_index = self._get_tld_extractor().suffix_index(

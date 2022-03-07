@@ -118,7 +118,7 @@ class DiskCache:
                         "unable to cache %s.%s in %s. This could refresh the "
                         "Public Suffix List over HTTP every app startup. "
                         "Construct your `TLDExtract` with a writable `cache_dir` or "
-                        "set `cache_dir=False` to silence this warning. %s"
+                        "set `cache_dir=None` to silence this warning. %s"
                     ),
                     namespace,
                     key,
@@ -172,7 +172,7 @@ class DiskCache:
                         "unable to cache %s.%s in %s. This could refresh the "
                         "Public Suffix List over HTTP every app startup. "
                         "Construct your `TLDExtract` with a writable `cache_dir` or "
-                        "set `cache_dir=False` to silence this warning. %s"
+                        "set `cache_dir=None` to silence this warning. %s"
                     ),
                     namespace,
                     key_args,

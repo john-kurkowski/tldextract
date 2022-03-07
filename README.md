@@ -124,7 +124,7 @@ custom_cache_extract = tldextract.TLDExtract(cache_dir='/path/to/your/cache/')
 custom_cache_extract('http://www.google.com')
 
 # extract callable that doesn't use caching
-no_cache_extract = tldextract.TLDExtract(cache_dir=False)
+no_cache_extract = tldextract.TLDExtract(cache_dir=None)
 no_cache_extract('http://www.google.com')
 ```
 

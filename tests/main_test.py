@@ -346,10 +346,10 @@ def test_cache_timeouts(tmpdir):
 
 def test_tlds_property():
     extract_private = tldextract.TLDExtract(
-        cache_dir=None, suffix_list_urls=None, include_psl_private_domains=True
+        cache_dir=None, suffix_list_urls=(), include_psl_private_domains=True
     )
     extract_public = tldextract.TLDExtract(
-        cache_dir=None, suffix_list_urls=None, include_psl_private_domains=False
+        cache_dir=None, suffix_list_urls=(), include_psl_private_domains=False
     )
     assert len(extract_private.tlds) > len(extract_public.tlds)
 

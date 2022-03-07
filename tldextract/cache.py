@@ -219,7 +219,8 @@ def _fetch_url(session, url, timeout):
 def _make_cache_key(inputs):
     key = repr(inputs)
     try:
-        key = md5(key).hexdigest()
+        # TODO: does this path ever not throw?
+        key = md5(key).hexdigest()  # type: ignore[arg-type]
     except TypeError:
         key = md5(key.encode("utf8")).hexdigest()
     return key

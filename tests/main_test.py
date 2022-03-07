@@ -3,6 +3,7 @@
 import logging
 import os
 import tempfile
+from typing import Sequence, Tuple
 
 import pytest
 import responses
@@ -23,17 +24,17 @@ extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
 
 
 def assert_extract(
-    url,
-    expected_domain_data,
-    expected_ip_data="",
-    funs=(
+    url: str,
+    expected_domain_data: Tuple[str, str, str, str],
+    expected_ip_data: str = "",
+    funs: Sequence[tldextract.TLDExtract] = (
         extract,
         extract_no_cache,
         extract_using_real_local_suffix_list,
         extract_using_real_local_suffix_list_no_cache,
         extract_using_fallback_to_snapshot_no_cache,
     ),
-):
+) -> None:
     """Test helper to compare all the expected and actual attributes and
     properties of an extraction. Runs the same comparison across several
     permutations of tldextract instance configurations."""

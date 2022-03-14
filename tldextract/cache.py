@@ -118,7 +118,7 @@ class DiskCache:
                         "unable to cache %s.%s in %s. This could refresh the "
                         "Public Suffix List over HTTP every app startup. "
                         "Construct your `TLDExtract` with a writable `cache_dir` or "
-                        "set `cache_dir=False` to silence this warning. %s"
+                        "set `cache_dir=None` to silence this warning. %s"
                     ),
                     namespace,
                     key,
@@ -172,7 +172,7 @@ class DiskCache:
                         "unable to cache %s.%s in %s. This could refresh the "
                         "Public Suffix List over HTTP every app startup. "
                         "Construct your `TLDExtract` with a writable `cache_dir` or "
-                        "set `cache_dir=False` to silence this warning. %s"
+                        "set `cache_dir=None` to silence this warning. %s"
                     ),
                     namespace,
                     key_args,
@@ -218,11 +218,7 @@ def _fetch_url(session, url, timeout):
 
 def _make_cache_key(inputs):
     key = repr(inputs)
-    try:
-        key = md5(key).hexdigest()
-    except TypeError:
-        key = md5(key.encode("utf8")).hexdigest()
-    return key
+    return md5(key.encode("utf8")).hexdigest()
 
 
 def _make_dir(filename):

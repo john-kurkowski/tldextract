@@ -2,11 +2,11 @@
 import os.path
 import sys
 import types
+from typing import Any, cast
 
 import pytest
 import tldextract.cache
-from tldextract.cache import (DiskCache, get_cache_dir,
-                              get_pkg_unique_identifier)
+from tldextract.cache import DiskCache, get_cache_dir, get_pkg_unique_identifier
 
 
 def test_disk_cache(tmpdir):
@@ -28,7 +28,7 @@ def test_get_pkg_unique_identifier(monkeypatch):
     monkeypatch.setattr(sys, "prefix", "/home/john/.pyenv/versions/myvirtualenv")
 
     mock_version_module = types.ModuleType("tldextract._version", "mocked module")
-    mock_version_module.version = "1.2.3"
+    cast(Any, mock_version_module).version = "1.2.3"
     monkeypatch.setitem(sys.modules, "tldextract._version", mock_version_module)
 
     assert (

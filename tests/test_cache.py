@@ -72,3 +72,23 @@ def test_get_cache_dir(monkeypatch):
     monkeypatch.setenv("TLDEXTRACT_CACHE", "/alt-tld-cache")
 
     assert get_cache_dir() == "/alt-tld-cache"
+
+
+def test_cache_and_run(tmpdir):
+    cache = DiskCache(tmpdir)
+
+    def return_value(value):
+        """Test function that returns whatever is passed to it."""
+        return value
+
+    # Call the cache with a function that returns any value
+    first_call = cache.run_and_cache(return_value, "testing", {"value": 1}, {"value"})
+
+    def raise_error(*args, **kwags):  # pylint: disable=unused-argument
+        """Test function that raises an error."""
+        raise RuntimeError()
+
+    # Calling it again with the same namespace and hash should give the same
+    # value
+    second_call = cache.run_and_cache(raise_error, "testing", {"value": 1}, {"value"})
+    assert first_call == second_call

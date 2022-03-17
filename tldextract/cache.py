@@ -203,7 +203,7 @@ class DiskCache:
                 result: T = self.get(namespace=namespace, key=key_args)
             except KeyError:
                 result = func(**kwargs)
-                self.set(namespace="urls", key=key_args, value=result)
+                self.set(namespace=namespace, key=key_args, value=result)
 
             return result
 

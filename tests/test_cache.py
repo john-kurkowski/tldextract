@@ -3,6 +3,7 @@ import os.path
 import sys
 import types
 from typing import Any, cast
+from unittest.mock import Mock
 
 import pytest
 import tldextract.cache
@@ -74,21 +75,27 @@ def test_get_cache_dir(monkeypatch):
     assert get_cache_dir() == "/alt-tld-cache"
 
 
-def test_cache_and_run(tmpdir):
+def test_run_and_cache(tmpdir):
     cache = DiskCache(tmpdir)
 
-    def return_value(value):
-        """Test function that returns whatever is passed to it."""
-        return value
+    return_value1 = "unique return value"
+    some_fn = Mock(return_value=return_value1)
+    kwargs1 = {"value": 1}
 
-    # Call the cache with a function that returns any value
-    first_call = cache.run_and_cache(return_value, "testing", {"value": 1}, {"value"})
+    assert some_fn.call_count == 0
 
-    def raise_error(*args, **kwags):  # pylint: disable=unused-argument
-        """Test function that raises an error."""
-        raise RuntimeError()
+    call1 = cache.run_and_cache(some_fn, "test_namespace", kwargs1, kwargs1.keys())
+    assert call1 == return_value1
+    assert some_fn.call_count == 1
 
-    # Calling it again with the same namespace and hash should give the same
-    # value
-    second_call = cache.run_and_cache(raise_error, "testing", {"value": 1}, {"value"})
-    assert first_call == second_call
+    call2 = cache.run_and_cache(some_fn, "test_namespace", kwargs1, kwargs1.keys())
+    assert call2 == return_value1
+    assert some_fn.call_count == 1
+
+    kwargs2 = {"value": 2}
+    return_value2 = "another return value"
+    some_fn.return_value = return_value2
+
+    call3 = cache.run_and_cache(some_fn, "test_namespace", kwargs2, kwargs2.keys())
+    assert call3 == return_value2
+    assert some_fn.call_count == 2

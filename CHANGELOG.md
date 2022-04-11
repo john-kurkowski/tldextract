@@ -3,6 +3,22 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.2.1 (2022-04-11)
+
+* Bugfixes
+  * Fix incorrect namespace used for caching function returns ([#258](https://github.com/john-kurkowski/tldextract/issues/258))
+  * Remove redundant encode ([`6e2c0e0`](https://github.com/john-kurkowski/tldextract/commit/6e2c0e0))
+  * Remove redundant lowercase ([`226bfc2`](https://github.com/john-kurkowski/tldextract/commit/226bfc2))
+  * Remove unused `try`/`except` path ([#255](https://github.com/john-kurkowski/tldextract/issues/255))
+  * Add types to the private API (disallow untyped calls and defs) ([#256](https://github.com/john-kurkowski/tldextract/issues/256))
+  * Rely on `python_requires` instead of runtime check ([#247](https://github.com/john-kurkowski/tldextract/issues/247))
+* Docs
+  * Fix docs with updated types
+  * Fix link in Travis CI badge ([#248](https://github.com/john-kurkowski/tldextract/issues/248))
+  * Rewrite documentation intro
+  * Remove unnecessary subheading
+  * Unify case
+
 ## 3.2.0 (2022-02-20)
 
 * Features

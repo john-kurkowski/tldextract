@@ -7,7 +7,7 @@ import os
 import os.path
 import sys
 from hashlib import md5
-from typing import Callable, Dict, Hashable, List, Optional, TypeVar, Union
+from typing import Callable, Dict, Hashable, Iterable, Optional, TypeVar, Union
 
 from filelock import FileLock
 import requests
@@ -166,7 +166,7 @@ class DiskCache:
         func: Callable[..., T],
         namespace: str,
         kwargs: Dict[str, Hashable],
-        hashed_argnames: List[str],
+        hashed_argnames: Iterable[str],
     ) -> T:
         """Get a url but cache the response"""
         if not self.enabled:

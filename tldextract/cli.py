@@ -34,7 +34,7 @@ def main() -> None:
         help="force fetch the latest TLD definitions",
     )
     parser.add_argument(
-        "--update_source",
+        "--suffix_list_url",
         action="append",
         required=False,
         help="use an alternate URL or local file for TLD definitions.",
@@ -69,9 +69,9 @@ def main() -> None:
 
     tld_extract = TLDExtract(**obj_kwargs)
 
-    if args.update_source is not None:
+    if args.suffix_list_url is not None:
         suffix_list_urls = []
-        for source in args.update_source:
+        for source in args.suffix_list_url:
             if os.path.isfile(source):
                 as_path_uri = pathlib.Path(os.path.abspath(source)).as_uri()
                 suffix_list_urls.append(as_path_uri)

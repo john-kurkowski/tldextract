@@ -7,12 +7,16 @@ import os
 import os.path
 import sys
 from hashlib import md5
+from typing import Callable, Dict, Hashable, Iterable, Optional, TypeVar, Union
 
 from filelock import FileLock
+import requests
 
 LOG = logging.getLogger(__name__)
 
 _DID_LOG_UNABLE_TO_CACHE = False
+
+T = TypeVar("T")  # pylint: disable=invalid-name
 
 
 def get_pkg_unique_identifier() -> str:
@@ -75,7 +79,7 @@ def get_cache_dir() -> str:
 class DiskCache:
     """Disk _cache that only works for jsonable values"""
 
-    def __init__(self, cache_dir, lock_timeout=20):
+    def __init__(self, cache_dir: Optional[str], lock_timeout: int = 20):
         self.enabled = bool(cache_dir)
         self.cache_dir = os.path.expanduser(str(cache_dir) or "")
         self.lock_timeout = lock_timeout
@@ -83,7 +87,7 @@ class DiskCache:
         # combined with a call to `.clear()` wont wipe someones hard drive
         self.file_ext = ".tldextract.json"
 
-    def get(self, namespace, key):
+    def get(self, namespace: str, key: Union[str, Dict[str, Hashable]]) -> T:
         """Retrieve a value from the disk cache"""
         if not self.enabled:
             raise KeyError("Cache is disabled")
@@ -99,10 +103,13 @@ class DiskCache:
             LOG.error("error reading TLD cache file %s: %s", cache_filepath, exc)
             raise KeyError("namespace: " + namespace + " key: " + repr(key)) from None
 
-    def set(self, namespace, key, value):
+    def set(
+        self, namespace: str, key: Union[str, Dict[str, Hashable]], value: T
+    ) -> None:
         """Set a value in the disk cache"""
         if not self.enabled:
-            return False
+            return
+
         cache_filepath = self._key_to_cachefile_path(namespace, key)
 
         try:
@@ -127,9 +134,7 @@ class DiskCache:
                 )
                 _DID_LOG_UNABLE_TO_CACHE = True
 
-        return None
-
-    def clear(self):
+    def clear(self) -> None:
         """Clear the disk cache"""
         for root, _, files in os.walk(self.cache_dir):
             for filename in files:
@@ -146,7 +151,9 @@ class DiskCache:
                         if exc.errno != errno.ENOENT:
                             raise
 
-    def _key_to_cachefile_path(self, namespace, key):
+    def _key_to_cachefile_path(
+        self, namespace: str, key: Union[str, Dict[str, Hashable]]
+    ) -> str:
         namespace_path = os.path.join(self.cache_dir, namespace)
         hashed_key = _make_cache_key(key)
 
@@ -154,7 +161,13 @@ class DiskCache:
 
         return cache_path
 
-    def run_and_cache(self, func, namespace, kwargs, hashed_argnames):
+    def run_and_cache(
+        self,
+        func: Callable[..., T],
+        namespace: str,
+        kwargs: Dict[str, Hashable],
+        hashed_argnames: Iterable[str],
+    ) -> T:
         """Get a url but cache the response"""
         if not self.enabled:
             return func(**kwargs)
@@ -187,14 +200,16 @@ class DiskCache:
         # pylint: disable-next=abstract-class-instantiated
         with FileLock(lock_path, timeout=self.lock_timeout):
             try:
-                result = self.get(namespace=namespace, key=key_args)
+                result: T = self.get(namespace=namespace, key=key_args)
             except KeyError:
                 result = func(**kwargs)
-                self.set(namespace="urls", key=key_args, value=result)
+                self.set(namespace=namespace, key=key_args, value=result)
 
             return result
 
-    def cached_fetch_url(self, session, url, timeout):
+    def cached_fetch_url(
+        self, session: requests.Session, url: str, timeout: Union[float, int, None]
+    ) -> str:
         """Get a url but cache the response"""
         return self.run_and_cache(
             func=_fetch_url,
@@ -204,8 +219,7 @@ class DiskCache:
         )
 
 
-def _fetch_url(session, url, timeout):
-
+def _fetch_url(session: requests.Session, url: str, timeout: Optional[int]) -> str:
     response = session.get(url, timeout=timeout)
     response.raise_for_status()
     text = response.text
@@ -216,12 +230,12 @@ def _fetch_url(session, url, timeout):
     return text
 
 
-def _make_cache_key(inputs):
+def _make_cache_key(inputs: Union[str, Dict[str, Hashable]]) -> str:
     key = repr(inputs)
     return md5(key.encode("utf8")).hexdigest()
 
 
-def _make_dir(filename):
+def _make_dir(filename: str) -> None:
     """Make a directory if it doesn't already exist"""
     if not os.path.exists(os.path.dirname(filename)):
         try:

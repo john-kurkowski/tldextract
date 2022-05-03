@@ -9,7 +9,7 @@ from ._version import version as __version__
 from .tldextract import TLDExtract
 
 
-def main():
+def main() -> None:
     """tldextract CLI main command."""
     logging.basicConfig()
 

@@ -3,9 +3,12 @@
 import logging
 import pkgutil
 import re
+from typing import List, Sequence, Tuple, Union, cast
 
 import requests
 from requests_file import FileAdapter  # type: ignore[import]
+
+from .cache import DiskCache
 
 LOG = logging.getLogger("tldextract")
 
@@ -18,7 +21,11 @@ class SuffixListNotFound(LookupError):
     you can specify backups, or use this library's bundled snapshot."""
 
 
-def find_first_response(cache, urls, cache_fetch_timeout=None):
+def find_first_response(
+    cache: DiskCache,
+    urls: Sequence[str],
+    cache_fetch_timeout: Union[float, int, None] = None,
+) -> str:
     """Decode the first successfully fetched URL, from UTF-8 encoding to
     Python unicode.
     """
@@ -38,7 +45,7 @@ def find_first_response(cache, urls, cache_fetch_timeout=None):
     )
 
 
-def extract_tlds_from_suffix_list(suffix_list_text):
+def extract_tlds_from_suffix_list(suffix_list_text: str) -> Tuple[List[str], List[str]]:
     """Parse the raw suffix list text for its different designations of
     suffixes."""
     public_text, _, private_text = suffix_list_text.partition(
@@ -50,7 +57,12 @@ def extract_tlds_from_suffix_list(suffix_list_text):
     return public_tlds, private_tlds
 
 
-def get_suffix_lists(cache, urls, cache_fetch_timeout, fallback_to_snapshot):
+def get_suffix_lists(
+    cache: DiskCache,
+    urls: Sequence[str],
+    cache_fetch_timeout: Union[float, int, None],
+    fallback_to_snapshot: bool,
+) -> Tuple[List[str], List[str]]:
     """Fetch, parse, and cache the suffix lists"""
     return cache.run_and_cache(
         func=_get_suffix_lists,
@@ -65,16 +77,22 @@ def get_suffix_lists(cache, urls, cache_fetch_timeout, fallback_to_snapshot):
     )
 
 
-def _get_suffix_lists(cache, urls, cache_fetch_timeout, fallback_to_snapshot):
+def _get_suffix_lists(
+    cache: DiskCache,
+    urls: Sequence[str],
+    cache_fetch_timeout: Union[float, int, None],
+    fallback_to_snapshot: bool,
+) -> Tuple[List[str], List[str]]:
     """Fetch, parse, and cache the suffix lists"""
 
     try:
         text = find_first_response(cache, urls, cache_fetch_timeout=cache_fetch_timeout)
     except SuffixListNotFound as exc:
         if fallback_to_snapshot:
-            text = pkgutil.get_data("tldextract", ".tld_set_snapshot")
-            if not isinstance(text, str):
-                text = str(text, "utf-8")
+            maybe_pkg_data = pkgutil.get_data("tldextract", ".tld_set_snapshot")
+            # package maintainers guarantee file is included
+            pkg_data = cast(bytes, maybe_pkg_data)
+            text = pkg_data.decode("utf-8")
         else:
             raise exc
 

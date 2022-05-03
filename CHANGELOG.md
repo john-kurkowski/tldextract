@@ -3,6 +3,92 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.2.1 (2022-04-11)
+
+* Bugfixes
+  * Fix incorrect namespace used for caching function returns ([#258](https://github.com/john-kurkowski/tldextract/issues/258))
+  * Remove redundant encode ([`6e2c0e0`](https://github.com/john-kurkowski/tldextract/commit/6e2c0e0))
+  * Remove redundant lowercase ([`226bfc2`](https://github.com/john-kurkowski/tldextract/commit/226bfc2))
+  * Remove unused `try`/`except` path ([#255](https://github.com/john-kurkowski/tldextract/issues/255))
+  * Add types to the private API (disallow untyped calls and defs) ([#256](https://github.com/john-kurkowski/tldextract/issues/256))
+  * Rely on `python_requires` instead of runtime check ([#247](https://github.com/john-kurkowski/tldextract/issues/247))
+* Docs
+  * Fix docs with updated types
+  * Fix link in Travis CI badge ([#248](https://github.com/john-kurkowski/tldextract/issues/248))
+  * Rewrite documentation intro
+  * Remove unnecessary subheading
+  * Unify case
+
+## 3.2.0 (2022-02-20)
+
+* Features
+    * Add types to the public API ([#244](https://github.com/john-kurkowski/tldextract/issues/244))
+* Bugfixes
+    * Add support for Python 3.10 ([#246](https://github.com/john-kurkowski/tldextract/issues/246))
+    * Drop support for EOL Python 3.6 ([#246](https://github.com/john-kurkowski/tldextract/issues/246))
+    * Remove py2 tag from wheel ([#245](https://github.com/john-kurkowski/tldextract/issues/245))
+    * Remove extra backtick in README ([#240](https://github.com/john-kurkowski/tldextract/issues/240))
+
+## 3.1.2 (2021-09-01)
+
+* Misc.
+    * Only run pylint in Tox environments, i.e. CI, not by default in tests ([#230](https://github.com/john-kurkowski/tldextract/issues/230))
+
+## 3.1.1 (2021-08-27)
+
+* Bugfixes
+    * Support Python 3.9
+    * Drop support for EOL Python 3.5
+
+## 3.1.0 (2020-11-22)
+
+* Features
+    * Prefer to cache in XDG cache directory in user folder, vs. in Python install folder ([#213](https://github.com/john-kurkowski/tldextract/issues/213))
+* Bugfixes
+    * Fix `AttributeError` on `--update` ([#215](https://github.com/john-kurkowski/tldextract/issues/215))
+
+## 3.0.2 (2020-10-24)
+
+* Bugfixes
+    * Catch permission error when making cache dir, as well as cache file ([#211](https://github.com/john-kurkowski/tldextract/issues/211))
+
+## 3.0.1 (2020-10-21)
+
+* Bugfixes
+    * Fix `tlds` property `AttributeError` ([#210](https://github.com/john-kurkowski/tldextract/issues/210))
+    * Allow `include_psl_private_domains` in global `extract` too ([#210](https://github.com/john-kurkowski/tldextract/issues/210))
+
+## 3.0.0 (2020-10-20)
+
+No changes since 3.0.0.rc1.
+
+## 3.0.0.rc1 (2020-10-12)
+
+This release fixes the long standing bug that public and private suffixes were
+generated separately and could not be switched at runtime,
+[#66](https://github.com/john-kurkowski/tldextract/issues/66).
+
+* Breaking Changes
+    * Rename `cache_file` to `cache_dir` as it is no longer a single file but a directory ([#207](https://github.com/john-kurkowski/tldextract/issues/207))
+    * Rename CLI arg also, from `--cache_file` to `--cache_dir`
+    * Remove Python 2.7 support
+* Features
+    * Can pass `include_psl_private_domains` on call, not only on construction
+    * Use filelocking to support multi-processing and multithreading environments
+* Bugfixes
+    * Select public or private suffixes at runtime ([#66](https://github.com/john-kurkowski/tldextract/issues/66))
+* Removals
+    * Do not `debug` log the diff during update
+
+## 2.2.3 (2020-08-05)
+
+* Bugfixes
+    * Fix concurrent access to cache file when using tldextract in multiple threads ([#146](https://github.com/john-kurkowski/tldextract/pull/146))
+    * Relocate version number, to avoid costly imports ([#187](https://github.com/john-kurkowski/tldextract/pull/187))
+    * Catch `IndexError` caused by upstream punycode bug ([#200](https://github.com/john-kurkowski/tldextract/pull/200))
+    * Drop support for EOL Python 3.4 ([#186](https://github.com/john-kurkowski/tldextract/pull/186))
+    * Explain warning better
+
 ## 2.2.2 (2019-10-15)
 
 * Bugfixes
@@ -16,7 +102,6 @@ After upgrading, update your cache file by deleting it or via `tldextract
         * Use the latest pylint that works in Python 2
         * Appease pylint with the new rules
         * Support Python 3.8-dev
-        * Drop support for EOL Python 3.4
 
 ## 2.2.1 (2019-03-05)
 

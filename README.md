@@ -1,22 +1,22 @@
-# tldextract
+# tldextract [![PyPI version](https://badge.fury.io/py/tldextract.svg)](https://badge.fury.io/py/tldextract) [![Build Status](https://travis-ci.com/john-kurkowski/tldextract.svg?branch=master)](https://app.travis-ci.com/github/john-kurkowski/tldextract)
 
-## Python Module [![PyPI version](https://badge.fury.io/py/tldextract.svg)](https://badge.fury.io/py/tldextract) [![Build Status](https://travis-ci.com/john-kurkowski/tldextract.svg?branch=master)](https://travis-ci.com/john-kurkowski/tldextract)
+`tldextract` accurately separates a URL's subdomain, domain, and public suffix,
+using [the Public Suffix List (PSL)](https://publicsuffix.org).
 
-`tldextract` accurately separates the gTLD or ccTLD (generic or country code
-top-level domain) from the registered domain and subdomains of a URL. For
-example, say you want just the 'google' part of 'http://www.google.com'.
+Say you want just the "google" part of https://www.google.com. *Everybody gets
+this wrong.* Splitting on the "." and taking the 2nd-to-last element only works
+for simple domains, e.g. .com. Consider
+[http://forums.bbc.co.uk](http://forums.bbc.co.uk): the naive splitting method
+will give you "co" as the domain, instead of "bbc". Rather than juggle TLDs,
+gTLDs, or ccTLDs  yourself, `tldextract` extracts the currently living public
+suffixes according to [the Public Suffix List](https://publicsuffix.org).
 
-*Everybody gets this wrong.* Splitting on the '.' and taking the last 2
-elements goes a long way only if you're thinking of simple e.g. .com
-domains. Think parsing
-[http://forums.bbc.co.uk](http://forums.bbc.co.uk) for example: the naive
-splitting method above will give you 'co' as the domain and 'uk' as the TLD,
-instead of 'bbc' and 'co.uk' respectively.
+> A "public suffix" is one under which Internet users can directly register
+> names.
 
-`tldextract` on the other hand knows what all gTLDs and ccTLDs look like by
-looking up the currently living ones according to [the Public Suffix List
-(PSL)](http://www.publicsuffix.org). So, given a URL, it knows its subdomain
-from its domain, and its domain from its country code.
+A public suffix is also sometimes called an effective TLD (eTLD).
+
+## Usage
 
 ```python
 >>> import tldextract
@@ -75,13 +75,13 @@ or suffix were found:
 By default, this package supports the public ICANN TLDs and their exceptions.
 You can optionally support the Public Suffix List's private domains as well.
 
-This module started by implementing the chosen answer from [this StackOverflow question on
+This package started by implementing the chosen answer from [this StackOverflow question on
 getting the "domain name" from a URL](http://stackoverflow.com/questions/569137/how-to-get-domain-name-from-url/569219#569219).
 However, the proposed regex solution doesn't address many country codes like
 com.au, or the exceptions to country codes like the registered domain
-parliament.uk. The Public Suffix List does, and so does this module.
+parliament.uk. The Public Suffix List does, and so does this package.
 
-### Installation
+## Install
 
 Latest release on PyPI:
 
@@ -102,19 +102,17 @@ tldextract http://forums.bbc.co.uk
 # forums bbc co.uk
 ```
 
-### Note About Caching
+## Note about caching
 
-Beware when first running the module, it updates its TLD list with a live HTTP
-request. This updated TLD set is cached indefinitely in
-`/path/to/tldextract/.tld_set`.
+Beware when first calling `tldextract`, it updates its TLD list with a live HTTP
+request. This updated TLD set is usually cached indefinitely in `$HOME/.cache/python-tldextract`.
+To control the cache's location, set TLDEXTRACT_CACHE environment variable or set the
+cache_dir path in TLDExtract initialization.
 
 (Arguably runtime bootstrapping like that shouldn't be the default behavior,
 like for production systems. But I want you to have the latest TLDs, especially
 when I haven't kept this code up to date.)
 
-To avoid this fetch or control the cache's location, use your own extract
-callable by setting TLDEXTRACT_CACHE environment variable or by setting the
-cache_file path in TLDExtract initialization.
 
 ```python
 # extract callable that falls back to the included TLD snapshot, no live HTTP fetching
@@ -122,11 +120,11 @@ no_fetch_extract = tldextract.TLDExtract(suffix_list_urls=None)
 no_fetch_extract('http://www.google.com')
 
 # extract callable that reads/writes the updated TLD set to a different path
-custom_cache_extract = tldextract.TLDExtract(cache_file='/path/to/your/cache/file')
+custom_cache_extract = tldextract.TLDExtract(cache_dir='/path/to/your/cache/')
 custom_cache_extract('http://www.google.com')
 
 # extract callable that doesn't use caching
-no_cache_extract = tldextract.TLDExtract(cache_file=False)
+no_cache_extract = tldextract.TLDExtract(cache_dir=None)
 no_cache_extract('http://www.google.com')
 ```
 
@@ -145,9 +143,9 @@ env TLDEXTRACT_CACHE="~/tldextract.cache" tldextract --update
 
 It is also recommended to delete the file after upgrading this lib.
 
-### Advanced Usage
+## Advanced usage
 
-#### Public vs. Private Domains
+### Public vs. private domains
 
 The PSL [maintains a concept of "private"
 domains](https://publicsuffix.org/list/).
@@ -167,10 +165,15 @@ ExtractResult(subdomain='waiterrant', domain='blogspot', suffix='com')
 ```
 
 The following overrides this.
-
 ```python
->>> extract = tldextract.TLDExtract(include_psl_private_domains=True)
->>> extract.update() # necessary until #66 is fixed
+>>> extract = tldextract.TLDExtract()
+>>> extract('waiterrant.blogspot.com', include_psl_private_domains=True)
+ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com')
+```
+
+or to change the default for all extract calls,
+```python
+>>> extract = tldextract.TLDExtract( include_psl_private_domains=True)
 >>> extract('waiterrant.blogspot.com')
 ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com')
 ```
@@ -180,7 +183,7 @@ mentally parse a URL. It doesn't assume familiarity with the PSL nor that the
 PSL makes such a distinction. Note this may run counter to the default parsing
 behavior of other, PSL-based libraries.
 
-#### Specifying your own URL or file for the Suffix List data
+### Specifying your own URL or file for Public Suffix List data
 
 You can specify your own input data in place of the default Mozilla Public Suffix List:
 
@@ -189,19 +192,19 @@ extract = tldextract.TLDExtract(
     suffix_list_urls=["http://foo.bar.baz"],
     # Recommended: Specify your own cache file, to minimize ambiguities about where
     # tldextract is getting its data, or cached data, from.
-    cache_file='/path/to/your/cache/file',
+    cache_dir='/path/to/your/cache/',
     fallback_to_snapshot=False)
 ```
 
 The above snippet will fetch from the URL *you* specified, upon first need to download the
-suffix list (i.e. if the cache_file doesn't exist).
+suffix list (i.e. if the cached version doesn't exist).
 
 If you want to use input data from your local filesystem, just use the `file://` protocol:
 
 ```python
 extract = tldextract.TLDExtract(
     suffix_list_urls=["file://absolute/path/to/your/local/suffix/list/file"],
-    cache_file='/path/to/your/cache/file',
+    cache_dir='/path/to/your/cache/',
     fallback_to_snapshot=False)
 ```
 
@@ -217,9 +220,9 @@ tldextract --update --update_source "http://foo.bar.baz"
 This could be useful in production when you don't want the delay associated with updating the suffix
 list on first use, or if you are behind a complex firewall that prevents a simple update from working.
 
-### FAQ
+## FAQ
 
-#### Can you add suffix \_\_\_\_? Can you make an exception for domain \_\_\_\_?
+### Can you add suffix \_\_\_\_? Can you make an exception for domain \_\_\_\_?
 
 This project doesn't contain an actual list of public suffixes. That comes from
 [the Public Suffix List (PSL)](https://publicsuffix.org/). Submit amendments there.
@@ -228,7 +231,7 @@ This project doesn't contain an actual list of public suffixes. That comes from
 forking the PSL and using your fork in the `suffix_list_urls` param, or adding
 your suffix piecemeal with the `extra_suffixes` param.)
 
-#### If I pass an invalid URL, I still get a result, no error. What gives?
+### If I pass an invalid URL, I still get a result, no error. What gives?
 
 To keep `tldextract` light in LoC & overhead, and because there are plenty of
 URL validators out there, this library is very lenient with input. If valid
@@ -239,19 +242,6 @@ of desensitizing users to the nuances of URLs. Who knows how much. But in the
 future, I would consider an overhaul. For example, users could opt into
 validation, either receiving exceptions or error metadata on results.
 
-## Public API
-
-I know it's just one method, but I've needed this functionality in a few
-projects and programming languages, so I've uploaded
-[`tldextract` to App Engine](http://tldextract.appspot.com/). It's there on
-GAE's free pricing plan until Google cuts it off. Just hit it with
-your favorite HTTP client with the URL you want parsed like so:
-
-```zsh
-curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar/baz.html"
-# {"domain": "bbc", "subdomain": "www", "suffix": "co.uk"}
-```
-
 ## Contribute
 
 ### Setting up
@@ -260,14 +250,12 @@ curl "http://tldextract.appspot.com/api/extract?url=http://www.bbc.co.uk/foo/bar
 2. Change into the new directory.
 3. `pip install tox`
 
-Alternatively you can install `detox` instead of `tox` to run tests in parallel.
-
-### Running the Test Suite
+### Running the test suite
 
 Run all tests against all supported Python versions:
 
 ```zsh
-tox
+tox --parallel
 ```
 
 Run all tests against a specific Python environment configuration:

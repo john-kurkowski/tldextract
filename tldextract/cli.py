@@ -1,56 +1,73 @@
-'''tldextract CLI'''
+"""tldextract CLI"""
 
 
+import argparse
 import logging
 import os.path
+import pathlib
 import sys
 
-import pathlib
-
-try:
-    import pkg_resources
-    __version__ = pkg_resources.get_distribution('tldextract').version  # pylint: disable=no-member
-except ImportError:
-    __version__ = '(local)'
-except pkg_resources.DistributionNotFound:
-    __version__ = '(local)'
-
+from ._version import version as __version__
 from .tldextract import TLDExtract
 
-try:
-    unicode
-except NameError:
-    unicode = str  # pylint: disable=invalid-name,redefined-builtin
 
-
-def main():
-    '''tldextract CLI main command.'''
-    import argparse
-
+def main() -> None:
+    """tldextract CLI main command."""
     logging.basicConfig()
 
     parser = argparse.ArgumentParser(
-        prog='tldextract',
-        description='Parse hostname from a url or fqdn')
+        prog="tldextract", description="Parse hostname from a url or fqdn"
+    )
 
-    parser.add_argument('--version', action='version', version='%(prog)s ' + __version__)  # pylint: disable=no-member
-    parser.add_argument('input', metavar='fqdn|url',
-                        type=unicode, nargs='*', help='fqdn or url')
+    parser.add_argument(
+        "--version", action="version", version="%(prog)s " + __version__
+    )
+    parser.add_argument(
+        "input", metavar="fqdn|url", type=str, nargs="*", help="fqdn or url"
+    )
 
-    parser.add_argument('-u', '--update', default=False, action='store_true',
-                        help='force fetch the latest TLD definitions')
-    parser.add_argument('--update_source', action='append', required=False,
-                        help='use an alternate URL or local file for TLD definitions.')
-    parser.add_argument('-c', '--cache_file',
-                        help='use an alternate TLD definition file')
-    parser.add_argument('-p', '--private_domains', default=False, action='store_true',
-                        help='Include private domains')
+    parser.add_argument(
+        "-u",
+        "--update",
+        default=False,
+        action="store_true",
+        help="force fetch the latest TLD definitions",
+    )
+    parser.add_argument(
+        "--update_source",
+        action="append",
+        required=False,
+        help="use an alternate URL or local file for TLD definitions.",
+    )
+    parser.add_argument(
+        "-c", "--cache_dir", help="use an alternate TLD definition caching folder"
+    )
+    parser.add_argument(
+        "-p",
+        "--include_psl_private_domains",
+        "--private_domains",
+        default=False,
+        action="store_true",
+        help="Include private domains",
+    )
+    parser.add_argument(
+        "--no_fallback_to_snapshot",
+        default=True,
+        action="store_false",
+        dest="fallback_to_snapshot",
+        help="Don't fall back to the package's snapshot of the suffix list",
+    )
 
     args = parser.parse_args()
-    tld_extract = TLDExtract(include_psl_private_domains=args.private_domains)
 
-    if args.cache_file:
-        tld_extract.cache_file = args.cache_file
+    obj_kwargs = {
+        "include_psl_private_domains": args.include_psl_private_domains,
+        "fallback_to_snapshot": args.fallback_to_snapshot,
+    }
+    if args.cache_dir:
+        obj_kwargs["cache_dir"] = args.cache_dir
+
+    tld_extract = TLDExtract(**obj_kwargs)
 
     if args.update_source is not None:
         suffix_list_urls = []
@@ -61,7 +78,7 @@ def main():
             else:
                 suffix_list_urls.append(source)
 
-        tld_extract.suffix_list_urls = suffix_list_urls
+        tld_extract.suffix_list_urls = tuple(suffix_list_urls)
 
     if args.update:
         tld_extract.update(True)
@@ -71,4 +88,4 @@ def main():
         return
 
     for i in args.input:
-        print(' '.join(tld_extract(i)))  # pylint: disable=superfluous-parens
+        print(" ".join(tld_extract(i)))

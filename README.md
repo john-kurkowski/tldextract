@@ -214,7 +214,7 @@ Use an absolute path when specifying the `suffix_list_urls` keyword argument.
 The command line update command can be used with a url or local file you specify:
 
 ```zsh
-tldextract --update --update_source "http://foo.bar.baz"
+tldextract --update --suffix_list_url "http://foo.bar.baz"
 ```
 
 This could be useful in production when you don't want the delay associated with updating the suffix

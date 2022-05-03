@@ -46,7 +46,7 @@ def main() -> None:
         default=True,
         action="store_false",
         dest="fallback_to_snapshot",
-        help="Don't fall back to the package's snapshot of the prefix list",
+        help="Don't fall back to the package's snapshot of the suffix list",
     )
 
     args = parser.parse_args()

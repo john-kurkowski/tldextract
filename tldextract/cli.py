@@ -64,10 +64,9 @@ def main() -> None:
         "include_psl_private_domains": args.include_psl_private_domains,
         "fallback_to_snapshot": args.fallback_to_snapshot,
     }
+
     if args.cache_dir:
         obj_kwargs["cache_dir"] = args.cache_dir
-
-    tld_extract = TLDExtract(**obj_kwargs)
 
     if args.suffix_list_url is not None:
         suffix_list_urls = []
@@ -78,7 +77,9 @@ def main() -> None:
             else:
                 suffix_list_urls.append(source)
 
-        tld_extract.suffix_list_urls = tuple(suffix_list_urls)
+        obj_kwargs["suffix_list_urls"] = suffix_list_urls
+
+    tld_extract = TLDExtract(**obj_kwargs)
 
     if args.update:
         tld_extract.update(True)

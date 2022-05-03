@@ -36,6 +36,7 @@ def main() -> None:
     )
     parser.add_argument(
         "-p",
+        "--include_psl_private_domains",
         "--private_domains",
         default=False,
         action="store_true",
@@ -52,7 +53,7 @@ def main() -> None:
     args = parser.parse_args()
 
     obj_kwargs = {
-        "include_psl_private_domains": args.private_domains,
+        "include_psl_private_domains": args.include_psl_private_domains,
         "fallback_to_snapshot": args.fallback_to_snapshot,
     }
     if args.cache_dir:

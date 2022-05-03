@@ -41,11 +41,19 @@ def main() -> None:
         action="store_true",
         help="Include private domains",
     )
+    parser.add_argument(
+        "--no_fallback_to_snapshot",
+        default=True,
+        action="store_false",
+        dest="fallback_to_snapshot",
+        help="Don't fall back to the package's snapshot of the suffix list",
+    )
 
     args = parser.parse_args()
 
     obj_kwargs = {
         "include_psl_private_domains": args.private_domains,
+        "fallback_to_snapshot": args.fallback_to_snapshot,
     }
     if args.cache_dir:
         obj_kwargs["cache_dir"] = args.cache_dir

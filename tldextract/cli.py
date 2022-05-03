@@ -37,7 +37,7 @@ def main() -> None:
         "--suffix_list_url",
         action="append",
         required=False,
-        help="use an alternate URL or local file for TLD definitions.",
+        help="use an alternate URL or local file for TLD definitions",
     )
     parser.add_argument(
         "-c", "--cache_dir", help="use an alternate TLD definition caching folder"

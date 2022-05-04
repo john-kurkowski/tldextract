@@ -3,6 +3,18 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.3.0 (2022-05-04)
+
+* Features
+  * Add CLI flag `--suffix_list_url` to set the suffix list URL(s) or source file(s) ([#197](https://github.com/john-kurkowski/tldextract/issues/197))
+  * Add CLI flag `--no_fallback_to_snapshot` to not fall back to the snapshot ([#260](https://github.com/john-kurkowski/tldextract/issues/260))
+  * Add alias `--include_psl_private_domains` for CLI flag `--private_domains`
+* Bugfixes
+  * Handle more internationalized domain name dots ([#253](https://github.com/john-kurkowski/tldextract/issues/253))
+* Misc.
+  * Update bundled snapshot
+  * Add basic CLI test coverage
+
 ## 3.2.1 (2022-04-11)
 
 * Bugfixes

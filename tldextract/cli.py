@@ -3,6 +3,8 @@
 
 import argparse
 import logging
+import os.path
+import pathlib
 import sys
 
 from ._version import version as __version__
@@ -32,6 +34,12 @@ def main() -> None:
         help="force fetch the latest TLD definitions",
     )
     parser.add_argument(
+        "--suffix_list_url",
+        action="append",
+        required=False,
+        help="use an alternate URL or local file for TLD definitions",
+    )
+    parser.add_argument(
         "-c", "--cache_dir", help="use an alternate TLD definition caching folder"
     )
     parser.add_argument(
@@ -56,8 +64,20 @@ def main() -> None:
         "include_psl_private_domains": args.include_psl_private_domains,
         "fallback_to_snapshot": args.fallback_to_snapshot,
     }
+
     if args.cache_dir:
         obj_kwargs["cache_dir"] = args.cache_dir
+
+    if args.suffix_list_url is not None:
+        suffix_list_urls = []
+        for source in args.suffix_list_url:
+            if os.path.isfile(source):
+                as_path_uri = pathlib.Path(os.path.abspath(source)).as_uri()
+                suffix_list_urls.append(as_path_uri)
+            else:
+                suffix_list_urls.append(source)
+
+        obj_kwargs["suffix_list_urls"] = suffix_list_urls
 
     tld_extract = TLDExtract(**obj_kwargs)
 

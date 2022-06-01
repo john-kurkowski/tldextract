@@ -135,7 +135,7 @@ class TLDExtract:
     def __init__(  # pylint: disable=too-many-arguments
         self,
         cache_dir: Optional[str] = get_cache_dir(),
-        suffix_list_urls: Sequence[str] = PUBLIC_SUFFIX_LIST_URLS,
+        suffix_list_urls: Optional[Sequence[str]] = PUBLIC_SUFFIX_LIST_URLS,
         fallback_to_snapshot: bool = True,
         include_psl_private_domains: bool = False,
         extra_suffixes: Sequence[str] = (),

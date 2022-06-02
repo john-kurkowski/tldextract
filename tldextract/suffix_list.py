@@ -40,8 +40,8 @@ def find_first_response(
             except requests.exceptions.RequestException:
                 LOG.exception("Exception reading Public Suffix List url %s", url)
     raise SuffixListNotFound(
-        "No Public Suffix List found. Consider using a mirror or constructing "
-        "your TLDExtract with `suffix_list_urls=None`."
+        "No remote Public Suffix List found. Consider using a mirror, or avoid this"
+        " fetch by constructing your TLDExtract with `suffix_list_urls=()`."
     )
 
 

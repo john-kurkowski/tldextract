@@ -308,7 +308,7 @@ def test_ipv4_lookalike():
 
 def test_result_as_dict():
     result = extract(
-        "http://admin:password1@www.google.com:666" "/secret/admin/interface?param1=42"
+        "http://admin:password1@www.google.com:666/secret/admin/interface?param1=42"
     )
     expected_dict = {"subdomain": "www", "domain": "google", "suffix": "com"}
     assert result._asdict() == expected_dict

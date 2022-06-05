@@ -264,3 +264,12 @@ Run all tests against a specific Python environment configuration:
 tox -l
 tox -e py37
 ```
+
+### Code Style
+
+Automatically format all code:
+
+```zsh
+pip install black
+black .
+```

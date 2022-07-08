@@ -3,6 +3,13 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.3.1 (2022-07-08)
+
+* Bugfixes
+  * Fix documented types, in README and in exception message ([#265](https://github.com/john-kurkowski/tldextract/issues/265))
+* Misc.
+  * Format source code
+
 ## 3.3.0 (2022-05-04)
 
 * Features

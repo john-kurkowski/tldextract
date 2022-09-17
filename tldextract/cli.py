@@ -89,4 +89,4 @@ def main() -> None:
         return
 
     for i in args.input:
-        print(" ".join(tld_extract(i)))
+        print(" ".join(str(field) for field in tld_extract(i) if field is not None))

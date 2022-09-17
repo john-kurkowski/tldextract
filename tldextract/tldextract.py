@@ -23,6 +23,8 @@ using the Public Suffix List (PSL).
     >>> # a common alias
     >>> ext.registered_domain
     'bbc.co.uk'
+    >>> ext.fqdn
+    'forums.bbc.co.uk'
 
 Note subdomain and suffix are _optional_. Not all URL-like inputs have a
 subdomain or a valid suffix.
@@ -34,20 +36,10 @@ subdomain or a valid suffix.
     ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='')
 
     >>> tldextract.extract('http://127.0.0.1:8080/deployed/')
-    ExtractResult(subdomain='', domain='127.0.0.1', suffix='')
-
-If you want to rejoin the whole namedtuple, regardless of whether a subdomain
-or suffix were found:
-
-    >>> ext = tldextract.extract('http://127.0.0.1:8080/deployed/')
-    >>> # this has unwanted dots
-    >>> '.'.join(ext)
-    '.127.0.0.1.'
-    >>> # join part only if truthy
-    >>> '.'.join(part for part in ext if part)
-    '127.0.0.1'
+    ExtractResult(subdomain='', domain='127.0.0.1', suffix='', port=8080)
 """
 
+import itertools
 import logging
 import os
 import re
@@ -79,6 +71,7 @@ class ExtractResult(NamedTuple):
     subdomain: str
     domain: str
     suffix: str
+    port: Optional[int] = None
 
     @property
     def registered_domain(self) -> str:
@@ -105,9 +98,15 @@ class ExtractResult(NamedTuple):
         ''
         """
         if self.domain and self.suffix:
-            # Disable bogus lint error (https://github.com/PyCQA/pylint/issues/2568)
-            # pylint: disable-next=not-an-iterable
-            return ".".join(i for i in self if i)
+            names = ".".join(i for i in (self.subdomain, self.domain, self.suffix) if i)
+            return ":".join(
+                j
+                for j in (
+                    names,
+                    str(self.port) if self.port is not None else None,
+                )
+                if j
+            )
         return ""
 
     @property
@@ -125,6 +124,15 @@ class ExtractResult(NamedTuple):
         if not (self.suffix or self.subdomain) and IP_RE.match(self.domain):
             return self.domain
         return ""
+
+    def __repr__(self) -> str:
+        fields = (
+            f"subdomain='{self.subdomain}'",
+            f"domain='{self.domain}'",
+            f"suffix='{self.suffix}'",
+            f"port={self.port}" if self.port is not None else None,
+        )
+        return f"ExtractResult({', '.join(field for field in fields if field is not None)})"
 
 
 class TLDExtract:
@@ -219,16 +227,23 @@ class TLDExtract:
         ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
         """
 
-        netloc = (
+        netloc, _, port_and_beyond = (
             SCHEME_RE.sub("", url)
             .partition("/")[0]
             .partition("?")[0]
             .partition("#")[0]
             .split("@")[-1]
-            .partition(":")[0]
-            .strip()
-            .rstrip(".")
+            .partition(":")
         )
+
+        netloc = netloc.strip().rstrip(".")
+
+        port = None
+        if port_and_beyond:
+            leading_digits = "".join(
+                itertools.takewhile(lambda c: c.isdigit(), port_and_beyond)
+            )
+            port = int(leading_digits)
 
         labels = _UNICODE_DOTS_RE.split(netloc)
 
@@ -239,11 +254,11 @@ class TLDExtract:
 
         suffix = ".".join(labels[suffix_index:])
         if not suffix and netloc and looks_like_ip(netloc):
-            return ExtractResult("", netloc, "")
+            return ExtractResult("", netloc, "", port)
 
         subdomain = ".".join(labels[: suffix_index - 1]) if suffix_index else ""
         domain = labels[suffix_index - 1] if suffix_index else ""
-        return ExtractResult(subdomain, domain, suffix)
+        return ExtractResult(subdomain, domain, suffix, port)
 
     def update(self, fetch_now: bool = False) -> None:
         """Force fetch the latest suffix list definitions."""

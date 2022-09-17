@@ -26,11 +26,12 @@ extract_using_extra_suffixes = tldextract.TLDExtract(
 def test_private_extraction():
     tld = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp(), suffix_list_urls=[])
 
-    assert tld("foo.blogspot.com") == ("foo", "blogspot", "com")
+    assert tld("foo.blogspot.com") == ("foo", "blogspot", "com", None)
     assert tld("foo.blogspot.com", include_psl_private_domains=True) == (
         "",
         "foo",
         "blogspot.com",
+        None,
     )
 
 

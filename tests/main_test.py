@@ -3,7 +3,7 @@
 import logging
 import os
 import tempfile
-from typing import Sequence, Tuple
+from typing import Optional, Sequence, Tuple
 
 import pytest
 import responses
@@ -25,7 +25,7 @@ extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
 
 def assert_extract(
     url: str,
-    expected_domain_data: Tuple[str, str, str, str],
+    expected_domain_data: Tuple[str, str, str, str, Optional[int]],
     expected_ip_data: str = "",
     funs: Sequence[tldextract.TLDExtract] = (
         extract,
@@ -43,6 +43,7 @@ def assert_extract(
         expected_subdomain,
         expected_domain,
         expected_tld,
+        expected_port,
     ) = expected_domain_data
     for fun in funs:
         ext = fun(url)
@@ -50,90 +51,100 @@ def assert_extract(
         assert expected_subdomain == ext.subdomain
         assert expected_domain == ext.domain
         assert expected_tld == ext.suffix
+        assert expected_port == ext.port
         assert expected_ip_data == ext.ipv4
 
 
 def test_american():
-    assert_extract("http://www.google.com", ("www.google.com", "www", "google", "com"))
+    assert_extract(
+        "http://www.google.com", ("www.google.com", "www", "google", "com", None)
+    )
 
 
 def test_british():
     assert_extract(
         "http://www.theregister.co.uk",
-        ("www.theregister.co.uk", "www", "theregister", "co.uk"),
+        ("www.theregister.co.uk", "www", "theregister", "co.uk", None),
     )
 
 
 def test_no_subdomain():
-    assert_extract("http://gmail.com", ("gmail.com", "", "gmail", "com"))
+    assert_extract("http://gmail.com", ("gmail.com", "", "gmail", "com", None))
 
 
 def test_nested_subdomain():
     assert_extract(
         "http://media.forums.theregister.co.uk",
-        ("media.forums.theregister.co.uk", "media.forums", "theregister", "co.uk"),
+        (
+            "media.forums.theregister.co.uk",
+            "media.forums",
+            "theregister",
+            "co.uk",
+            None,
+        ),
     )
 
 
 def test_odd_but_possible():
-    assert_extract("http://www.www.com", ("www.www.com", "www", "www", "com"))
-    assert_extract("http://www.com", ("www.com", "", "www", "com"))
+    assert_extract("http://www.www.com", ("www.www.com", "www", "www", "com", None))
+    assert_extract("http://www.com", ("www.com", "", "www", "com", None))
 
 
 def test_suffix():
-    assert_extract("com", ("", "", "", "com"))
-    assert_extract("co.uk", ("", "", "", "co.uk"))
+    assert_extract("com", ("", "", "", "com", None))
+    assert_extract("co.uk", ("", "", "", "co.uk", None))
 
 
 def test_local_host():
     assert_extract(
-        "http://internalunlikelyhostname/", ("", "", "internalunlikelyhostname", "")
+        "http://internalunlikelyhostname/",
+        ("", "", "internalunlikelyhostname", "", None),
     )
     assert_extract(
         "http://internalunlikelyhostname.bizarre",
-        ("", "internalunlikelyhostname", "bizarre", ""),
+        ("", "internalunlikelyhostname", "bizarre", "", None),
     )
 
 
 def test_qualified_local_host():
     assert_extract(
         "http://internalunlikelyhostname.info/",
-        ("internalunlikelyhostname.info", "", "internalunlikelyhostname", "info"),
+        ("internalunlikelyhostname.info", "", "internalunlikelyhostname", "info", None),
     )
     assert_extract(
         "http://internalunlikelyhostname.information/",
-        ("", "internalunlikelyhostname", "information", ""),
+        ("", "internalunlikelyhostname", "information", "", None),
     )
 
 
 def test_ip():
     assert_extract(
         "http://216.22.0.192/",
-        ("", "", "216.22.0.192", ""),
+        ("", "", "216.22.0.192", "", None),
         expected_ip_data="216.22.0.192",
     )
     assert_extract(
         "http://216.22.project.coop/",
-        ("216.22.project.coop", "216.22", "project", "coop"),
+        ("216.22.project.coop", "216.22", "project", "coop", None),
     )
 
 
 def test_looks_like_ip():
-    assert_extract("1\xe9", ("", "", "1\xe9", ""))
+    assert_extract("1\xe9", ("", "", "1\xe9", "", None))
 
 
 def test_punycode():
     assert_extract(
         "http://xn--h1alffa9f.xn--p1ai",
-        ("xn--h1alffa9f.xn--p1ai", "", "xn--h1alffa9f", "xn--p1ai"),
+        ("xn--h1alffa9f.xn--p1ai", "", "xn--h1alffa9f", "xn--p1ai", None),
     )
     assert_extract(
         "http://xN--h1alffa9f.xn--p1ai",
-        ("xN--h1alffa9f.xn--p1ai", "", "xN--h1alffa9f", "xn--p1ai"),
+        ("xN--h1alffa9f.xn--p1ai", "", "xN--h1alffa9f", "xn--p1ai", None),
     )
     assert_extract(
         "http://XN--h1alffa9f.xn--p1ai",
-        ("XN--h1alffa9f.xn--p1ai", "", "XN--h1alffa9f", "xn--p1ai"),
+        ("XN--h1alffa9f.xn--p1ai", "", "XN--h1alffa9f", "xn--p1ai", None),
     )
     # Entries that might generate UnicodeError exception
     # This subdomain generates UnicodeError 'IDNA does not round-trip'
@@ -144,6 +155,7 @@ def test_punycode():
             "xn--tub-1m9d15sfkkhsifsbqygyujjrw602gk4li5qqk98aca0w",
             "google",
             "com",
+            None,
         ),
     )
     # This subdomain generates UnicodeError 'incomplete punicode string'
@@ -154,6 +166,7 @@ def test_punycode():
             "xn--tub-1m9d15sfkkhsifsbqygyujjrw60",
             "google",
             "com",
+            None,
         ),
     )
 
@@ -166,10 +179,11 @@ def test_invalid_puny_with_puny():
             "xn--zckzap6140b352by.blog",
             "so-net",
             "xn--wcvs22d.hk",
+            None,
         ),
     )
     assert_extract(
-        "http://xn--&.so-net.com", ("xn--&.so-net.com", "xn--&", "so-net", "com")
+        "http://xn--&.so-net.com", ("xn--&.so-net.com", "xn--&", "so-net", "com", None)
     )
 
 
@@ -181,6 +195,7 @@ def test_puny_with_non_puny():
             "xn--zckzap6140b352by.blog",
             "so-net",
             "教育.hk",
+            None,
         ),
     )
 
@@ -191,80 +206,93 @@ def test_idna_2008():
     """
     assert_extract(
         "xn--gieen46ers-73a.de",
-        ("xn--gieen46ers-73a.de", "", "xn--gieen46ers-73a", "de"),
+        ("xn--gieen46ers-73a.de", "", "xn--gieen46ers-73a", "de", None),
     )
     assert_extract(
         "angelinablog。com.de",
-        ("angelinablog.com.de", "angelinablog", "com", "de"),
+        ("angelinablog.com.de", "angelinablog", "com", "de", None),
     )
 
 
 def test_empty():
-    assert_extract("http://", ("", "", "", ""))
+    assert_extract("http://", ("", "", "", "", None))
 
 
 def test_scheme():
     assert_extract(
-        "https://mail.google.com/mail", ("mail.google.com", "mail", "google", "com")
+        "https://mail.google.com/mail",
+        ("mail.google.com", "mail", "google", "com", None),
     )
     assert_extract(
-        "ssh://mail.google.com/mail", ("mail.google.com", "mail", "google", "com")
+        "ssh://mail.google.com/mail", ("mail.google.com", "mail", "google", "com", None)
     )
     assert_extract(
-        "//mail.google.com/mail", ("mail.google.com", "mail", "google", "com")
+        "//mail.google.com/mail", ("mail.google.com", "mail", "google", "com", None)
     )
     assert_extract(
         "mail.google.com/mail",
-        ("mail.google.com", "mail", "google", "com"),
+        ("mail.google.com", "mail", "google", "com", None),
         funs=(extract,),
     )
 
 
 def test_port():
     assert_extract(
-        "git+ssh://www.github.com:8443/", ("www.github.com", "www", "github", "com")
+        "git+ssh://www.github.com:8443/",
+        ("www.github.com:8443", "www", "github", "com", 8443),
     )
 
 
 def test_username():
     assert_extract(
         "ftp://johndoe:5cr1p7k1dd13@1337.warez.com:2501",
-        ("1337.warez.com", "1337", "warez", "com"),
+        ("1337.warez.com:2501", "1337", "warez", "com", 2501),
     )
 
 
 def test_query_fragment():
-    assert_extract("http://google.com?q=cats", ("google.com", "", "google", "com"))
-    assert_extract("http://google.com#Welcome", ("google.com", "", "google", "com"))
-    assert_extract("http://google.com/#Welcome", ("google.com", "", "google", "com"))
-    assert_extract("http://google.com/s#Welcome", ("google.com", "", "google", "com"))
     assert_extract(
-        "http://google.com/s?q=cats#Welcome", ("google.com", "", "google", "com")
+        "http://google.com?q=cats", ("google.com", "", "google", "com", None)
+    )
+    assert_extract(
+        "http://google.com#Welcome", ("google.com", "", "google", "com", None)
+    )
+    assert_extract(
+        "http://google.com/#Welcome", ("google.com", "", "google", "com", None)
+    )
+    assert_extract(
+        "http://google.com/s#Welcome", ("google.com", "", "google", "com", None)
+    )
+    assert_extract(
+        "http://google.com/s?q=cats#Welcome", ("google.com", "", "google", "com", None)
     )
 
 
 def test_regex_order():
     assert_extract(
-        "http://www.parliament.uk", ("www.parliament.uk", "www", "parliament", "uk")
+        "http://www.parliament.uk",
+        ("www.parliament.uk", "www", "parliament", "uk", None),
     )
     assert_extract(
         "http://www.parliament.co.uk",
-        ("www.parliament.co.uk", "www", "parliament", "co.uk"),
+        ("www.parliament.co.uk", "www", "parliament", "co.uk", None),
     )
 
 
 def test_unhandled_by_iana():
     assert_extract(
-        "http://www.cgs.act.edu.au/", ("www.cgs.act.edu.au", "www", "cgs", "act.edu.au")
+        "http://www.cgs.act.edu.au/",
+        ("www.cgs.act.edu.au", "www", "cgs", "act.edu.au", None),
     )
     assert_extract(
-        "http://www.google.com.au/", ("www.google.com.au", "www", "google", "com.au")
+        "http://www.google.com.au/",
+        ("www.google.com.au", "www", "google", "com.au", None),
     )
 
 
 def test_tld_is_a_website_too():
     assert_extract(
-        "http://www.metp.net.cn", ("www.metp.net.cn", "www", "metp", "net.cn")
+        "http://www.metp.net.cn", ("www.metp.net.cn", "www", "metp", "net.cn", None)
     )
     # This is unhandled by the PSL. Or is it?
     # assert_extract(http://www.net.cn',
@@ -273,21 +301,21 @@ def test_tld_is_a_website_too():
 
 def test_dns_root_label():
     assert_extract(
-        "http://www.example.com./", ("www.example.com", "www", "example", "com")
+        "http://www.example.com./", ("www.example.com", "www", "example", "com", None)
     )
 
 
 def test_private_domains():
     assert_extract(
         "http://waiterrant.blogspot.com",
-        ("waiterrant.blogspot.com", "waiterrant", "blogspot", "com"),
+        ("waiterrant.blogspot.com", "waiterrant", "blogspot", "com", None),
     )
 
 
 def test_ipv4():
     assert_extract(
         "http://127.0.0.1/foo/bar",
-        ("", "", "127.0.0.1", ""),
+        ("", "", "127.0.0.1", "", None),
         expected_ip_data="127.0.0.1",
     )
 
@@ -295,14 +323,16 @@ def test_ipv4():
 def test_ipv4_bad():
     assert_extract(
         "http://256.256.256.256/foo/bar",
-        ("", "256.256.256", "256", ""),
+        ("", "256.256.256", "256", "", None),
         expected_ip_data="",
     )
 
 
 def test_ipv4_lookalike():
     assert_extract(
-        "http://127.0.0.1.9/foo/bar", ("", "127.0.0.1", "9", ""), expected_ip_data=""
+        "http://127.0.0.1.9/foo/bar",
+        ("", "127.0.0.1", "9", "", None),
+        expected_ip_data="",
     )
 
 
@@ -310,7 +340,12 @@ def test_result_as_dict():
     result = extract(
         "http://admin:password1@www.google.com:666/secret/admin/interface?param1=42"
     )
-    expected_dict = {"subdomain": "www", "domain": "google", "suffix": "com"}
+    expected_dict = {
+        "subdomain": "www",
+        "domain": "google",
+        "suffix": "com",
+        "port": 666,
+    }
     assert result._asdict() == expected_dict
 
 
@@ -331,7 +366,7 @@ def test_cache_permission(mocker, monkeypatch, tmpdir):
         my_extract = tldextract.TLDExtract(cache_dir=tmpdir)
         assert_extract(
             "http://www.google.com",
-            ("www.google.com", "www", "google", "com"),
+            ("www.google.com", "www", "google", "com", None),
             funs=(my_extract,),
         )
 

@@ -12,6 +12,23 @@ IP_RE = re.compile(
 SCHEME_RE = re.compile(r"^([" + scheme_chars + "]+:)?//")
 
 
+def lenient_netloc(url: str) -> str:
+    """Extract the netloc of a URL-like string, similar to the netloc attribute
+    returned by urllib.parse.{urlparse,urlsplit}, but extract more leniently,
+    without raising errors."""
+
+    return (
+        SCHEME_RE.sub("", url)
+        .partition("/")[0]
+        .partition("?")[0]
+        .partition("#")[0]
+        .split("@")[-1]
+        .partition(":")[0]
+        .strip()
+        .rstrip(".")
+    )
+
+
 def looks_like_ip(maybe_ip: str) -> bool:
     """Does the given str look like an IP address?"""
     if not maybe_ip[0].isdigit():

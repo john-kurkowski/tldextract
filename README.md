@@ -56,20 +56,7 @@ ExtractResult(subdomain='', domain='google', suffix='com')
 ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='')
 
 >>> tldextract.extract('http://127.0.0.1:8080/deployed/')
-ExtractResult(subdomain='', domain='127.0.0.1', suffix='')
-```
-
-If you want to rejoin the whole namedtuple, regardless of whether a subdomain
-or suffix were found:
-
-```python
->>> ext = tldextract.extract('http://127.0.0.1:8080/deployed/')
->>> # this has unwanted dots
->>> '.'.join(ext)
-'.127.0.0.1.'
->>> # join each part only if it's truthy
->>> '.'.join(part for part in ext if part)
-'127.0.0.1'
+ExtractResult(subdomain='', domain='127.0.0.1', suffix='', port=8080)
 ```
 
 By default, this package supports the public ICANN TLDs and their exceptions.

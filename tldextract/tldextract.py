@@ -53,11 +53,12 @@ import os
 import re
 from functools import wraps
 from typing import FrozenSet, List, NamedTuple, Optional, Sequence, Union
+import urllib.parse
 
 import idna
 
 from .cache import DiskCache, get_cache_dir
-from .remote import IP_RE, SCHEME_RE, looks_like_ip
+from .remote import IP_RE, lenient_netloc, looks_like_ip
 from .suffix_list import get_suffix_lists
 
 LOG = logging.getLogger("tldextract")
@@ -208,28 +209,48 @@ class TLDExtract:
     def __call__(
         self, url: str, include_psl_private_domains: Optional[bool] = None
     ) -> ExtractResult:
+        """Alias for `extract_str`."""
+        return self.extract_str(url, include_psl_private_domains)
+
+    def extract_str(
+        self, url: str, include_psl_private_domains: Optional[bool] = None
+    ) -> ExtractResult:
         """
         Takes a string URL and splits it into its subdomain, domain, and
-        suffix (effective TLD, gTLD, ccTLD, etc.) component.
+        suffix (effective TLD, gTLD, ccTLD, etc.) components.
 
-        >>> extract = TLDExtract()
-        >>> extract('http://forums.news.cnn.com/')
+        >>> extractor = TLDExtract()
+        >>> extractor.extract_str('http://forums.news.cnn.com/')
         ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
-        >>> extract('http://forums.bbc.co.uk/')
+        >>> extractor.extract_str('http://forums.bbc.co.uk/')
         ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
         """
+        return self._extract_netloc(lenient_netloc(url), include_psl_private_domains)
 
-        netloc = (
-            SCHEME_RE.sub("", url)
-            .partition("/")[0]
-            .partition("?")[0]
-            .partition("#")[0]
-            .split("@")[-1]
-            .partition(":")[0]
-            .strip()
-            .rstrip(".")
-        )
+    def extract_urllib(
+        self,
+        url: Union[urllib.parse.ParseResult, urllib.parse.SplitResult],
+        include_psl_private_domains: Optional[bool] = None,
+    ) -> ExtractResult:
+        """
+        Takes the output of urllib.parse URL parsing methods and further splits
+        the parsed URL into its subdomain, domain, and suffix (effective TLD,
+        gTLD, ccTLD, etc.) components.
 
+        This method is like `extract_str` but faster, as the string's domain
+        name has already been parsed.
+
+        >>> extractor = TLDExtract()
+        >>> extractor.extract_urllib(urllib.parse.urlsplit('http://forums.news.cnn.com/'))
+        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
+        >>> extractor.extract_urllib(urllib.parse.urlsplit('http://forums.bbc.co.uk/'))
+        ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
+        """
+        return self._extract_netloc(url.netloc, include_psl_private_domains)
+
+    def _extract_netloc(
+        self, netloc: str, include_psl_private_domains: Optional[bool]
+    ) -> ExtractResult:
         labels = _UNICODE_DOTS_RE.split(netloc)
 
         translations = [_decode_punycode(label) for label in labels]

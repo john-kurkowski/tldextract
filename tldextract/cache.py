@@ -7,7 +7,16 @@ import os
 import os.path
 import sys
 from hashlib import md5
-from typing import Callable, Dict, Hashable, Iterable, Optional, TypeVar, Union
+from typing import (
+    Callable,
+    Dict,
+    Hashable,
+    Iterable,
+    Optional,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from filelock import FileLock
 import requests
@@ -87,7 +96,7 @@ class DiskCache:
         # combined with a call to `.clear()` wont wipe someones hard drive
         self.file_ext = ".tldextract.json"
 
-    def get(self, namespace: str, key: Union[str, Dict[str, Hashable]]) -> T:
+    def get(self, namespace: str, key: Union[str, Dict[str, Hashable]]) -> object:
         """Retrieve a value from the disk cache"""
         if not self.enabled:
             raise KeyError("Cache is disabled")
@@ -121,12 +130,10 @@ class DiskCache:
             global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement
             if not _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
-                    (
-                        "unable to cache %s.%s in %s. This could refresh the "
-                        "Public Suffix List over HTTP every app startup. "
-                        "Construct your `TLDExtract` with a writable `cache_dir` or "
-                        "set `cache_dir=None` to silence this warning. %s"
-                    ),
+                    "unable to cache %s.%s in %s. This could refresh the "
+                    "Public Suffix List over HTTP every app startup. "
+                    "Construct your `TLDExtract` with a writable `cache_dir` or "
+                    "set `cache_dir=None` to silence this warning. %s",
                     namespace,
                     key,
                     cache_filepath,
@@ -181,12 +188,10 @@ class DiskCache:
             global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement
             if not _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
-                    (
-                        "unable to cache %s.%s in %s. This could refresh the "
-                        "Public Suffix List over HTTP every app startup. "
-                        "Construct your `TLDExtract` with a writable `cache_dir` or "
-                        "set `cache_dir=None` to silence this warning. %s"
-                    ),
+                    "unable to cache %s.%s in %s. This could refresh the "
+                    "Public Suffix List over HTTP every app startup. "
+                    "Construct your `TLDExtract` with a writable `cache_dir` or "
+                    "set `cache_dir=None` to silence this warning. %s",
                     namespace,
                     key_args,
                     cache_filepath,
@@ -200,7 +205,7 @@ class DiskCache:
         # pylint: disable-next=abstract-class-instantiated
         with FileLock(lock_path, timeout=self.lock_timeout):
             try:
-                result: T = self.get(namespace=namespace, key=key_args)
+                result = cast(T, self.get(namespace=namespace, key=key_args))
             except KeyError:
                 result = func(**kwargs)
                 self.set(namespace=namespace, key=key_args, value=result)

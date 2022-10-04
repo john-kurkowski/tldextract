@@ -95,7 +95,7 @@ Or the latest dev version:
 pip install -e 'git://github.com/john-kurkowski/tldextract.git#egg=tldextract'
 ```
 
-Command-line usage, splits the url components by space:
+Command-line usage, splits the URL components by space:
 
 ```zsh
 tldextract http://forums.bbc.co.uk
@@ -179,9 +179,9 @@ ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com')
 ```
 
 The thinking behind the default is, it's the more common case when people
-mentally parse a URL. It doesn't assume familiarity with the PSL nor that the
-PSL makes such a distinction. Note this may run counter to the default parsing
-behavior of other, PSL-based libraries.
+mentally parse a domain name. It doesn't assume familiarity with the PSL nor
+that the PSL makes a public/private distinction. Note this default may run
+counter to the default parsing behavior of other, PSL-based libraries.
 
 ### Specifying your own URL or file for Public Suffix List data
 
@@ -211,7 +211,7 @@ extract = tldextract.TLDExtract(
 Use an absolute path when specifying the `suffix_list_urls` keyword argument.
 `os.path` is your friend.
 
-The command line update command can be used with a url or local file you specify:
+The command line update command can be used with a URL or local file you specify:
 
 ```zsh
 tldextract --update --suffix_list_url "http://foo.bar.baz"
@@ -237,10 +237,21 @@ To keep `tldextract` light in LoC & overhead, and because there are plenty of
 URL validators out there, this library is very lenient with input. If valid
 URLs are important to you, validate them before calling `tldextract`.
 
-This lenient stance lowers the learning curve of using the library, at the cost
-of desensitizing users to the nuances of URLs. Who knows how much. But in the
-future, I would consider an overhaul. For example, users could opt into
-validation, either receiving exceptions or error metadata on results.
+To avoid parsing a string twice, you can pass `tldextract` the output of
+[`urllib.parse`](https://docs.python.org/3/library/urllib.parse.html) methods.
+For example:
+
+```py
+extractor = TLDExtract()
+split_url = urllib.parse.urlsplit("https://foo.bar.com:8080")
+split_suffix = extractor.extract_urllib(split_url)
+url_to_crawl = f"{split_url.scheme}://{split_suffix.registered_domain}:{split_url.port}"
+```
+
+`tldextract`'s lenient string parsing stance lowers the learning curve of using
+the library, at the cost of desensitizing users to the nuances of URLs. This
+could be overhauled. For example, users could opt into validation, either
+receiving exceptions or error metadata on results.
 
 ## Contribute
 

@@ -3,6 +3,13 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.4.0 (2022-10-04)
+
+* Features
+  * Add method `extract_urllib` to extract from a `urllib.parse.{ParseResult,SplitResult}` ([#274](https://github.com/john-kurkowski/tldextract/issues/274))
+* Bugfixes
+  * Fix internal type-var error, in newer versions of mypy ([#275](https://github.com/john-kurkowski/tldextract/issues/275))
+
 ## 3.3.1 (2022-07-08)
 
 * Bugfixes

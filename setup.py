@@ -41,7 +41,10 @@ setup(
         "List's private domains as well."
     ),
     license="BSD License",
-    keywords="tld domain subdomain url parse extract urlparse urlsplit public suffix list publicsuffix publicsuffixlist",
+    keywords=(
+        "tld domain subdomain url parse extract urlparse urlsplit public suffix list"
+        " publicsuffix publicsuffixlist"
+    ),
     url="https://github.com/john-kurkowski/tldextract",
     packages=["tldextract"],
     include_package_data=True,
@@ -57,6 +60,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     entry_points={
         "console_scripts": [

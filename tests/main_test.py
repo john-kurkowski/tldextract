@@ -8,6 +8,7 @@ from typing import Sequence, Tuple
 import pytest
 import responses
 import tldextract
+import tldextract.suffix_list
 from tldextract.cache import DiskCache
 from tldextract.suffix_list import SuffixListNotFound
 from tldextract.tldextract import ExtractResult

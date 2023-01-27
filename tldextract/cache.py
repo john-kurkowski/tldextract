@@ -113,7 +113,7 @@ class DiskCache:
             raise KeyError("namespace: " + namespace + " key: " + repr(key)) from None
 
     def set(
-        self, namespace: str, key: Union[str, Dict[str, Hashable]], value: T
+        self, namespace: str, key: Union[str, Dict[str, Hashable]], value: object
     ) -> None:
         """Set a value in the disk cache"""
         if not self.enabled:

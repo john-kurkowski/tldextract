@@ -40,7 +40,7 @@ setup(
         "exceptions. You can optionally support the Public Suffix "
         "List's private domains as well."
     ),
-    license="BSD License",
+    license="BSD-3-Clause",
     keywords=(
         "tld domain subdomain url parse extract urlparse urlsplit public suffix list"
         " publicsuffix publicsuffixlist"

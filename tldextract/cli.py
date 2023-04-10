@@ -86,7 +86,6 @@ def main() -> None:
     elif not args.input:
         parser.print_usage()
         sys.exit(1)
-        return
 
     for i in args.input:
         print(" ".join(tld_extract(i)))

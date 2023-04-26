@@ -3,6 +3,19 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.4.1 (2023-04-26)
+
+* Bugfixes
+  * Fix Pyright not finding tldextract public interface ([#279](https://github.com/john-kurkowski/tldextract/issues/279))
+  * Fix various Pyright checks
+  * Use SPDX license identifier ([#280](https://github.com/john-kurkowski/tldextract/issues/280))
+  * Support Python 3.11
+* Docs
+  * Add FAQ about private domains
+* Misc.
+  * Update bundled snapshot
+  * Fix lint in newer pylint
+
 ## 3.4.0 (2022-10-04)
 
 * Features

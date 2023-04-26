@@ -231,6 +231,11 @@ This project doesn't contain an actual list of public suffixes. That comes from
 forking the PSL and using your fork in the `suffix_list_urls` param, or adding
 your suffix piecemeal with the `extra_suffixes` param.)
 
+### I see my suffix in [the Public Suffix List (PSL)](https://publicsuffix.org/), but this library doesn't extract it.
+
+Check if your suffix is in the private section of the list. See [this
+documentation](#public-vs-private-domains).
+
 ### If I pass an invalid URL, I still get a result, no error. What gives?
 
 To keep `tldextract` light in LoC & overhead, and because there are plenty of

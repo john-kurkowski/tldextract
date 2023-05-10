@@ -389,10 +389,11 @@ class _PublicSuffixListTLDExtractor:
                 continue
             if i >= 2:
                 prev_maybe_tld = maybe_tld
-                if f"{_decode_punycode(lower_spl[i-2])}.{maybe_tld}" in tlds:
+                next_maybe_tld = f"{_decode_punycode(lower_spl[i-2])}.{maybe_tld}"
+                if next_maybe_tld in tlds:
                     i -= 1
                     continue
-                if f"!{_decode_punycode(lower_spl[i-2])}.{maybe_tld}" in tlds:
+                if f"!{next_maybe_tld}" in tlds:
                     return i - 1
                 if "*." + prev_maybe_tld in tlds:
                     return i - 2

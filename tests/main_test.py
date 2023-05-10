@@ -7,6 +7,7 @@ from typing import Sequence, Tuple
 
 import pytest
 import responses
+
 import tldextract
 import tldextract.suffix_list
 from tldextract.cache import DiskCache
@@ -84,6 +85,12 @@ def test_odd_but_possible():
 def test_suffix():
     assert_extract("com", ("", "", "", "com"))
     assert_extract("co.uk", ("", "", "", "co.uk"))
+    assert_extract("example.ck", ("", "", "", "example.ck"))
+    assert_extract("www.example.ck", ("www.example.ck", "", "www", "example.ck"))
+    assert_extract(
+        "sub.www.example.ck", ("sub.www.example.ck", "sub", "www", "example.ck")
+    )
+    assert_extract("www.ck", ("www.ck", "", "www", "ck"))
 
 
 def test_local_host():
@@ -270,6 +277,16 @@ def test_tld_is_a_website_too():
     # This is unhandled by the PSL. Or is it?
     # assert_extract(http://www.net.cn',
     #                ('www.net.cn', 'www', 'net', 'cn'))
+
+
+def test_no_1st_level_tld():
+    assert_extract("za", ("", "", "za", ""))
+    assert_extract("example.za", ("", "example", "za", ""))
+    assert_extract("co.za", ("", "", "", "co.za"))
+    assert_extract("example.co.za", ("example.co.za", "", "example", "co.za"))
+    assert_extract(
+        "sub.example.co.za", ("sub.example.co.za", "sub", "example", "co.za")
+    )
 
 
 def test_dns_root_label():

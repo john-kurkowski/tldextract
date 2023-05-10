@@ -253,9 +253,8 @@ class TLDExtract:
     ) -> ExtractResult:
         labels = _UNICODE_DOTS_RE.split(netloc)
 
-        translations = [_decode_punycode(label) for label in labels]
         suffix_index = self._get_tld_extractor().suffix_index(
-            translations, include_psl_private_domains=include_psl_private_domains
+            labels, include_psl_private_domains=include_psl_private_domains
         )
 
         suffix = ".".join(labels[suffix_index:])
@@ -373,7 +372,11 @@ class _PublicSuffixListTLDExtractor:
         maybe_tld = ""
         prev_maybe_tld = ""
         for label in reversed(lower_spl):
-            maybe_tld = f"{label}.{maybe_tld}" if maybe_tld else label
+            maybe_tld = (
+                f"{_decode_punycode(label)}.{maybe_tld}"
+                if maybe_tld
+                else _decode_punycode(label)
+            )
 
             if "!" + maybe_tld in tlds:
                 return i + 1
@@ -386,10 +389,10 @@ class _PublicSuffixListTLDExtractor:
                 continue
             if i >= 2:
                 prev_maybe_tld = maybe_tld
-                if f"{lower_spl[i - 2]}.{maybe_tld}" in tlds:
+                if f"{_decode_punycode(lower_spl[i-2])}.{maybe_tld}" in tlds:
                     i -= 1
                     continue
-                if f"!{lower_spl[i - 2]}.{maybe_tld}" in tlds:
+                if f"!{_decode_punycode(lower_spl[i-2])}.{maybe_tld}" in tlds:
                     return i - 1
                 if "*." + prev_maybe_tld in tlds:
                     return i - 2

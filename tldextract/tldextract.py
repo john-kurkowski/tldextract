@@ -51,9 +51,9 @@ or suffix were found:
 import logging
 import os
 import re
+import urllib.parse
 from functools import wraps
 from typing import FrozenSet, List, NamedTuple, Optional, Sequence, Union
-import urllib.parse
 
 import idna
 
@@ -369,21 +369,32 @@ class _PublicSuffixListTLDExtractor:
         Returns len(spl) if no suffix is found
         """
         tlds = self.tlds(include_psl_private_domains)
-        length = len(lower_spl)
-        for i in range(length):
-            maybe_tld = ".".join(lower_spl[i:])
-            exception_tld = "!" + maybe_tld
-            if exception_tld in tlds:
+        i = len(lower_spl)
+        maybe_tld = ""
+        prev_maybe_tld = ""
+        for label in reversed(lower_spl):
+            maybe_tld = f"{label}.{maybe_tld}" if maybe_tld else label
+
+            if "!" + maybe_tld in tlds:
                 return i + 1
+            if "*." + prev_maybe_tld in tlds:
+                return i
 
             if maybe_tld in tlds:
-                return i
-
-            wildcard_tld = "*." + ".".join(lower_spl[i + 1 :])
-            if wildcard_tld in tlds:
-                return i
-
-        return length
+                i -= 1
+                prev_maybe_tld = maybe_tld
+                continue
+            if i >= 2:
+                prev_maybe_tld = maybe_tld
+                if f"{lower_spl[i - 2]}.{maybe_tld}" in tlds:
+                    i -= 1
+                    continue
+                if f"!{lower_spl[i - 2]}.{maybe_tld}" in tlds:
+                    return i - 1
+                if "*." + prev_maybe_tld in tlds:
+                    return i - 2
+            break
+        return i
 
 
 def _decode_punycode(label: str) -> str:

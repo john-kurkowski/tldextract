@@ -52,7 +52,7 @@ import logging
 import os
 import urllib.parse
 from functools import wraps
-from typing import FrozenSet, List, NamedTuple, Optional, Sequence, Union
+from typing import FrozenSet, List, NamedTuple, Optional, Sequence, Set, Union
 
 import idna
 
@@ -350,6 +350,30 @@ class _PublicSuffixListTLDExtractor:
         self.tlds_incl_private = frozenset(public_tlds + private_tlds + extra_tlds)
         self.tlds_excl_private = frozenset(public_tlds + extra_tlds)
 
+        public_false_tlds = self.get_false_intermediate_suffixes(public_tlds)
+        private_false_tlds = self.get_false_intermediate_suffixes(private_tlds)
+        extra_false_tlds = self.get_false_intermediate_suffixes(extra_tlds)
+        self.false_tlds_incl_private = frozenset(
+            public_false_tlds + private_false_tlds + extra_false_tlds
+        )
+        self.false_tlds_excl_private = frozenset(public_false_tlds + extra_false_tlds)
+
+    def get_false_intermediate_suffixes(self, tlds: List[str]) -> List[str]:
+        """From list of suffixes, identify false intermediate suffixes.
+
+        Example: If valid TLDs include only ["a.b.c.d", "d"], then
+        ["b.c.d", "c.d"] are false intermediate suffixes.
+        """
+        valid_tlds: Set[str] = set(tlds)
+        false_tlds: Set[str] = set()
+        for tld in valid_tlds:
+            labels: List[str] = tld.split(".")
+            variants: Set[str] = set(
+                ".".join(labels[-i:]) for i in range(1, len(labels))
+            )
+            false_tlds.update(variants)
+        return list(false_tlds.difference(valid_tlds))
+
     def tlds(
         self, include_psl_private_domains: Optional[bool] = None
     ) -> FrozenSet[str]:
@@ -363,6 +387,19 @@ class _PublicSuffixListTLDExtractor:
             else self.tlds_excl_private
         )
 
+    def false_tlds(
+        self, include_psl_private_domains: Optional[bool] = None
+    ) -> FrozenSet[str]:
+        """Get the currently filtered list of false intermediate suffixes."""
+        if include_psl_private_domains is None:
+            include_psl_private_domains = self.include_psl_private_domains
+
+        return (
+            self.false_tlds_incl_private
+            if include_psl_private_domains
+            else self.false_tlds_excl_private
+        )
+
     def suffix_index(
         self, lower_spl: List[str], include_psl_private_domains: Optional[bool] = None
     ) -> int:
@@ -370,7 +407,9 @@ class _PublicSuffixListTLDExtractor:
         Returns len(spl) if no suffix is found
         """
         tlds = self.tlds(include_psl_private_domains)
+        false_tlds = self.false_tlds(include_psl_private_domains)
         i = len(lower_spl)
+        j = i
         maybe_tld = ""
         prev_maybe_tld = ""
         for label in reversed(lower_spl):
@@ -381,24 +420,30 @@ class _PublicSuffixListTLDExtractor:
             )
 
             if "!" + maybe_tld in tlds:
-                return i + 1
+                return j
             if "*." + prev_maybe_tld in tlds:
-                return i
+                return j - 1
 
             if maybe_tld in tlds:
-                i -= 1
+                j -= 1
+                i = j
                 prev_maybe_tld = maybe_tld
                 continue
-            if i >= 2:
+            if maybe_tld in false_tlds:
+                j -= 1
                 prev_maybe_tld = maybe_tld
-                next_maybe_tld = f"{_decode_punycode(lower_spl[i-2])}.{maybe_tld}"
+                continue
+            if j >= 2:
+                prev_maybe_tld = maybe_tld
+                next_maybe_tld = f"{_decode_punycode(lower_spl[j-2])}.{maybe_tld}"
                 if next_maybe_tld in tlds:
-                    i -= 1
+                    j -= 1
+                    i = j
                     continue
                 if f"!{next_maybe_tld}" in tlds:
-                    return i - 1
+                    return j - 1
                 if "*." + prev_maybe_tld in tlds:
-                    return i - 2
+                    return j - 2
             break
         return i
 

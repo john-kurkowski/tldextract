@@ -91,6 +91,8 @@ def test_suffix():
         "sub.www.example.ck", ("sub.www.example.ck", "sub", "www", "example.ck")
     )
     assert_extract("www.ck", ("www.ck", "", "www", "ck"))
+    assert_extract("nes.buskerud.no", ("", "", "", "nes.buskerud.no"))
+    assert_extract("buskerud.no", ("buskerud.no", "", "buskerud", "no"))
 
 
 def test_local_host():
@@ -387,3 +389,29 @@ def test_global_extract():
     assert tldextract.extract(
         "s3.ap-south-1.amazonaws.com", include_psl_private_domains=True
     ) == ExtractResult(subdomain="", domain="", suffix="s3.ap-south-1.amazonaws.com")
+    assert tldextract.extract(
+        "the-quick-brown-fox.ap-south-1.amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(
+        subdomain="the-quick-brown-fox.ap-south-1", domain="amazonaws", suffix="com"
+    )
+    assert tldextract.extract(
+        "ap-south-1.amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="ap-south-1", domain="amazonaws", suffix="com")
+    assert tldextract.extract(
+        "amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="", domain="amazonaws", suffix="com")
+    assert tldextract.extract(
+        "s3.cn-north-1.amazonaws.com.cn", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="", domain="", suffix="s3.cn-north-1.amazonaws.com.cn")
+    assert tldextract.extract(
+        "the-quick-brown-fox.cn-north-1.amazonaws.com.cn",
+        include_psl_private_domains=True,
+    ) == ExtractResult(
+        subdomain="the-quick-brown-fox.cn-north-1", domain="amazonaws", suffix="com.cn"
+    )
+    assert tldextract.extract(
+        "cn-north-1.amazonaws.com.cn", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="cn-north-1", domain="amazonaws", suffix="com.cn")
+    assert tldextract.extract(
+        "amazonaws.com.cn", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="", domain="amazonaws", suffix="com.cn")

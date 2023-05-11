@@ -384,3 +384,6 @@ def test_global_extract():
     assert tldextract.extract(
         "foo.blogspot.com", include_psl_private_domains=True
     ) == ExtractResult(subdomain="", domain="foo", suffix="blogspot.com")
+    assert tldextract.extract(
+        "s3.ap-south-1.amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="", domain="", suffix="s3.ap-south-1.amazonaws.com")

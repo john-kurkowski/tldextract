@@ -50,7 +50,6 @@ or suffix were found:
 
 import logging
 import os
-import re
 import urllib.parse
 from functools import wraps
 from typing import FrozenSet, List, NamedTuple, Optional, Sequence, Union
@@ -70,8 +69,6 @@ PUBLIC_SUFFIX_LIST_URLS = (
     "https://publicsuffix.org/list/public_suffix_list.dat",
     "https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat",
 )
-
-_UNICODE_DOTS_RE = re.compile("[\u002e\u3002\uff0e\uff61]")
 
 
 class ExtractResult(NamedTuple):
@@ -251,7 +248,12 @@ class TLDExtract:
     def _extract_netloc(
         self, netloc: str, include_psl_private_domains: Optional[bool]
     ) -> ExtractResult:
-        labels = _UNICODE_DOTS_RE.split(netloc)
+        labels = (
+            netloc.replace("\u3002", "\u002e")
+            .replace("\uff0e", "\u002e")
+            .replace("\uff61", "\u002e")
+            .split(".")
+        )
 
         suffix_index = self._get_tld_extractor().suffix_index(
             labels, include_psl_private_domains=include_psl_private_domains

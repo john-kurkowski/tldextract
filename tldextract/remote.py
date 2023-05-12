@@ -18,11 +18,11 @@ def lenient_netloc(url: str) -> str:
     without raising errors."""
 
     return (
-        SCHEME_RE.sub("", url)
+        SCHEME_RE.sub("", url, 1)
         .partition("/")[0]
         .partition("?")[0]
         .partition("#")[0]
-        .split("@")[-1]
+        .rpartition("@")[-1]
         .partition(":")[0]
         .strip()
         .rstrip(".")

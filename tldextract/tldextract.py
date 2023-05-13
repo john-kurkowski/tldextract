@@ -52,7 +52,7 @@ import logging
 import os
 import urllib.parse
 from functools import wraps
-from typing import FrozenSet, List, NamedTuple, Optional, Sequence, Set, Union
+from typing import FrozenSet, List, NamedTuple, Optional, Sequence, Union
 
 import idna
 
@@ -364,13 +364,11 @@ class _PublicSuffixListTLDExtractor:
         Example: If valid TLDs include only ["a.b.c.d", "d"], then
         ["b.c.d", "c.d"] are false intermediate suffixes.
         """
-        valid_tlds: Set[str] = set(tlds)
-        false_tlds: Set[str] = set()
+        valid_tlds = set(tlds)
+        false_tlds = set()
         for tld in valid_tlds:
-            labels: List[str] = tld.split(".")
-            variants: Set[str] = set(
-                ".".join(labels[-i:]) for i in range(1, len(labels))
-            )
+            labels = tld.split(".")
+            variants = {".".join(labels[-i:]) for i in range(1, len(labels))}
             false_tlds.update(variants)
         return list(false_tlds.difference(valid_tlds))
 

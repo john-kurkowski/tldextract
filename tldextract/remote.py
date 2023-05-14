@@ -13,7 +13,7 @@ scheme_chars_set = set(scheme_chars)
 
 
 def without_netloc_right(schemeless_netloc: str) -> str:
-    """Returns schemelss netloc without any URL components on its right"""
+    """Returns schemeless netloc without any URL components on its right"""
     return (
         schemeless_netloc.partition("/")[0]
         .partition("?")[0]

@@ -399,18 +399,18 @@ class _PublicSuffixListTLDExtractor:
         )
 
     def suffix_index(
-        self, lower_spl: List[str], include_psl_private_domains: Optional[bool] = None
+        self, spl: List[str], include_psl_private_domains: Optional[bool] = None
     ) -> int:
         """Returns the index of the first suffix label.
         Returns len(spl) if no suffix is found
         """
         tlds = self.tlds(include_psl_private_domains)
         false_tlds = self.false_tlds(include_psl_private_domains)
-        i = len(lower_spl)
+        i = len(spl)
         j = i
         maybe_tld = ""
         prev_maybe_tld = ""
-        for label in reversed(lower_spl):
+        for label in reversed(spl):
             maybe_tld = (
                 f"{_decode_punycode(label)}.{maybe_tld}"
                 if maybe_tld
@@ -433,7 +433,7 @@ class _PublicSuffixListTLDExtractor:
                 continue
             if j >= 2:
                 prev_maybe_tld = maybe_tld
-                next_maybe_tld = f"{_decode_punycode(lower_spl[j-2])}.{maybe_tld}"
+                next_maybe_tld = f"{_decode_punycode(spl[j-2])}.{maybe_tld}"
                 if next_maybe_tld in tlds:
                     j -= 1
                     i = j

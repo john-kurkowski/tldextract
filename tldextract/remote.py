@@ -5,11 +5,24 @@ import socket
 from urllib.parse import scheme_chars
 
 IP_RE = re.compile(
-    # pylint: disable-next=line-too-long
-    r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+    r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)"
+    r"{3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
 )
 
-SCHEME_RE = re.compile(r"^([" + scheme_chars + "]+:)?//")
+scheme_chars_set = set(scheme_chars)
+
+
+def without_netloc_right(schemeless_netloc: str) -> str:
+    """Returns schemelss netloc without any URL components on its right"""
+    return (
+        schemeless_netloc.partition("/")[0]
+        .partition("?")[0]
+        .partition("#")[0]
+        .rpartition("@")[-1]
+        .partition(":")[0]
+        .strip()
+        .rstrip(".")
+    )
 
 
 def lenient_netloc(url: str) -> str:
@@ -17,16 +30,16 @@ def lenient_netloc(url: str) -> str:
     returned by urllib.parse.{urlparse,urlsplit}, but extract more leniently,
     without raising errors."""
 
-    return (
-        SCHEME_RE.sub("", url)
-        .partition("/")[0]
-        .partition("?")[0]
-        .partition("#")[0]
-        .split("@")[-1]
-        .partition(":")[0]
-        .strip()
-        .rstrip(".")
-    )
+    double_slashes_start = url.find("//")
+    if double_slashes_start == 0:
+        return without_netloc_right(url[2:])
+    if (
+        double_slashes_start < 2
+        or not url[double_slashes_start - 1] == ":"
+        or set(url[: double_slashes_start - 1]) - scheme_chars_set
+    ):
+        return without_netloc_right(url)
+    return without_netloc_right(url[double_slashes_start + 2 :])
 
 
 def looks_like_ip(maybe_ip: str) -> bool:

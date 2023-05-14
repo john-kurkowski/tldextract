@@ -12,10 +12,10 @@ IP_RE = re.compile(
 scheme_chars_set = set(scheme_chars)
 
 
-def without_netloc_right(schemeless_netloc: str) -> str:
-    """Returns schemeless netloc without any URL components on its right"""
+def extract_netloc(schemeless_url: str) -> str:
+    """Extract netloc from a schemeless URL"""
     return (
-        schemeless_netloc.partition("/")[0]
+        schemeless_url.partition("/")[0]
         .partition("?")[0]
         .partition("#")[0]
         .rpartition("@")[-1]
@@ -32,14 +32,14 @@ def lenient_netloc(url: str) -> str:
 
     double_slashes_start = url.find("//")
     if double_slashes_start == 0:
-        return without_netloc_right(url[2:])
+        return extract_netloc(url[2:])
     if (
         double_slashes_start < 2
         or not url[double_slashes_start - 1] == ":"
         or set(url[: double_slashes_start - 1]) - scheme_chars_set
     ):
-        return without_netloc_right(url)
-    return without_netloc_right(url[double_slashes_start + 2 :])
+        return extract_netloc(url)
+    return extract_netloc(url[double_slashes_start + 2 :])
 
 
 def looks_like_ip(maybe_ip: str) -> bool:

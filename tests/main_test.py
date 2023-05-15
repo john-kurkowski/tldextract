@@ -7,6 +7,7 @@ from typing import Sequence, Tuple
 
 import pytest
 import responses
+
 import tldextract
 import tldextract.suffix_list
 from tldextract.cache import DiskCache
@@ -84,6 +85,14 @@ def test_odd_but_possible():
 def test_suffix():
     assert_extract("com", ("", "", "", "com"))
     assert_extract("co.uk", ("", "", "", "co.uk"))
+    assert_extract("example.ck", ("", "", "", "example.ck"))
+    assert_extract("www.example.ck", ("www.example.ck", "", "www", "example.ck"))
+    assert_extract(
+        "sub.www.example.ck", ("sub.www.example.ck", "sub", "www", "example.ck")
+    )
+    assert_extract("www.ck", ("www.ck", "", "www", "ck"))
+    assert_extract("nes.buskerud.no", ("", "", "", "nes.buskerud.no"))
+    assert_extract("buskerud.no", ("buskerud.no", "", "buskerud", "no"))
 
 
 def test_local_host():
@@ -277,6 +286,16 @@ def test_tld_is_a_website_too():
     #                ('www.net.cn', 'www', 'net', 'cn'))
 
 
+def test_no_1st_level_tld():
+    assert_extract("za", ("", "", "za", ""))
+    assert_extract("example.za", ("", "example", "za", ""))
+    assert_extract("co.za", ("", "", "", "co.za"))
+    assert_extract("example.co.za", ("example.co.za", "", "example", "co.za"))
+    assert_extract(
+        "sub.example.co.za", ("sub.example.co.za", "sub", "example", "co.za")
+    )
+
+
 def test_dns_root_label():
     assert_extract(
         "http://www.example.com./", ("www.example.com", "www", "example", "com")
@@ -372,3 +391,32 @@ def test_global_extract():
     assert tldextract.extract(
         "foo.blogspot.com", include_psl_private_domains=True
     ) == ExtractResult(subdomain="", domain="foo", suffix="blogspot.com")
+    assert tldextract.extract(
+        "s3.ap-south-1.amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="", domain="", suffix="s3.ap-south-1.amazonaws.com")
+    assert tldextract.extract(
+        "the-quick-brown-fox.ap-south-1.amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(
+        subdomain="the-quick-brown-fox.ap-south-1", domain="amazonaws", suffix="com"
+    )
+    assert tldextract.extract(
+        "ap-south-1.amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="ap-south-1", domain="amazonaws", suffix="com")
+    assert tldextract.extract(
+        "amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="", domain="amazonaws", suffix="com")
+    assert tldextract.extract(
+        "s3.cn-north-1.amazonaws.com.cn", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="", domain="", suffix="s3.cn-north-1.amazonaws.com.cn")
+    assert tldextract.extract(
+        "the-quick-brown-fox.cn-north-1.amazonaws.com.cn",
+        include_psl_private_domains=True,
+    ) == ExtractResult(
+        subdomain="the-quick-brown-fox.cn-north-1", domain="amazonaws", suffix="com.cn"
+    )
+    assert tldextract.extract(
+        "cn-north-1.amazonaws.com.cn", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="cn-north-1", domain="amazonaws", suffix="com.cn")
+    assert tldextract.extract(
+        "amazonaws.com.cn", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="", domain="amazonaws", suffix="com.cn")

@@ -5,8 +5,8 @@ import socket
 from urllib.parse import scheme_chars
 
 IP_RE = re.compile(
-    # pylint: disable-next=line-too-long
-    r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+    r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)"
+    r"{3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
 )
 
 SCHEME_RE = re.compile(r"^([" + scheme_chars + "]+:)?//")
@@ -18,11 +18,11 @@ def lenient_netloc(url: str) -> str:
     without raising errors."""
 
     return (
-        SCHEME_RE.sub("", url)
+        SCHEME_RE.sub("", url, 1)
         .partition("/")[0]
         .partition("?")[0]
         .partition("#")[0]
-        .split("@")[-1]
+        .rpartition("@")[-1]
         .partition(":")[0]
         .strip()
         .rstrip(".")

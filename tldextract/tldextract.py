@@ -50,10 +50,9 @@ or suffix were found:
 
 import logging
 import os
-import re
+import urllib.parse
 from functools import wraps
 from typing import FrozenSet, List, NamedTuple, Optional, Sequence, Union
-import urllib.parse
 
 import idna
 
@@ -70,8 +69,6 @@ PUBLIC_SUFFIX_LIST_URLS = (
     "https://publicsuffix.org/list/public_suffix_list.dat",
     "https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat",
 )
-
-_UNICODE_DOTS_RE = re.compile("[\u002e\u3002\uff0e\uff61]")
 
 
 class ExtractResult(NamedTuple):
@@ -251,11 +248,15 @@ class TLDExtract:
     def _extract_netloc(
         self, netloc: str, include_psl_private_domains: Optional[bool]
     ) -> ExtractResult:
-        labels = _UNICODE_DOTS_RE.split(netloc)
+        labels = (
+            netloc.replace("\u3002", "\u002e")
+            .replace("\uff0e", "\u002e")
+            .replace("\uff61", "\u002e")
+            .split(".")
+        )
 
-        translations = [_decode_punycode(label) for label in labels]
         suffix_index = self._get_tld_extractor().suffix_index(
-            translations, include_psl_private_domains=include_psl_private_domains
+            labels, include_psl_private_domains=include_psl_private_domains
         )
 
         suffix = ".".join(labels[suffix_index:])
@@ -349,6 +350,28 @@ class _PublicSuffixListTLDExtractor:
         self.tlds_incl_private = frozenset(public_tlds + private_tlds + extra_tlds)
         self.tlds_excl_private = frozenset(public_tlds + extra_tlds)
 
+        public_false_tlds = self.get_false_intermediate_suffixes(public_tlds)
+        private_false_tlds = self.get_false_intermediate_suffixes(private_tlds)
+        extra_false_tlds = self.get_false_intermediate_suffixes(extra_tlds)
+        self.false_tlds_incl_private = frozenset(
+            public_false_tlds + private_false_tlds + extra_false_tlds
+        )
+        self.false_tlds_excl_private = frozenset(public_false_tlds + extra_false_tlds)
+
+    def get_false_intermediate_suffixes(self, tlds: List[str]) -> List[str]:
+        """From list of suffixes, identify false intermediate suffixes.
+
+        Example: If valid TLDs include only ["a.b.c.d", "d"], then
+        ["b.c.d", "c.d"] are false intermediate suffixes.
+        """
+        valid_tlds = set(tlds)
+        false_tlds = set()
+        for tld in valid_tlds:
+            labels = tld.split(".")
+            variants = {".".join(labels[-i:]) for i in range(1, len(labels))}
+            false_tlds.update(variants)
+        return list(false_tlds.difference(valid_tlds))
+
     def tlds(
         self, include_psl_private_domains: Optional[bool] = None
     ) -> FrozenSet[str]:
@@ -362,28 +385,54 @@ class _PublicSuffixListTLDExtractor:
             else self.tlds_excl_private
         )
 
+    def false_tlds(
+        self, include_psl_private_domains: Optional[bool] = None
+    ) -> FrozenSet[str]:
+        """Get the currently filtered list of false intermediate suffixes."""
+        if include_psl_private_domains is None:
+            include_psl_private_domains = self.include_psl_private_domains
+
+        return (
+            self.false_tlds_incl_private
+            if include_psl_private_domains
+            else self.false_tlds_excl_private
+        )
+
     def suffix_index(
-        self, lower_spl: List[str], include_psl_private_domains: Optional[bool] = None
+        self, spl: List[str], include_psl_private_domains: Optional[bool] = None
     ) -> int:
         """Returns the index of the first suffix label.
         Returns len(spl) if no suffix is found
         """
         tlds = self.tlds(include_psl_private_domains)
-        length = len(lower_spl)
-        for i in range(length):
-            maybe_tld = ".".join(lower_spl[i:])
-            exception_tld = "!" + maybe_tld
-            if exception_tld in tlds:
-                return i + 1
+        false_tlds = self.false_tlds(include_psl_private_domains)
+        i = len(spl)
+        j = i
+        maybe_tld = ""
+        prev_maybe_tld = ""
+        for label in reversed(spl):
+            maybe_tld = (
+                f"{_decode_punycode(label)}.{maybe_tld}"
+                if maybe_tld
+                else _decode_punycode(label)
+            )
+
+            if "!" + maybe_tld in tlds:
+                return j
+            if "*." + prev_maybe_tld in tlds:
+                return j - 1
 
             if maybe_tld in tlds:
-                return i
-
-            wildcard_tld = "*." + ".".join(lower_spl[i + 1 :])
-            if wildcard_tld in tlds:
-                return i
-
-        return length
+                j -= 1
+                i = j
+                prev_maybe_tld = maybe_tld
+                continue
+            if maybe_tld in false_tlds:
+                j -= 1
+                prev_maybe_tld = maybe_tld
+                continue
+            break
+        return i
 
 
 def _decode_punycode(label: str) -> str:

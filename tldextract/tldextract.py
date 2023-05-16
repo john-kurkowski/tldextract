@@ -91,7 +91,7 @@ class ExtractResult(NamedTuple):
         ''
         """
         if self.domain and self.suffix:
-            return self.domain + "." + self.suffix
+            return f"{self.domain}.{self.suffix}"
         return ""
 
     @property
@@ -421,16 +421,16 @@ class _PublicSuffixListTLDExtractor:  # pylint: disable=too-many-instance-attrib
         j = i
         for label in reversed(spl):
             decoded_label = _decode_punycode(label)
-            if "!" + decoded_label in node.matches:
-                return j
-            if "*" in node.matches:
-                return j - 1
             if decoded_label in node.matches:
                 j -= 1
                 if node.matches[decoded_label].end:
                     i = j
                 node = node.matches[decoded_label]
                 continue
+            if "!" + decoded_label in node.matches:
+                return j
+            if "*" in node.matches:
+                return j - 1
             break
         return i
 

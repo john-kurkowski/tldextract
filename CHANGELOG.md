@@ -3,6 +3,13 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.4.2 (2023-05-16)
+
+* Bugfixes
+  * Speed up 10-40% on "average" inputs, and even more on pathological inputs, like long subdomains
+    * Optimize `suffix_index()` ([#283](https://github.com/john-kurkowski/tldextract/issues/283))
+    * Optimize netloc extraction ([#284](https://github.com/john-kurkowski/tldextract/issues/284))
+
 ## 3.4.1 (2023-04-26)
 
 * Bugfixes

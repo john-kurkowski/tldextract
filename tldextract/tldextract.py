@@ -48,11 +48,13 @@ or suffix were found:
     '127.0.0.1'
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import urllib.parse
 from functools import wraps
-from typing import FrozenSet, List, NamedTuple, Optional, Sequence, Union
+from typing import Dict, FrozenSet, List, NamedTuple, Optional, Sequence, Union
 
 import idna
 
@@ -318,6 +320,45 @@ class TLDExtract:
 TLD_EXTRACTOR = TLDExtract()
 
 
+class Trie:
+    """Trie for storing eTLDs with their labels in reverse-order"""
+
+    def __init__(self, matches: Optional[Dict] = None, end: bool = False) -> None:
+        self.matches = matches if matches else {}
+        self.end = end
+
+    @staticmethod
+    def create(suffixes: List[str]) -> Trie:
+        """Create a Trie from a list of suffixes and return its root node"""
+        root_node = Trie()
+
+        for suffix in suffixes:
+            suffix_labels = suffix.split(".")
+            suffix_labels.reverse()
+            root_node.add_suffix(suffix_labels)
+
+        for value in root_node.matches.values():
+            if "*" in value.matches:
+                value.end = True
+
+        return root_node
+
+    def add_suffix(self, labels: List[str]) -> None:
+        """Append a suffix's labels to this Trie node"""
+        node = self
+        labels_except_last = labels[: len(labels) - 1]
+
+        for label in labels_except_last:
+            if label not in node.matches:
+                node.matches[label] = Trie()
+            node = node.matches[label]
+
+        last_label = labels[len(labels) - 1]
+        if last_label not in node.matches:
+            node.matches[last_label] = Trie()
+        node.matches[last_label].end = True
+
+
 @wraps(TLD_EXTRACTOR.__call__)
 def extract(  # pylint: disable=missing-function-docstring
     url: str, include_psl_private_domains: Optional[bool] = False
@@ -331,7 +372,7 @@ def update(*args, **kwargs):  # type: ignore[no-untyped-def]
     return TLD_EXTRACTOR.update(*args, **kwargs)
 
 
-class _PublicSuffixListTLDExtractor:
+class _PublicSuffixListTLDExtractor:  # pylint: disable=too-many-instance-attributes
     """Wrapper around this project's main algo for PSL
     lookups.
     """
@@ -349,28 +390,8 @@ class _PublicSuffixListTLDExtractor:
         self.private_tlds = private_tlds
         self.tlds_incl_private = frozenset(public_tlds + private_tlds + extra_tlds)
         self.tlds_excl_private = frozenset(public_tlds + extra_tlds)
-
-        public_false_tlds = self.get_false_intermediate_suffixes(public_tlds)
-        private_false_tlds = self.get_false_intermediate_suffixes(private_tlds)
-        extra_false_tlds = self.get_false_intermediate_suffixes(extra_tlds)
-        self.false_tlds_incl_private = frozenset(
-            public_false_tlds + private_false_tlds + extra_false_tlds
-        )
-        self.false_tlds_excl_private = frozenset(public_false_tlds + extra_false_tlds)
-
-    def get_false_intermediate_suffixes(self, tlds: List[str]) -> List[str]:
-        """From list of suffixes, identify false intermediate suffixes.
-
-        Example: If valid TLDs include only ["a.b.c.d", "d"], then
-        ["b.c.d", "c.d"] are false intermediate suffixes.
-        """
-        valid_tlds = set(tlds)
-        false_tlds = set()
-        for tld in valid_tlds:
-            labels = tld.split(".")
-            variants = {".".join(labels[-i:]) for i in range(1, len(labels))}
-            false_tlds.update(variants)
-        return list(false_tlds.difference(valid_tlds))
+        self.tlds_incl_private_trie = Trie.create(list(self.tlds_incl_private))
+        self.tlds_excl_private_trie = Trie.create(list(self.tlds_excl_private))
 
     def tlds(
         self, include_psl_private_domains: Optional[bool] = None
@@ -385,51 +406,30 @@ class _PublicSuffixListTLDExtractor:
             else self.tlds_excl_private
         )
 
-    def false_tlds(
-        self, include_psl_private_domains: Optional[bool] = None
-    ) -> FrozenSet[str]:
-        """Get the currently filtered list of false intermediate suffixes."""
-        if include_psl_private_domains is None:
-            include_psl_private_domains = self.include_psl_private_domains
-
-        return (
-            self.false_tlds_incl_private
-            if include_psl_private_domains
-            else self.false_tlds_excl_private
-        )
-
     def suffix_index(
         self, spl: List[str], include_psl_private_domains: Optional[bool] = None
     ) -> int:
         """Returns the index of the first suffix label.
         Returns len(spl) if no suffix is found
         """
-        tlds = self.tlds(include_psl_private_domains)
-        false_tlds = self.false_tlds(include_psl_private_domains)
+        node = (
+            self.tlds_incl_private_trie
+            if include_psl_private_domains
+            else self.tlds_excl_private_trie
+        )
         i = len(spl)
         j = i
-        maybe_tld = ""
-        prev_maybe_tld = ""
         for label in reversed(spl):
-            maybe_tld = (
-                f"{_decode_punycode(label)}.{maybe_tld}"
-                if maybe_tld
-                else _decode_punycode(label)
-            )
-
-            if "!" + maybe_tld in tlds:
+            decoded_label = _decode_punycode(label)
+            if "!" + decoded_label in node.matches:
                 return j
-            if "*." + prev_maybe_tld in tlds:
+            if "*" in node.matches:
                 return j - 1
-
-            if maybe_tld in tlds:
+            if decoded_label in node.matches:
                 j -= 1
-                i = j
-                prev_maybe_tld = maybe_tld
-                continue
-            if maybe_tld in false_tlds:
-                j -= 1
-                prev_maybe_tld = maybe_tld
+                if node.matches[decoded_label].end:
+                    i = j
+                node = node.matches[decoded_label]
                 continue
             break
         return i

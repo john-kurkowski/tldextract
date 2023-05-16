@@ -427,9 +427,11 @@ class _PublicSuffixListTLDExtractor:  # pylint: disable=too-many-instance-attrib
                     i = j
                 node = node.matches[decoded_label]
                 continue
-            if "!" + decoded_label in node.matches:
-                return j
             if "*" in node.matches:
+                # check if label falls under any wildcard exception rule
+                # e.g. !www.ck
+                if "!" + decoded_label in node.matches:
+                    return j
                 return j - 1
             break
         return i

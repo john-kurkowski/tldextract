@@ -12,10 +12,13 @@ IP_RE = re.compile(
 scheme_chars_set = set(scheme_chars)
 
 
-def extract_netloc(schemeless_url: str) -> str:
-    """Extract netloc from a schemeless URL"""
+def lenient_netloc(url: str) -> str:
+    """Extract the netloc of a URL-like string, similar to the netloc attribute
+    returned by urllib.parse.{urlparse,urlsplit}, but extract more leniently,
+    without raising errors."""
     return (
-        schemeless_url.partition("/")[0]
+        _schemeless_url(url)
+        .partition("/")[0]
         .partition("?")[0]
         .partition("#")[0]
         .rpartition("@")[-1]
@@ -25,21 +28,17 @@ def extract_netloc(schemeless_url: str) -> str:
     )
 
 
-def lenient_netloc(url: str) -> str:
-    """Extract the netloc of a URL-like string, similar to the netloc attribute
-    returned by urllib.parse.{urlparse,urlsplit}, but extract more leniently,
-    without raising errors."""
-
+def _schemeless_url(url: str) -> str:
     double_slashes_start = url.find("//")
     if double_slashes_start == 0:
-        return extract_netloc(url[2:])
+        return url[2:]
     if (
         double_slashes_start < 2
         or not url[double_slashes_start - 1] == ":"
         or set(url[: double_slashes_start - 1]) - scheme_chars_set
     ):
-        return extract_netloc(url)
-    return extract_netloc(url[double_slashes_start + 2 :])
+        return url
+    return url[double_slashes_start + 2 :]
 
 
 def looks_like_ip(maybe_ip: str) -> bool:

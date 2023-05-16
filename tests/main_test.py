@@ -218,6 +218,8 @@ def test_scheme():
     assert_extract("://", ("", "", "", ""))
     assert_extract("://example.com", ("", "", "", ""))
     assert_extract("a+-.://example.com", ("example.com", "", "example", "com"))
+    assert_extract("a#//example.com", ("", "", "a", ""))
+    assert_extract("a@://example.com", ("", "", "", ""))
     assert_extract("#//example.com", ("", "", "", ""))
     assert_extract(
         "https://mail.google.com/mail", ("mail.google.com", "mail", "google", "com")

@@ -321,7 +321,7 @@ TLD_EXTRACTOR = TLDExtract()
 
 
 class Trie:
-    """Trie for storing eTLDs with their labels in reverse-order"""
+    """Trie for storing eTLDs with their labels in reverse-order."""
 
     def __init__(self, matches: Optional[Dict] = None, end: bool = False) -> None:
         self.matches = matches if matches else {}
@@ -329,7 +329,7 @@ class Trie:
 
     @staticmethod
     def create(suffixes: List[str]) -> Trie:
-        """Create a Trie from a list of suffixes and return its root node"""
+        """Create a Trie from a list of suffixes and return its root node."""
         root_node = Trie()
 
         for suffix in suffixes:
@@ -340,7 +340,7 @@ class Trie:
         return root_node
 
     def add_suffix(self, labels: List[str]) -> None:
-        """Append a suffix's labels to this Trie node"""
+        """Append a suffix's labels to this Trie node."""
         node = self
 
         for label in labels:

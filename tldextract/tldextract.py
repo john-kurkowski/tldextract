@@ -428,13 +428,16 @@ class _PublicSuffixListTLDExtractor:
                     i = j
                 node = node.matches[decoded_label]
                 continue
-            if "*" in node.matches:
-                # check if label falls under any wildcard exception rule
-                # e.g. !www.ck
-                if "!" + decoded_label in node.matches:
+
+            is_wildcard = "*" in node.matches
+            if is_wildcard:
+                is_wildcard_exception = "!" + decoded_label in node.matches
+                if is_wildcard_exception:
                     return j
                 return j - 1
+
             break
+
         return i
 
 

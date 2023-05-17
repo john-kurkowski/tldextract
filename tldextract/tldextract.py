@@ -90,7 +90,7 @@ class ExtractResult(NamedTuple):
         >>> extract('http://localhost:8080').registered_domain
         ''
         """
-        if self.domain and self.suffix:
+        if self.suffix and self.domain:
             return f"{self.domain}.{self.suffix}"
         return ""
 
@@ -104,7 +104,7 @@ class ExtractResult(NamedTuple):
         >>> extract('http://localhost:8080').fqdn
         ''
         """
-        if self.domain and self.suffix:
+        if self.suffix and self.domain:
             # Disable bogus lint error (https://github.com/PyCQA/pylint/issues/2568)
             # pylint: disable-next=not-an-iterable
             return ".".join(i for i in self if i)

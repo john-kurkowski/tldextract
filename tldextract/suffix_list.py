@@ -3,7 +3,8 @@
 import logging
 import pkgutil
 import re
-from typing import List, Sequence, Tuple, Union, cast
+from collections.abc import Sequence
+from typing import cast
 
 import requests
 from requests_file import FileAdapter  # type: ignore[import]
@@ -27,7 +28,7 @@ class SuffixListNotFound(LookupError):
 def find_first_response(
     cache: DiskCache,
     urls: Sequence[str],
-    cache_fetch_timeout: Union[float, int, None] = None,
+    cache_fetch_timeout: float | int | None = None,
 ) -> str:
     """Decode the first successfully fetched URL, from UTF-8 encoding to Python unicode."""
     with requests.Session() as session:
@@ -46,7 +47,7 @@ def find_first_response(
     )
 
 
-def extract_tlds_from_suffix_list(suffix_list_text: str) -> Tuple[List[str], List[str]]:
+def extract_tlds_from_suffix_list(suffix_list_text: str) -> tuple[list[str], list[str]]:
     """Parse the raw suffix list text for its different designations of suffixes."""
     public_text, _, private_text = suffix_list_text.partition(
         PUBLIC_PRIVATE_SUFFIX_SEPARATOR
@@ -60,10 +61,10 @@ def extract_tlds_from_suffix_list(suffix_list_text: str) -> Tuple[List[str], Lis
 def get_suffix_lists(
     cache: DiskCache,
     urls: Sequence[str],
-    cache_fetch_timeout: Union[float, int, None],
+    cache_fetch_timeout: float | int | None,
     fallback_to_snapshot: bool,
-) -> Tuple[List[str], List[str]]:
-    """Fetch, parse, and cache the suffix lists"""
+) -> tuple[list[str], list[str]]:
+    """Fetch, parse, and cache the suffix lists."""
     return cache.run_and_cache(
         func=_get_suffix_lists,
         namespace="publicsuffix.org-tlds",
@@ -80,11 +81,10 @@ def get_suffix_lists(
 def _get_suffix_lists(
     cache: DiskCache,
     urls: Sequence[str],
-    cache_fetch_timeout: Union[float, int, None],
+    cache_fetch_timeout: float | int | None,
     fallback_to_snapshot: bool,
-) -> Tuple[List[str], List[str]]:
-    """Fetch, parse, and cache the suffix lists"""
-
+) -> tuple[list[str], list[str]]:
+    """Fetch, parse, and cache the suffix lists."""
     try:
         text = find_first_response(cache, urls, cache_fetch_timeout=cache_fetch_timeout)
     except SuffixListNotFound as exc:

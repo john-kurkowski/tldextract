@@ -54,16 +54,10 @@ from __future__ import annotations
 import logging
 import os
 import urllib.parse
+from collections.abc import Collection, Sequence
 from functools import wraps
 from typing import (
-    Collection,
-    Dict,
-    FrozenSet,
-    List,
     NamedTuple,
-    Optional,
-    Sequence,
-    Union,
 )
 
 import idna
@@ -143,12 +137,12 @@ class TLDExtract:
     # TODO: Agreed with Pylint: too-many-arguments
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        cache_dir: Optional[str] = get_cache_dir(),
+        cache_dir: str | None = get_cache_dir(),
         suffix_list_urls: Sequence[str] = PUBLIC_SUFFIX_LIST_URLS,
         fallback_to_snapshot: bool = True,
         include_psl_private_domains: bool = False,
         extra_suffixes: Sequence[str] = (),
-        cache_fetch_timeout: Union[str, float, None] = CACHE_TIMEOUT,
+        cache_fetch_timeout: str | float | None = CACHE_TIMEOUT,
     ) -> None:
         """Construct a callable for extracting subdomain, domain, and suffix components from a URL.
 
@@ -203,7 +197,7 @@ class TLDExtract:
 
         self.include_psl_private_domains = include_psl_private_domains
         self.extra_suffixes = extra_suffixes
-        self._extractor: Optional[_PublicSuffixListTLDExtractor] = None
+        self._extractor: _PublicSuffixListTLDExtractor | None = None
 
         self.cache_fetch_timeout = (
             float(cache_fetch_timeout)
@@ -235,8 +229,8 @@ class TLDExtract:
 
     def extract_urllib(
         self,
-        url: Union[urllib.parse.ParseResult, urllib.parse.SplitResult],
-        include_psl_private_domains: Optional[bool] = None,
+        url: urllib.parse.ParseResult | urllib.parse.SplitResult,
+        include_psl_private_domains: bool | None = None,
     ) -> ExtractResult:
         """Take the output of urllib.parse URL parsing methods and further splits the parsed URL.
 
@@ -255,7 +249,7 @@ class TLDExtract:
         return self._extract_netloc(url.netloc, include_psl_private_domains)
 
     def _extract_netloc(
-        self, netloc: str, include_psl_private_domains: Optional[bool]
+        self, netloc: str, include_psl_private_domains: bool | None
     ) -> ExtractResult:
         labels = (
             netloc.replace("\u3002", "\u002e")
@@ -284,7 +278,7 @@ class TLDExtract:
             self._get_tld_extractor()
 
     @property
-    def tlds(self) -> List[str]:
+    def tlds(self) -> list[str]:
         """
         Returns the list of tld's used by default.
 
@@ -331,7 +325,7 @@ TLD_EXTRACTOR = TLDExtract()
 class Trie:
     """Trie for storing eTLDs with their labels in reverse-order."""
 
-    def __init__(self, matches: Optional[Dict] = None, end: bool = False) -> None:
+    def __init__(self, matches: dict | None = None, end: bool = False) -> None:
         self.matches = matches if matches else {}
         self.end = end
 
@@ -347,7 +341,7 @@ class Trie:
 
         return root_node
 
-    def add_suffix(self, labels: List[str]) -> None:
+    def add_suffix(self, labels: list[str]) -> None:
         """Append a suffix's labels to this Trie node."""
         node = self
 
@@ -361,7 +355,7 @@ class Trie:
 
 @wraps(TLD_EXTRACTOR.__call__)
 def extract(  # pylint: disable=missing-function-docstring
-    url: str, include_psl_private_domains: Optional[bool] = False
+    url: str, include_psl_private_domains: bool | None = False
 ) -> ExtractResult:
     return TLD_EXTRACTOR(url, include_psl_private_domains=include_psl_private_domains)
 
@@ -378,9 +372,9 @@ class _PublicSuffixListTLDExtractor:
 
     def __init__(
         self,
-        public_tlds: List[str],
-        private_tlds: List[str],
-        extra_tlds: List[str],
+        public_tlds: list[str],
+        private_tlds: list[str],
+        extra_tlds: list[str],
         include_psl_private_domains: bool = False,
     ):
         # set the default value
@@ -392,9 +386,7 @@ class _PublicSuffixListTLDExtractor:
         self.tlds_incl_private_trie = Trie.create(self.tlds_incl_private)
         self.tlds_excl_private_trie = Trie.create(self.tlds_excl_private)
 
-    def tlds(
-        self, include_psl_private_domains: Optional[bool] = None
-    ) -> FrozenSet[str]:
+    def tlds(self, include_psl_private_domains: bool | None = None) -> frozenset[str]:
         """Get the currently filtered list of suffixes."""
         if include_psl_private_domains is None:
             include_psl_private_domains = self.include_psl_private_domains
@@ -406,7 +398,7 @@ class _PublicSuffixListTLDExtractor:
         )
 
     def suffix_index(
-        self, spl: List[str], include_psl_private_domains: Optional[bool] = None
+        self, spl: list[str], include_psl_private_domains: bool | None = None
     ) -> int:
         """Return the index of the first suffix label.
 

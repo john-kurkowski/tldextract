@@ -342,17 +342,14 @@ class Trie:
     def add_suffix(self, labels: List[str]) -> None:
         """Append a suffix's labels to this Trie node"""
         node = self
-        labels_except_last = labels[: len(labels) - 1]
 
-        for label in labels_except_last:
+        for idx, label in enumerate(labels, start=1):
             if label not in node.matches:
                 node.matches[label] = Trie()
-            node = node.matches[label]
-
-        last_label = labels[len(labels) - 1]
-        if last_label not in node.matches:
-            node.matches[last_label] = Trie()
-        node.matches[last_label].end = True
+            if idx != len(labels):
+                node = node.matches[label]
+            else:
+                node.matches[label].end = True
 
 
 @wraps(TLD_EXTRACTOR.__call__)

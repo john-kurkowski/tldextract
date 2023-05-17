@@ -343,13 +343,12 @@ class Trie:
         """Append a suffix's labels to this Trie node"""
         node = self
 
-        for idx, label in enumerate(labels, start=1):
+        for label in labels:
             if label not in node.matches:
                 node.matches[label] = Trie()
-            if idx != len(labels):
-                node = node.matches[label]
-            else:
-                node.matches[label].end = True
+            node = node.matches[label]
+
+        node.end = True
 
 
 @wraps(TLD_EXTRACTOR.__call__)

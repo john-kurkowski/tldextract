@@ -302,6 +302,15 @@ def test_dns_root_label():
     assert_extract(
         "http://www.example.com./", ("www.example.com", "www", "example", "com")
     )
+    assert_extract(
+        "http://www.example.com\u3002/", ("www.example.com", "www", "example", "com")
+    )
+    assert_extract(
+        "http://www.example.com\uff0e/", ("www.example.com", "www", "example", "com")
+    )
+    assert_extract(
+        "http://www.example.com\uff61/", ("www.example.com", "www", "example", "com")
+    )
 
 
 def test_private_domains():

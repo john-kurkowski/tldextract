@@ -24,7 +24,7 @@ def lenient_netloc(url: str) -> str:
         .rpartition("@")[-1]
         .partition(":")[0]
         .strip()
-        .rstrip(".")
+        .rstrip(".\u3002\uff0e\uff61")
     )
 
 

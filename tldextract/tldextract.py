@@ -264,7 +264,7 @@ class TLDExtract:
         if suffix_index == len(labels) and netloc and looks_like_ip(netloc):
             return ExtractResult("", netloc, "")
 
-        suffix = ".".join(labels[suffix_index:])
+        suffix = ".".join(labels[suffix_index:]) if suffix_index != len(labels) else ""
         subdomain = ".".join(labels[: suffix_index - 1]) if suffix_index >= 2 else ""
         domain = labels[suffix_index - 1] if suffix_index else ""
         return ExtractResult(subdomain, domain, suffix)

@@ -1,4 +1,4 @@
-"""Helpers """
+"""Helpers."""
 import errno
 import hashlib
 import json
@@ -30,7 +30,7 @@ T = TypeVar("T")  # pylint: disable=invalid-name
 
 def get_pkg_unique_identifier() -> str:
     """
-    Generate an identifier unique to the python version, tldextract version, and python instance
+    Generate an identifier unique to the python version, tldextract version, and python instance.
 
     This will prevent interference between virtualenvs and issues that might arise when installing
     a new version of tldextract
@@ -61,7 +61,7 @@ def get_pkg_unique_identifier() -> str:
 
 def get_cache_dir() -> str:
     """
-    Get a cache dir that we have permission to write to
+    Get a cache dir that we have permission to write to.
 
     Try to follow the XDG standard, but if that doesn't work fallback to the package directory
     http://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
@@ -86,7 +86,7 @@ def get_cache_dir() -> str:
 
 
 class DiskCache:
-    """Disk _cache that only works for jsonable values"""
+    """Disk _cache that only works for jsonable values."""
 
     def __init__(self, cache_dir: Optional[str], lock_timeout: int = 20):
         self.enabled = bool(cache_dir)
@@ -115,7 +115,7 @@ class DiskCache:
     def set(
         self, namespace: str, key: Union[str, Dict[str, Hashable]], value: object
     ) -> None:
-        """Set a value in the disk cache"""
+        """Set a value in the disk cache."""
         if not self.enabled:
             return
 
@@ -142,7 +142,7 @@ class DiskCache:
                 _DID_LOG_UNABLE_TO_CACHE = True
 
     def clear(self) -> None:
-        """Clear the disk cache"""
+        """Clear the disk cache."""
         for root, _, files in os.walk(self.cache_dir):
             for filename in files:
                 if filename.endswith(self.file_ext) or filename.endswith(
@@ -175,7 +175,7 @@ class DiskCache:
         kwargs: Dict[str, Hashable],
         hashed_argnames: Iterable[str],
     ) -> T:
-        """Get a url but cache the response"""
+        """Get a url but cache the response."""
         if not self.enabled:
             return func(**kwargs)
 
@@ -215,7 +215,7 @@ class DiskCache:
     def cached_fetch_url(
         self, session: requests.Session, url: str, timeout: Union[float, int, None]
     ) -> str:
-        """Get a url but cache the response"""
+        """Get a url but cache the response."""
         return self.run_and_cache(
             func=_fetch_url,
             namespace="urls",
@@ -241,7 +241,7 @@ def _make_cache_key(inputs: Union[str, Dict[str, Hashable]]) -> str:
 
 
 def _make_dir(filename: str) -> None:
-    """Make a directory if it doesn't already exist"""
+    """Make a directory if it doesn't already exist."""
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))

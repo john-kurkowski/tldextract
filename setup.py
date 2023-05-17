@@ -1,5 +1,6 @@
-""" `tldextract` accurately separates a URL's subdomain, domain, and public suffix,
-using the Public Suffix List (PSL).
+"""`tldextract` accurately separates a URL's subdomain, domain, and public suffix.
+
+It does this via the Public Suffix List (PSL).
 
     >>> import tldextract
     >>> tldextract.extract('http://forums.news.cnn.com/')

@@ -1,5 +1,6 @@
-""" `tldextract` accurately separates a URL's subdomain, domain, and public suffix,
-using the Public Suffix List (PSL).
+"""`tldextract` accurately separates a URL's subdomain, domain, and public suffix.
+
+It does this via the Public Suffix List (PSL).
 
     >>> import tldextract
 
@@ -122,7 +123,7 @@ class ExtractResult(NamedTuple):
     @property
     def ipv4(self) -> str:
         """
-        Returns the ipv4 if that is what the presented domain/url is
+        Returns the ipv4 if that is what the presented domain/url is.
 
         >>> extract('http://127.0.0.1/path/to/file').ipv4
         '127.0.0.1'
@@ -137,8 +138,7 @@ class ExtractResult(NamedTuple):
 
 
 class TLDExtract:
-    """A callable for extracting, subdomain, domain, and suffix components from
-    a URL."""
+    """A callable for extracting, subdomain, domain, and suffix components from a URL."""
 
     # TODO: Agreed with Pylint: too-many-arguments
     def __init__(  # pylint: disable=too-many-arguments
@@ -150,9 +150,7 @@ class TLDExtract:
         extra_suffixes: Sequence[str] = (),
         cache_fetch_timeout: Union[str, float, None] = CACHE_TIMEOUT,
     ) -> None:
-        """
-        Constructs a callable for extracting subdomain, domain, and suffix
-        components from a URL.
+        """Construct a callable for extracting subdomain, domain, and suffix components from a URL.
 
         Upon calling it, it first checks for a JSON in `cache_dir`. By default,
         the `cache_dir` will live in the tldextract directory. You can disable
@@ -215,17 +213,17 @@ class TLDExtract:
         self._cache = DiskCache(cache_dir)
 
     def __call__(
-        self, url: str, include_psl_private_domains: Optional[bool] = None
+        self, url: str, include_psl_private_domains: bool | None = None
     ) -> ExtractResult:
         """Alias for `extract_str`."""
         return self.extract_str(url, include_psl_private_domains)
 
     def extract_str(
-        self, url: str, include_psl_private_domains: Optional[bool] = None
+        self, url: str, include_psl_private_domains: bool | None = None
     ) -> ExtractResult:
-        """
-        Takes a string URL and splits it into its subdomain, domain, and
-        suffix (effective TLD, gTLD, ccTLD, etc.) components.
+        """Take a string URL and splits it into its subdomain, domain, and suffix components.
+
+        I.e. its effective TLD, gTLD, ccTLD, etc. components.
 
         >>> extractor = TLDExtract()
         >>> extractor.extract_str('http://forums.news.cnn.com/')
@@ -240,10 +238,10 @@ class TLDExtract:
         url: Union[urllib.parse.ParseResult, urllib.parse.SplitResult],
         include_psl_private_domains: Optional[bool] = None,
     ) -> ExtractResult:
-        """
-        Takes the output of urllib.parse URL parsing methods and further splits
-        the parsed URL into its subdomain, domain, and suffix (effective TLD,
-        gTLD, ccTLD, etc.) components.
+        """Take the output of urllib.parse URL parsing methods and further splits the parsed URL.
+
+        Splits the parsed URL into its subdomain, domain, and suffix
+        components, i.e. its effective TLD, gTLD, ccTLD, etc. components.
 
         This method is like `extract_str` but faster, as the string's domain
         name has already been parsed.
@@ -288,22 +286,23 @@ class TLDExtract:
     @property
     def tlds(self) -> List[str]:
         """
-        Returns the list of tld's used by default
+        Returns the list of tld's used by default.
 
         This will vary based on `include_psl_private_domains` and `extra_suffixes`
         """
         return list(self._get_tld_extractor().tlds())
 
-    def _get_tld_extractor(self) -> "_PublicSuffixListTLDExtractor":
-        """Get or compute this object's TLDExtractor. Looks up the TLDExtractor
-        in roughly the following order, based on the settings passed to
-        __init__:
+    def _get_tld_extractor(self) -> _PublicSuffixListTLDExtractor:
+        """Get or compute this object's TLDExtractor.
+
+        Looks up the TLDExtractor in roughly the following order, based on the
+        settings passed to __init__:
 
         1. Memoized on `self`
         2. Local system _cache file
         3. Remote PSL, over HTTP
-        4. Bundled PSL snapshot file"""
-
+        4. Bundled PSL snapshot file
+        """
         if self._extractor:
             return self._extractor
 
@@ -374,9 +373,7 @@ def update(*args, **kwargs):  # type: ignore[no-untyped-def]
 
 
 class _PublicSuffixListTLDExtractor:
-    """Wrapper around this project's main algo for PSL
-    lookups.
-    """
+    """Wrapper around this project's main algo for PSL lookups."""
 
     def __init__(
         self,
@@ -410,8 +407,9 @@ class _PublicSuffixListTLDExtractor:
     def suffix_index(
         self, spl: List[str], include_psl_private_domains: Optional[bool] = None
     ) -> int:
-        """Returns the index of the first suffix label.
-        Returns len(spl) if no suffix is found
+        """Return the index of the first suffix label.
+
+        Returns len(spl) if no suffix is found.
         """
         node = (
             self.tlds_incl_private_trie

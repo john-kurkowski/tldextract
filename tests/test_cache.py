@@ -1,4 +1,4 @@
-"""Test the caching functionality"""
+"""Test the caching functionality."""
 import os.path
 import sys
 import types

@@ -1,4 +1,4 @@
-"""Trie tests"""
+"""Trie tests."""
 from itertools import permutations
 
 from tldextract.tldextract import Trie

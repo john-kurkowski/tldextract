@@ -1,4 +1,4 @@
-"tldextract helpers for testing and fetching remote resources."
+"""tldextract helpers for testing and fetching remote resources."""
 
 import logging
 import pkgutil
@@ -17,8 +17,11 @@ PUBLIC_PRIVATE_SUFFIX_SEPARATOR = "// ===BEGIN PRIVATE DOMAINS==="
 
 
 class SuffixListNotFound(LookupError):
-    """A recoverable error while looking up a suffix list. Recoverable because
-    you can specify backups, or use this library's bundled snapshot."""
+    """A recoverable error while looking up a suffix list.
+
+    Recoverable because you can specify backups, or use this library's bundled
+    snapshot.
+    """
 
 
 def find_first_response(
@@ -26,9 +29,7 @@ def find_first_response(
     urls: Sequence[str],
     cache_fetch_timeout: Union[float, int, None] = None,
 ) -> str:
-    """Decode the first successfully fetched URL, from UTF-8 encoding to
-    Python unicode.
-    """
+    """Decode the first successfully fetched URL, from UTF-8 encoding to Python unicode."""
     with requests.Session() as session:
         session.mount("file://", FileAdapter())
 
@@ -46,8 +47,7 @@ def find_first_response(
 
 
 def extract_tlds_from_suffix_list(suffix_list_text: str) -> Tuple[List[str], List[str]]:
-    """Parse the raw suffix list text for its different designations of
-    suffixes."""
+    """Parse the raw suffix list text for its different designations of suffixes."""
     public_text, _, private_text = suffix_list_text.partition(
         PUBLIC_PRIVATE_SUFFIX_SEPARATOR
     )

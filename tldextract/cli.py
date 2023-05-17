@@ -1,4 +1,4 @@
-"""tldextract CLI"""
+"""tldextract CLI."""
 
 
 import argparse
@@ -12,7 +12,7 @@ from .tldextract import TLDExtract
 
 
 def main() -> None:
-    """tldextract CLI main command."""
+    """Tldextract CLI main command."""
     logging.basicConfig()
 
     parser = argparse.ArgumentParser(

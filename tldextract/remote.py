@@ -1,4 +1,4 @@
-"tldextract helpers for testing and fetching remote resources."
+"""tldextract helpers for testing and fetching remote resources."""
 
 import re
 import socket
@@ -13,9 +13,12 @@ scheme_chars_set = set(scheme_chars)
 
 
 def lenient_netloc(url: str) -> str:
-    """Extract the netloc of a URL-like string, similar to the netloc attribute
-    returned by urllib.parse.{urlparse,urlsplit}, but extract more leniently,
-    without raising errors."""
+    """Extract the netloc of a URL-like string.
+
+    Similar to the netloc attribute returned by
+    urllib.parse.{urlparse,urlsplit}, but extract more leniently, without
+    raising errors.
+    """
     return (
         _schemeless_url(url)
         .partition("/")[0]
@@ -42,7 +45,7 @@ def _schemeless_url(url: str) -> str:
 
 
 def looks_like_ip(maybe_ip: str) -> bool:
-    """Does the given str look like an IP address?"""
+    """Check whether the given str looks like an IP address."""
     if not maybe_ip[0].isdigit():
         return False
 

@@ -37,9 +37,11 @@ def assert_extract(
         extract_using_fallback_to_snapshot_no_cache,
     ),
 ) -> None:
-    """Test helper to compare all the expected and actual attributes and
-    properties of an extraction. Runs the same comparison across several
-    permutations of tldextract instance configurations."""
+    """Test helper to compare all expected and actual attributes of an extraction.
+
+    Runs the same comparison across several permutations of tldextract instance
+    configurations.
+    """
     (
         expected_fqdn,
         expected_subdomain,
@@ -196,9 +198,7 @@ def test_puny_with_non_puny():
 
 
 def test_idna_2008():
-    """Python supports IDNA 2003.
-    The IDNA library adds 2008 support for characters like ß.
-    """
+    """Python supports IDNA 2003. The IDNA library adds 2008 support for characters like ß."""
     assert_extract(
         "xn--gieen46ers-73a.de",
         ("xn--gieen46ers-73a.de", "", "xn--gieen46ers-73a", "de"),
@@ -352,7 +352,6 @@ def test_result_as_dict():
 
 def test_cache_permission(mocker, monkeypatch, tmpdir):
     """Emit a warning once that this can't cache the latest PSL."""
-
     warning = mocker.patch.object(logging.getLogger("tldextract.cache"), "warning")
 
     def no_permission_makedirs(*args, **kwargs):

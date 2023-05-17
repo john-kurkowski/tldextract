@@ -2,10 +2,12 @@
 import os.path
 import sys
 import types
-from typing import Any, Dict, Hashable, cast
+from collections.abc import Hashable
+from typing import Any, cast
 from unittest.mock import Mock
 
 import pytest
+
 import tldextract.cache
 from tldextract.cache import DiskCache, get_cache_dir, get_pkg_unique_identifier
 
@@ -80,7 +82,7 @@ def test_run_and_cache(tmpdir):
 
     return_value1 = "unique return value"
     some_fn = Mock(return_value=return_value1)
-    kwargs1: Dict[str, Hashable] = {"value": 1}
+    kwargs1: dict[str, Hashable] = {"value": 1}
 
     assert some_fn.call_count == 0
 
@@ -92,7 +94,7 @@ def test_run_and_cache(tmpdir):
     assert call2 == return_value1
     assert some_fn.call_count == 1
 
-    kwargs2: Dict[str, Hashable] = {"value": 2}
+    kwargs2: dict[str, Hashable] = {"value": 2}
     return_value2 = "another return value"
     some_fn.return_value = return_value2
 

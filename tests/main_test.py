@@ -3,7 +3,7 @@
 import logging
 import os
 import tempfile
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 
 import pytest
 import responses
@@ -27,7 +27,7 @@ extract_using_fallback_to_snapshot_no_cache = tldextract.TLDExtract(
 
 def assert_extract(
     url: str,
-    expected_domain_data: Tuple[str, str, str, str],
+    expected_domain_data: tuple[str, str, str, str],
     expected_ip_data: str = "",
     funs: Sequence[tldextract.TLDExtract] = (
         extract,

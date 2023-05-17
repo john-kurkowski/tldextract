@@ -6,20 +6,15 @@ import logging
 import os
 import os.path
 import sys
+from collections.abc import Callable, Hashable, Iterable
 from hashlib import md5
 from typing import (
-    Callable,
-    Dict,
-    Hashable,
-    Iterable,
-    Optional,
     TypeVar,
-    Union,
     cast,
 )
 
-from filelock import FileLock
 import requests
+from filelock import FileLock
 
 LOG = logging.getLogger(__name__)
 
@@ -88,7 +83,7 @@ def get_cache_dir() -> str:
 class DiskCache:
     """Disk _cache that only works for jsonable values."""
 
-    def __init__(self, cache_dir: Optional[str], lock_timeout: int = 20):
+    def __init__(self, cache_dir: str | None, lock_timeout: int = 20):
         self.enabled = bool(cache_dir)
         self.cache_dir = os.path.expanduser(str(cache_dir) or "")
         self.lock_timeout = lock_timeout
@@ -96,8 +91,8 @@ class DiskCache:
         # combined with a call to `.clear()` wont wipe someones hard drive
         self.file_ext = ".tldextract.json"
 
-    def get(self, namespace: str, key: Union[str, Dict[str, Hashable]]) -> object:
-        """Retrieve a value from the disk cache"""
+    def get(self, namespace: str, key: str | dict[str, Hashable]) -> object:
+        """Retrieve a value from the disk cache."""
         if not self.enabled:
             raise KeyError("Cache is disabled")
         cache_filepath = self._key_to_cachefile_path(namespace, key)
@@ -113,7 +108,7 @@ class DiskCache:
             raise KeyError("namespace: " + namespace + " key: " + repr(key)) from None
 
     def set(
-        self, namespace: str, key: Union[str, Dict[str, Hashable]], value: object
+        self, namespace: str, key: str | dict[str, Hashable], value: object
     ) -> None:
         """Set a value in the disk cache."""
         if not self.enabled:
@@ -159,7 +154,7 @@ class DiskCache:
                             raise
 
     def _key_to_cachefile_path(
-        self, namespace: str, key: Union[str, Dict[str, Hashable]]
+        self, namespace: str, key: str | dict[str, Hashable]
     ) -> str:
         namespace_path = os.path.join(self.cache_dir, namespace)
         hashed_key = _make_cache_key(key)
@@ -172,7 +167,7 @@ class DiskCache:
         self,
         func: Callable[..., T],
         namespace: str,
-        kwargs: Dict[str, Hashable],
+        kwargs: dict[str, Hashable],
         hashed_argnames: Iterable[str],
     ) -> T:
         """Get a url but cache the response."""
@@ -213,7 +208,7 @@ class DiskCache:
             return result
 
     def cached_fetch_url(
-        self, session: requests.Session, url: str, timeout: Union[float, int, None]
+        self, session: requests.Session, url: str, timeout: float | int | None
     ) -> str:
         """Get a url but cache the response."""
         return self.run_and_cache(
@@ -224,7 +219,7 @@ class DiskCache:
         )
 
 
-def _fetch_url(session: requests.Session, url: str, timeout: Optional[int]) -> str:
+def _fetch_url(session: requests.Session, url: str, timeout: int | None) -> str:
     response = session.get(url, timeout=timeout)
     response.raise_for_status()
     text = response.text
@@ -235,7 +230,7 @@ def _fetch_url(session: requests.Session, url: str, timeout: Optional[int]) -> s
     return text
 
 
-def _make_cache_key(inputs: Union[str, Dict[str, Hashable]]) -> str:
+def _make_cache_key(inputs: str | dict[str, Hashable]) -> str:
     key = repr(inputs)
     return md5(key.encode("utf8")).hexdigest()
 

@@ -261,11 +261,11 @@ class TLDExtract:
             labels, include_psl_private_domains=include_psl_private_domains
         )
 
-        suffix = ".".join(labels[suffix_index:])
-        if not suffix and netloc and looks_like_ip(netloc):
+        if suffix_index == len(labels) and netloc and looks_like_ip(netloc):
             return ExtractResult("", netloc, "")
 
-        subdomain = ".".join(labels[: suffix_index - 1]) if suffix_index else ""
+        suffix = ".".join(labels[suffix_index:])
+        subdomain = ".".join(labels[: suffix_index - 1]) if suffix_index >= 2 else ""
         domain = labels[suffix_index - 1] if suffix_index else ""
         return ExtractResult(subdomain, domain, suffix)
 

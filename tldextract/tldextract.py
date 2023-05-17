@@ -54,7 +54,16 @@ import logging
 import os
 import urllib.parse
 from functools import wraps
-from typing import Dict, FrozenSet, List, NamedTuple, Optional, Sequence, Union
+from typing import (
+    Collection,
+    Dict,
+    FrozenSet,
+    List,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Union,
+)
 
 import idna
 
@@ -328,7 +337,7 @@ class Trie:
         self.end = end
 
     @staticmethod
-    def create(suffixes: List[str]) -> Trie:
+    def create(suffixes: Collection[str]) -> Trie:
         """Create a Trie from a list of suffixes and return its root node."""
         root_node = Trie()
 
@@ -382,8 +391,8 @@ class _PublicSuffixListTLDExtractor:
         self.private_tlds = private_tlds
         self.tlds_incl_private = frozenset(public_tlds + private_tlds + extra_tlds)
         self.tlds_excl_private = frozenset(public_tlds + extra_tlds)
-        self.tlds_incl_private_trie = Trie.create(list(self.tlds_incl_private))
-        self.tlds_excl_private_trie = Trie.create(list(self.tlds_excl_private))
+        self.tlds_incl_private_trie = Trie.create(self.tlds_incl_private)
+        self.tlds_excl_private_trie = Trie.create(self.tlds_excl_private)
 
     def tlds(
         self, include_psl_private_domains: Optional[bool] = None

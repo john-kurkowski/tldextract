@@ -367,8 +367,9 @@ def extract(  # pylint: disable=missing-function-docstring
 
 
 @wraps(TLD_EXTRACTOR.update)
-# pylint: disable-next=missing-function-docstring
-def update(*args, **kwargs):  # type: ignore[no-untyped-def]
+def update(  # type: ignore[no-untyped-def]
+    *args, **kwargs
+):  # pylint: disable=missing-function-docstring
     return TLD_EXTRACTOR.update(*args, **kwargs)
 
 

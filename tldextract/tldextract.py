@@ -372,7 +372,7 @@ def update(*args, **kwargs):  # type: ignore[no-untyped-def]
     return TLD_EXTRACTOR.update(*args, **kwargs)
 
 
-class _PublicSuffixListTLDExtractor:  # pylint: disable=too-many-instance-attributes
+class _PublicSuffixListTLDExtractor:
     """Wrapper around this project's main algo for PSL
     lookups.
     """

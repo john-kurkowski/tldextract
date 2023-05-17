@@ -337,10 +337,6 @@ class Trie:
             suffix_labels.reverse()
             root_node.add_suffix(suffix_labels)
 
-        for value in root_node.matches.values():
-            if "*" in value.matches:
-                value.end = True
-
         return root_node
 
     def add_suffix(self, labels: List[str]) -> None:

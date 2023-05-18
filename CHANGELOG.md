@@ -3,6 +3,14 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.4.3 (2023-05-18)
+
+* Bugfixes
+  * Speed up 10-15% over all inputs
+    * Refactor `suffix_index()` to use a trie ([#285](https://github.com/john-kurkowski/tldextract/issues/285))
+  * Docs
+    * Adopt PEP257 doc style
+
 ## 3.4.2 (2023-05-16)
 
 * Bugfixes

@@ -1,4 +1,6 @@
 """Helpers."""
+from __future__ import annotations
+
 import errno
 import hashlib
 import json
@@ -125,10 +127,12 @@ class DiskCache:
             global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement
             if not _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
-                    "unable to cache %s.%s in %s. This could refresh the "
-                    "Public Suffix List over HTTP every app startup. "
-                    "Construct your `TLDExtract` with a writable `cache_dir` or "
-                    "set `cache_dir=None` to silence this warning. %s",
+                    (
+                        "unable to cache %s.%s in %s. This could refresh the "
+                        "Public Suffix List over HTTP every app startup. "
+                        "Construct your `TLDExtract` with a writable `cache_dir` or "
+                        "set `cache_dir=None` to silence this warning. %s"
+                    ),
                     namespace,
                     key,
                     cache_filepath,
@@ -183,10 +187,12 @@ class DiskCache:
             global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement
             if not _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
-                    "unable to cache %s.%s in %s. This could refresh the "
-                    "Public Suffix List over HTTP every app startup. "
-                    "Construct your `TLDExtract` with a writable `cache_dir` or "
-                    "set `cache_dir=None` to silence this warning. %s",
+                    (
+                        "unable to cache %s.%s in %s. This could refresh the "
+                        "Public Suffix List over HTTP every app startup. "
+                        "Construct your `TLDExtract` with a writable `cache_dir` or "
+                        "set `cache_dir=None` to silence this warning. %s"
+                    ),
                     namespace,
                     key_args,
                     cache_filepath,

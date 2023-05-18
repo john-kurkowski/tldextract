@@ -8,15 +8,15 @@ After upgrading, update your cache file by deleting it or via `tldextract
 * Bugfixes
   * Speed up 10-15% over all inputs
     * Refactor `suffix_index()` to use a trie ([#285](https://github.com/john-kurkowski/tldextract/issues/285))
-  * Docs
-    * Adopt PEP257 doc style
+* Docs
+  * Adopt PEP257 doc style
 
 ## 3.4.2 (2023-05-16)
 
 * Bugfixes
   * Speed up 10-40% on "average" inputs, and even more on pathological inputs, like long subdomains
-    * Optimize `suffix_index()` ([#283](https://github.com/john-kurkowski/tldextract/issues/283))
-    * Optimize netloc extraction ([#284](https://github.com/john-kurkowski/tldextract/issues/284))
+    * Optimize `suffix_index()`: search from right to left ([#283](https://github.com/john-kurkowski/tldextract/issues/283))
+    * Optimize netloc extraction: switch from regex to if/else ([#284](https://github.com/john-kurkowski/tldextract/issues/284))
 
 ## 3.4.1 (2023-04-26)
 

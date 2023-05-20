@@ -411,6 +411,9 @@ class _PublicSuffixListTLDExtractor:
 
         Returns len(spl) if no suffix is found.
         """
+        if include_psl_private_domains is None:
+            include_psl_private_domains = self.include_psl_private_domains
+
         node = (
             self.tlds_incl_private_trie
             if include_psl_private_domains

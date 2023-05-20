@@ -3,6 +3,11 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.4.4 (2023-05-19)
+
+* Bugfixes
+  * Honor private domains flag on `self`, not only when passed to `__call__` ([#289](https://github.com/john-kurkowski/tldextract/issues/289))
+
 ## 3.4.3 (2023-05-18)
 
 * Bugfixes

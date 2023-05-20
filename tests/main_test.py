@@ -384,6 +384,17 @@ def test_cache_timeouts(tmpdir):
         tldextract.suffix_list.find_first_response(cache, [server], 5)
 
 
+def test_include_psl_private_domain_attr():
+    extract_private = tldextract.TLDExtract(include_psl_private_domains=True)
+    extract_public = tldextract.TLDExtract(include_psl_private_domains=False)
+    assert extract_private("foo.uk.com") == ExtractResult(
+        subdomain="", domain="foo", suffix="uk.com"
+    )
+    assert extract_public("foo.uk.com") == ExtractResult(
+        subdomain="foo", domain="uk", suffix="com"
+    )
+
+
 def test_tlds_property():
     extract_private = tldextract.TLDExtract(
         cache_dir=None, suffix_list_urls=(), include_psl_private_domains=True

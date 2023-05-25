@@ -1,7 +1,10 @@
 """tldextract helpers for testing and fetching remote resources."""
 
+try:
+    from socket import inet_pton, AF_INET  # Availability: Unix, Windows.
+except ImportError:
+    inet_pton = None  # type: ignore
 import re
-import socket
 from urllib.parse import scheme_chars
 
 IP_RE = re.compile(
@@ -49,13 +52,11 @@ def looks_like_ip(maybe_ip: str) -> bool:
     if not maybe_ip[0].isdigit():
         return False
 
-    try:
-        socket.inet_aton(maybe_ip)
-        return True
-    except (AttributeError, UnicodeError):
-        if IP_RE.match(maybe_ip):
+    if inet_pton is not None:
+        try:
+            inet_pton(AF_INET, maybe_ip)
             return True
-    except OSError:
-        pass
+        except OSError:
+            return False
 
-    return False
+    return IP_RE.match(maybe_ip) is not None

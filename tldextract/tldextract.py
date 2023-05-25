@@ -251,19 +251,19 @@ class TLDExtract:
     def _extract_netloc(
         self, netloc: str, include_psl_private_domains: bool | None
     ) -> ExtractResult:
-        labels = (
+        netloc_with_ascii_dots = (
             netloc.replace("\u3002", "\u002e")
             .replace("\uff0e", "\u002e")
             .replace("\uff61", "\u002e")
-            .split(".")
         )
+        labels = netloc_with_ascii_dots.split(".")
 
         suffix_index = self._get_tld_extractor().suffix_index(
             labels, include_psl_private_domains=include_psl_private_domains
         )
 
-        if suffix_index == len(labels) and netloc and looks_like_ip(netloc):
-            return ExtractResult("", netloc, "")
+        if suffix_index == len(labels) == 4 and looks_like_ip(netloc_with_ascii_dots):
+            return ExtractResult("", netloc_with_ascii_dots, "")
 
         suffix = ".".join(labels[suffix_index:]) if suffix_index != len(labels) else ""
         subdomain = ".".join(labels[: suffix_index - 1]) if suffix_index >= 2 else ""

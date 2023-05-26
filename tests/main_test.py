@@ -6,6 +6,7 @@ import logging
 import os
 import tempfile
 from collections.abc import Sequence
+from socket import inet_pton
 
 import pytest
 import responses
@@ -13,6 +14,7 @@ import responses
 import tldextract
 import tldextract.suffix_list
 from tldextract.cache import DiskCache
+from tldextract.remote import looks_like_ip
 from tldextract.suffix_list import SuffixListNotFound
 from tldextract.tldextract import ExtractResult
 
@@ -133,6 +135,15 @@ def test_ip():
 
 
 def test_looks_like_ip():
+    assert inet_pton is not None and looks_like_ip("1.1.1.1", inet_pton) is True
+    assert looks_like_ip("1.1.1.1", None) is True
+    assert (
+        inet_pton is not None and looks_like_ip("256.256.256.256", inet_pton) is False
+    )
+    assert looks_like_ip("256.256.256.256", None) is False
+
+
+def test_similar_to_ip():
     assert_extract("1\xe9", ("", "", "1\xe9", ""))
 
 

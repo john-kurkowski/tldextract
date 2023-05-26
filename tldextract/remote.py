@@ -52,16 +52,17 @@ def _schemeless_url(url: str) -> str:
     return url[double_slashes_start + 2 :]
 
 
-def looks_like_ip(maybe_ip: str) -> bool:
+def looks_like_ip(
+    maybe_ip: str, pton: Callable[[int, str], bytes] | None = inet_pton
+) -> bool:
     """Check whether the given str looks like an IP address."""
     if not maybe_ip[0].isdigit():
         return False
 
-    if inet_pton is not None:
+    if pton is not None:
         try:
-            inet_pton(AF_INET, maybe_ip)
+            pton(AF_INET, maybe_ip)
             return True
         except OSError:
             return False
-    assert inet_pton is None
     return IP_RE.match(maybe_ip) is not None

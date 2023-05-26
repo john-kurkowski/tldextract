@@ -63,5 +63,5 @@ def looks_like_ip(maybe_ip: str) -> bool:
             return True
         except OSError:
             return False
-
+    assert inet_pton is None
     return IP_RE.match(maybe_ip) is not None

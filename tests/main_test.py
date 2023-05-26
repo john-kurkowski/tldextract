@@ -172,7 +172,7 @@ def test_punycode():
             "com",
         ),
     )
-    # This subdomain generates UnicodeError 'incomplete punicode string'
+    # This subdomain generates UnicodeError 'incomplete punycode string'
     assert_extract(
         "xn--tub-1m9d15sfkkhsifsbqygyujjrw60.google.com",
         (

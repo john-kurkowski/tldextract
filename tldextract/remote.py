@@ -1,8 +1,16 @@
 """tldextract helpers for testing and fetching remote resources."""
 
+from __future__ import annotations
+
 import re
-import socket
+from collections.abc import Callable
 from urllib.parse import scheme_chars
+
+inet_pton: Callable[[int, str], bytes] | None
+try:
+    from socket import AF_INET, inet_pton  # Availability: Unix, Windows.
+except ImportError:
+    inet_pton = None
 
 IP_RE = re.compile(
     r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)"
@@ -44,18 +52,17 @@ def _schemeless_url(url: str) -> str:
     return url[double_slashes_start + 2 :]
 
 
-def looks_like_ip(maybe_ip: str) -> bool:
+def looks_like_ip(
+    maybe_ip: str, pton: Callable[[int, str], bytes] | None = inet_pton
+) -> bool:
     """Check whether the given str looks like an IP address."""
     if not maybe_ip[0].isdigit():
         return False
 
-    try:
-        socket.inet_aton(maybe_ip)
-        return True
-    except (AttributeError, UnicodeError):
-        if IP_RE.match(maybe_ip):
+    if pton is not None:
+        try:
+            pton(AF_INET, maybe_ip)
             return True
-    except OSError:
-        pass
-
-    return False
+        except OSError:
+            return False
+    return IP_RE.match(maybe_ip) is not None

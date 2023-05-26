@@ -13,6 +13,7 @@ import responses
 import tldextract
 import tldextract.suffix_list
 from tldextract.cache import DiskCache
+from tldextract.remote import inet_pton, looks_like_ip
 from tldextract.suffix_list import SuffixListNotFound
 from tldextract.tldextract import ExtractResult
 
@@ -132,7 +133,18 @@ def test_ip():
     )
 
 
-def test_looks_like_ip():
+@pytest.mark.skipif(not inet_pton, reason="inet_pton unavailable")
+def test_looks_like_ip_with_inet_pton():
+    assert looks_like_ip("1.1.1.1", inet_pton) is True
+    assert looks_like_ip("256.256.256.256", inet_pton) is False
+
+
+def test_looks_like_ip_without_inet_pton():
+    assert looks_like_ip("1.1.1.1", None) is True
+    assert looks_like_ip("256.256.256.256", None) is False
+
+
+def test_similar_to_ip():
     assert_extract("1\xe9", ("", "", "1\xe9", ""))
 
 
@@ -328,6 +340,11 @@ def test_ipv4():
         ("", "", "127.0.0.1", ""),
         expected_ip_data="127.0.0.1",
     )
+    assert_extract(
+        "http://127\u30020\uff0e0\uff611/foo/bar",
+        ("", "", "127.0.0.1", ""),
+        expected_ip_data="127.0.0.1",
+    )
 
 
 def test_ipv4_bad():
@@ -339,6 +356,12 @@ def test_ipv4_bad():
 
 
 def test_ipv4_lookalike():
+    assert_extract(
+        "http://127.0.0/foo/bar", ("", "127.0", "0", ""), expected_ip_data=""
+    )
+    assert_extract(
+        "http://127.0.0.0x1/foo/bar", ("", "127.0.0", "0x1", ""), expected_ip_data=""
+    )
     assert_extract(
         "http://127.0.0.1.9/foo/bar", ("", "127.0.0.1", "9", ""), expected_ip_data=""
     )

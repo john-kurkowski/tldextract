@@ -199,6 +199,12 @@ def test_invalid_puny_with_puny():
     )
 
 
+def test_invalid_puny_with_nonpuny():
+    assert_extract(
+        "xn--ß‌꫶ᢥ.com", ("xn--ß‌꫶ᢥ.com", "", "xn--ß‌꫶ᢥ", "com")
+    )
+
+
 def test_puny_with_non_puny():
     assert_extract(
         "http://xn--zckzap6140b352by.blog.so-net.教育.hk",

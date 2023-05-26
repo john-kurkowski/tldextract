@@ -133,10 +133,13 @@ def test_ip():
     )
 
 
-def test_looks_like_ip():
-    assert callable(inet_pton)
+@pytest.mark.skipif(not inet_pton, reason="inet_pton unavailable")
+def test_looks_like_ip_with_inet_pton():
     assert looks_like_ip("1.1.1.1", inet_pton) is True
     assert looks_like_ip("256.256.256.256", inet_pton) is False
+
+
+def test_looks_like_ip_without_inet_pton():
     assert looks_like_ip("1.1.1.1", None) is True
     assert looks_like_ip("256.256.256.256", None) is False
 

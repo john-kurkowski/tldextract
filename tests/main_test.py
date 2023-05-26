@@ -6,7 +6,6 @@ import logging
 import os
 import tempfile
 from collections.abc import Sequence
-from socket import inet_pton
 
 import pytest
 import responses
@@ -14,7 +13,7 @@ import responses
 import tldextract
 import tldextract.suffix_list
 from tldextract.cache import DiskCache
-from tldextract.remote import looks_like_ip
+from tldextract.remote import inet_pton, looks_like_ip
 from tldextract.suffix_list import SuffixListNotFound
 from tldextract.tldextract import ExtractResult
 

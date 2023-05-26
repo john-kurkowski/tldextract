@@ -1,11 +1,16 @@
 """tldextract helpers for testing and fetching remote resources."""
 
-try:
-    from socket import inet_pton, AF_INET  # Availability: Unix, Windows.
-except ImportError:
-    inet_pton = None  # type: ignore
+from __future__ import annotations
+
 import re
+from collections.abc import Callable
 from urllib.parse import scheme_chars
+
+inet_pton: Callable[[int, str], bytes] | None
+try:
+    from socket import AF_INET, inet_pton  # Availability: Unix, Windows.
+except ImportError:
+    inet_pton = None
 
 IP_RE = re.compile(
     r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)"

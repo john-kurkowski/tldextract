@@ -5,6 +5,7 @@ import sys
 import pytest
 
 from tldextract.cli import main
+from tldextract.tldextract import PUBLIC_SUFFIX_LIST_URLS
 
 
 def test_cli_no_input(monkeypatch):
@@ -26,6 +27,19 @@ def test_cli_parses_args(monkeypatch):
 def test_cli_posargs(capsys, monkeypatch):
     monkeypatch.setattr(
         sys, "argv", ["tldextract", "example.com", "bbc.co.uk", "forums.bbc.co.uk"]
+    )
+
+    main()
+
+    stdout, stderr = capsys.readouterr()
+    assert not stderr
+    assert stdout == " example com\n bbc co.uk\nforums bbc co.uk\n"
+
+
+def test_cli_namedargs(capsys, monkeypatch):
+    monkeypatch.setattr(
+        sys, "argv", ["tldextract", "--suffix_list_url", PUBLIC_SUFFIX_LIST_URLS[0],
+                      "example.com", "bbc.co.uk", "forums.bbc.co.uk"]
     )
 
     main()

@@ -136,12 +136,14 @@ def test_ip():
 @pytest.mark.skipif(not inet_pton, reason="inet_pton unavailable")
 def test_looks_like_ip_with_inet_pton():
     assert looks_like_ip("1.1.1.1", inet_pton) is True
+    assert looks_like_ip("a.1.1.1", inet_pton) is False
     assert looks_like_ip("1.1.1.1\n", inet_pton) is False
     assert looks_like_ip("256.256.256.256", inet_pton) is False
 
 
 def test_looks_like_ip_without_inet_pton():
     assert looks_like_ip("1.1.1.1", None) is True
+    assert looks_like_ip("a.1.1.1", None) is False
     assert looks_like_ip("1.1.1.1\n", None) is False
     assert looks_like_ip("256.256.256.256", None) is False
 

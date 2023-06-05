@@ -65,4 +65,4 @@ def looks_like_ip(
             return True
         except OSError:
             return False
-    return IP_RE.match(maybe_ip) is not None
+    return IP_RE.fullmatch(maybe_ip) is not None

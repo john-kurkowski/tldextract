@@ -204,9 +204,7 @@ def test_invalid_puny_with_puny():
 
 
 def test_invalid_puny_with_nonpuny():
-    assert_extract(
-        "xn--ß‌꫶ᢥ.com", ("xn--ß‌꫶ᢥ.com", "", "xn--ß‌꫶ᢥ", "com")
-    )
+    assert_extract("xn--ß‌꫶ᢥ.com", ("xn--ß‌꫶ᢥ.com", "", "xn--ß‌꫶ᢥ", "com"))
 
 
 def test_puny_with_non_puny():

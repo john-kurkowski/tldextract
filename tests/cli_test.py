@@ -38,8 +38,16 @@ def test_cli_posargs(capsys, monkeypatch):
 
 def test_cli_namedargs(capsys, monkeypatch):
     monkeypatch.setattr(
-        sys, "argv", ["tldextract", "--suffix_list_url", PUBLIC_SUFFIX_LIST_URLS[0],
-                      "example.com", "bbc.co.uk", "forums.bbc.co.uk"]
+        sys,
+        "argv",
+        [
+            "tldextract",
+            "--suffix_list_url",
+            PUBLIC_SUFFIX_LIST_URLS[0],
+            "example.com",
+            "bbc.co.uk",
+            "forums.bbc.co.uk",
+        ],
     )
 
     main()

@@ -150,6 +150,8 @@ def test_looks_like_ip_without_inet_pton():
 
 def test_similar_to_ip():
     assert_extract("1\xe9", ("", "", "1\xe9", ""))
+    assert_extract("1.1.1.1\ncom", ("", "1.1.1", "1\ncom", ""))
+    assert_extract("1.1.1.1\rcom", ("", "1.1.1", "1\rcom", ""))
 
 
 def test_punycode():

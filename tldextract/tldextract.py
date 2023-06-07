@@ -126,7 +126,7 @@ class ExtractResult(NamedTuple):
         >>> extract('http://256.1.1.1').ipv4
         ''
         """
-        if not (self.suffix or self.subdomain) and IP_RE.match(self.domain):
+        if not (self.suffix or self.subdomain) and IP_RE.fullmatch(self.domain):
             return self.domain
         return ""
 

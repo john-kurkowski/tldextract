@@ -63,7 +63,7 @@ from typing import (
 import idna
 
 from .cache import DiskCache, get_cache_dir
-from .remote import IP_RE, lenient_netloc, looks_like_ip
+from .remote import lenient_netloc, looks_like_ip
 from .suffix_list import get_suffix_lists
 
 LOG = logging.getLogger("tldextract")
@@ -126,7 +126,11 @@ class ExtractResult(NamedTuple):
         >>> extract('http://256.1.1.1').ipv4
         ''
         """
-        if not (self.suffix or self.subdomain) and IP_RE.match(self.domain):
+        if (
+            self.domain
+            and not (self.suffix or self.subdomain)
+            and looks_like_ip(self.domain)
+        ):
             return self.domain
         return ""
 

@@ -136,16 +136,22 @@ def test_ip():
 @pytest.mark.skipif(not inet_pton, reason="inet_pton unavailable")
 def test_looks_like_ip_with_inet_pton():
     assert looks_like_ip("1.1.1.1", inet_pton) is True
+    assert looks_like_ip("a.1.1.1", inet_pton) is False
+    assert looks_like_ip("1.1.1.1\n", inet_pton) is False
     assert looks_like_ip("256.256.256.256", inet_pton) is False
 
 
 def test_looks_like_ip_without_inet_pton():
     assert looks_like_ip("1.1.1.1", None) is True
+    assert looks_like_ip("a.1.1.1", None) is False
+    assert looks_like_ip("1.1.1.1\n", None) is False
     assert looks_like_ip("256.256.256.256", None) is False
 
 
 def test_similar_to_ip():
     assert_extract("1\xe9", ("", "", "1\xe9", ""))
+    assert_extract("1.1.1.1\ncom", ("", "1.1.1", "1\ncom", ""))
+    assert_extract("1.1.1.1\rcom", ("", "1.1.1", "1\rcom", ""))
 
 
 def test_punycode():
@@ -172,7 +178,7 @@ def test_punycode():
             "com",
         ),
     )
-    # This subdomain generates UnicodeError 'incomplete punicode string'
+    # This subdomain generates UnicodeError 'incomplete punycode string'
     assert_extract(
         "xn--tub-1m9d15sfkkhsifsbqygyujjrw60.google.com",
         (
@@ -197,6 +203,10 @@ def test_invalid_puny_with_puny():
     assert_extract(
         "http://xn--&.so-net.com", ("xn--&.so-net.com", "xn--&", "so-net", "com")
     )
+
+
+def test_invalid_puny_with_nonpuny():
+    assert_extract("xn--ß‌꫶ᢥ.com", ("xn--ß‌꫶ᢥ.com", "", "xn--ß‌꫶ᢥ", "com"))
 
 
 def test_puny_with_non_puny():

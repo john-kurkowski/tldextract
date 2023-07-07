@@ -282,7 +282,7 @@ class TLDExtract:
         )
 
         if (
-            netloc_with_ascii_dots
+            len(netloc_with_ascii_dots) >= 4
             and netloc_with_ascii_dots[0] == "["
             and netloc_with_ascii_dots[-1] == "]"
         ):

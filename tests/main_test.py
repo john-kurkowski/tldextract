@@ -310,6 +310,7 @@ def test_username():
         expected_ipv6_data="aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1",
     )
 
+
 def test_query_fragment():
     assert_extract("http://google.com?q=cats", ("google.com", "", "google", "com"))
     assert_extract("http://google.com#Welcome", ("google.com", "", "google", "com"))

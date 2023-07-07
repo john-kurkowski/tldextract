@@ -75,9 +75,6 @@ def looks_like_ipv6(
     maybe_ip: str, pton: Callable[[int, str], bytes] | None = inet_pton
 ) -> bool:
     """Check whether the given str looks like an IPv6 address."""
-    if not maybe_ip[0].isalnum():
-        return False
-
     if pton is not None:
         try:
             pton(AF_INET6, maybe_ip)

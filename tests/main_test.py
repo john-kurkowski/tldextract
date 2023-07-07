@@ -300,11 +300,15 @@ def test_username():
         expected_ip_data="127.0.0.1",
     )
     assert_extract(
+        "https://apple:pass@[::]:50/a",
+        ("", "", "[::]", ""),
+        expected_ipv6_data="::",
+    )
+    assert_extract(
         "https://apple:pass@[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1]:50/a",
         ("", "", "[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1]", ""),
         expected_ipv6_data="aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1",
     )
-
 
 def test_query_fragment():
     assert_extract("http://google.com?q=cats", ("google.com", "", "google", "com"))

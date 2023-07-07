@@ -146,8 +146,11 @@ class ExtractResult(NamedTuple):
         >>> extract('http://[aBcD:ef01:2345:6789:aBcD:ef01:256.0.0.1]').ipv6
         ''
         """
-        if len(self.domain) >= 4 and not (  # Shortest ipv6 address is "[::]"
-            self.suffix or self.subdomain
+        if (
+            len(self.domain) >= 4
+            and self.domain[0] == "["
+            and self.domain[-1] == "]"
+            and not (self.suffix or self.subdomain)  # Shortest ipv6 address is "[::]"
         ):
             debracketed = self.domain[1:-1]
             if looks_like_ipv6(debracketed):

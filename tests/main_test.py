@@ -13,7 +13,7 @@ import responses
 import tldextract
 import tldextract.suffix_list
 from tldextract.cache import DiskCache
-from tldextract.remote import inet_pton, looks_like_ip
+from tldextract.remote import inet_pton, lenient_netloc, looks_like_ip
 from tldextract.suffix_list import SuffixListNotFound
 from tldextract.tldextract import ExtractResult
 
@@ -32,6 +32,7 @@ def assert_extract(
     url: str,
     expected_domain_data: tuple[str, str, str, str],
     expected_ip_data: str = "",
+    expected_ipv6_data: str = "",
     funs: Sequence[tldextract.TLDExtract] = (
         extract,
         extract_no_cache,
@@ -58,6 +59,7 @@ def assert_extract(
         assert expected_domain == ext.domain
         assert expected_tld == ext.suffix
         assert expected_ip_data == ext.ipv4
+        assert expected_ipv6_data == ext.ipv6
 
 
 def test_american():
@@ -130,6 +132,26 @@ def test_ip():
     assert_extract(
         "http://216.22.project.coop/",
         ("216.22.project.coop", "216.22", "project", "coop"),
+    )
+
+
+def test_lenient_netloc():
+    assert lenient_netloc("https://example.com.ca") == "example.com.ca"
+    assert lenient_netloc("https://[example.com.ca]") == "[example.com.ca]"
+    assert lenient_netloc("https://[example.com.ca]:5000") == "[example.com.ca]"
+    assert (
+        lenient_netloc("https://[aBcD:ef01:2345:6789:aBcD:ef01::]:5000")
+        == "[aBcD:ef01:2345:6789:aBcD:ef01::]"
+    )
+    assert (
+        lenient_netloc("https://[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1]:5000")
+        == "[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1]"
+    )
+    assert (
+        lenient_netloc(
+            "https://[aBcD:ef01:2345:6789:aBcD:ef01:127\uff0e0\u30020\uff611]:5000"
+        )
+        == "[aBcD:ef01:2345:6789:aBcD:ef01:127\uff0e0\u30020\uff611]"
     )
 
 
@@ -271,6 +293,16 @@ def test_username():
     assert_extract(
         "ftp://johndoe:5cr1p7k1dd13@1337.warez.com:2501",
         ("1337.warez.com", "1337", "warez", "com"),
+    )
+    assert_extract(
+        "https://apple:pass@127.0.0.1:50/a",
+        ("", "", "127.0.0.1", ""),
+        expected_ip_data="127.0.0.1",
+    )
+    assert_extract(
+        "https://apple:pass@[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1]:50/a",
+        ("", "", "[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1]", ""),
+        expected_ipv6_data="aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1",
     )
 
 

@@ -441,9 +441,9 @@ def test_tlds_property():
 
 
 def test_global_extract():
-    assert tldextract.extract("foo.blogspot.com") == ExtractResult(
-        subdomain="foo", domain="blogspot", suffix="com"
-    )
+    assert tldextract.extract(
+        "blogspot.com", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="", domain="blogspot", suffix="com")
     assert tldextract.extract(
         "foo.blogspot.com", include_psl_private_domains=True
     ) == ExtractResult(subdomain="", domain="foo", suffix="blogspot.com")

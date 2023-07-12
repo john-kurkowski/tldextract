@@ -441,7 +441,7 @@ class _PublicSuffixListTLDExtractor:
                 j -= 1
                 node = node.matches[decoded_label]
                 if node.end:
-                    k = min(i, len(spl) - 1)
+                    k = i
                     i = j
                 continue
 
@@ -452,7 +452,7 @@ class _PublicSuffixListTLDExtractor:
                     return j
                 if j == 1 and node.matches["*"].is_private:
                     # entire spl is private suffix
-                    return k
+                    return k if k != len(spl) else i
                 return j - 1
 
             break

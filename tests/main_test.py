@@ -475,6 +475,11 @@ def test_global_extract():
     ) == ExtractResult(
         subdomain="", domain="another", suffix="icann.compute.amazonaws.com"
     )
+    assert tldextract.extract(
+        "another.s3.dualstack.us-east-1.amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(
+        subdomain="", domain="another", suffix="s3.dualstack.us-east-1.amazonaws.com"
+    )
 
     assert tldextract.extract(
         "s3.ap-south-1.amazonaws.com", include_psl_private_domains=True

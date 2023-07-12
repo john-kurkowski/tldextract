@@ -329,25 +329,38 @@ TLD_EXTRACTOR = TLDExtract()
 class Trie:
     """Trie for storing eTLDs with their labels in reverse-order."""
 
-    def __init__(self, matches: dict | None = None, end: bool = False) -> None:
+    def __init__(
+        self, matches: dict | None = None, end: bool = False, is_private: bool = False
+    ) -> None:
         self.matches = matches if matches else {}
         self.end = end
+        self.is_private = is_private
 
     @staticmethod
-    def create(suffixes: Collection[str]) -> Trie:
+    def create(
+        public_suffixes: Collection[str],
+        private_suffixes: Collection[str] | None = None,
+    ) -> Trie:
         """Create a Trie from a list of suffixes and return its root node."""
         root_node = Trie()
 
-        for suffix in suffixes:
-            suffix_labels = suffix.split(".")
-            suffix_labels.reverse()
-            root_node.add_suffix(suffix_labels)
+        for suffix in public_suffixes:
+            root_node.add_suffix(suffix)
+
+        if private_suffixes is None:
+            private_suffixes = []
+
+        for suffix in private_suffixes:
+            root_node.add_suffix(suffix, True)
 
         return root_node
 
-    def add_suffix(self, labels: list[str]) -> None:
+    def add_suffix(self, suffix: str, is_private: bool = False) -> None:
         """Append a suffix's labels to this Trie node."""
         node = self
+
+        labels = suffix.split(".")
+        labels.reverse()
 
         for label in labels:
             if label not in node.matches:
@@ -355,6 +368,7 @@ class Trie:
             node = node.matches[label]
 
         node.end = True
+        node.is_private = is_private
 
 
 @wraps(TLD_EXTRACTOR.__call__)
@@ -387,7 +401,9 @@ class _PublicSuffixListTLDExtractor:
         self.private_tlds = private_tlds
         self.tlds_incl_private = frozenset(public_tlds + private_tlds + extra_tlds)
         self.tlds_excl_private = frozenset(public_tlds + extra_tlds)
-        self.tlds_incl_private_trie = Trie.create(self.tlds_incl_private)
+        self.tlds_incl_private_trie = Trie.create(
+            self.tlds_excl_private, frozenset(private_tlds)
+        )
         self.tlds_excl_private_trie = Trie.create(self.tlds_excl_private)
 
     def tlds(self, include_psl_private_domains: bool | None = None) -> frozenset[str]:
@@ -418,13 +434,15 @@ class _PublicSuffixListTLDExtractor:
         )
         i = len(spl)
         j = i
+        k = i
         for label in reversed(spl):
             decoded_label = _decode_punycode(label)
             if decoded_label in node.matches:
                 j -= 1
-                if node.matches[decoded_label].end:
-                    i = j
                 node = node.matches[decoded_label]
+                if node.end:
+                    k = min(i, len(spl) - 1)
+                    i = j
                 continue
 
             is_wildcard = "*" in node.matches
@@ -432,10 +450,16 @@ class _PublicSuffixListTLDExtractor:
                 is_wildcard_exception = "!" + decoded_label in node.matches
                 if is_wildcard_exception:
                     return j
+                if j == 1 and node.matches["*"].is_private:
+                    # entire spl is private suffix
+                    return k
                 return j - 1
 
             break
 
+        if i == 0 and node.is_private:
+            # entire spl is private suffix
+            return k
         return i
 
 

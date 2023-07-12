@@ -5,19 +5,11 @@ from tldextract.tldextract import Trie
 
 
 def test_nested_dict() -> None:
-    original_keys_sequence = [
-        ["a"],
-        ["a", "d"],
-        ["a", "b"],
-        ["a", "b", "c"],
-        ["c"],
-        ["c", "b"],
-        ["d", "f"],
-    ]
-    for keys_sequence in permutations(original_keys_sequence):
+    suffixes = ["a", "d.a", "b.a", "c.b.a", "c", "b.c", "f.d"]
+    for suffixes_sequence in permutations(suffixes):
         trie = Trie()
-        for keys in keys_sequence:
-            trie.add_suffix(keys)
+        for suffix in suffixes_sequence:
+            trie.add_suffix(suffix)
         # check each nested value
         # Top level c
         assert "c" in trie.matches

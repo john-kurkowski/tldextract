@@ -63,7 +63,7 @@ from typing import (
 import idna
 
 from .cache import DiskCache, get_cache_dir
-from .remote import lenient_netloc, looks_like_ip
+from .remote import lenient_netloc, looks_like_ip, looks_like_ipv6
 from .suffix_list import get_suffix_lists
 
 LOG = logging.getLogger("tldextract")
@@ -132,6 +132,29 @@ class ExtractResult(NamedTuple):
             and looks_like_ip(self.domain)
         ):
             return self.domain
+        return ""
+
+    @property
+    def ipv6(self) -> str:
+        """
+        Returns the ipv6 if that is what the presented domain/url is.
+
+        >>> extract('http://[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1]/path/to/file').ipv6
+        'aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1'
+        >>> extract('http://[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1.1]/path/to/file').ipv6
+        ''
+        >>> extract('http://[aBcD:ef01:2345:6789:aBcD:ef01:256.0.0.1]').ipv6
+        ''
+        """
+        if (
+            len(self.domain) >= 4
+            and self.domain[0] == "["
+            and self.domain[-1] == "]"
+            and not (self.suffix or self.subdomain)  # Shortest ipv6 address is "[::]"
+        ):
+            debracketed = self.domain[1:-1]
+            if looks_like_ipv6(debracketed):
+                return debracketed
         return ""
 
 
@@ -260,6 +283,15 @@ class TLDExtract:
             .replace("\uff0e", "\u002e")
             .replace("\uff61", "\u002e")
         )
+
+        if (
+            len(netloc_with_ascii_dots) >= 4
+            and netloc_with_ascii_dots[0] == "["
+            and netloc_with_ascii_dots[-1] == "]"
+        ):
+            if looks_like_ipv6(netloc_with_ascii_dots[1:-1]):
+                return ExtractResult("", netloc_with_ascii_dots, "")
+
         labels = netloc_with_ascii_dots.split(".")
 
         suffix_index = self._get_tld_extractor().suffix_index(

@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable
+from ipaddress import AddressValueError, IPv6Address
 from urllib.parse import scheme_chars
 
 inet_pton: Callable[[int, str], bytes] | None
 try:
-    from socket import AF_INET, inet_pton  # Availability: Unix, Windows.
+    from socket import AF_INET, AF_INET6, inet_pton  # Availability: Unix, Windows.
 except ImportError:
     inet_pton = None
 
@@ -27,16 +28,18 @@ def lenient_netloc(url: str) -> str:
     urllib.parse.{urlparse,urlsplit}, but extract more leniently, without
     raising errors.
     """
-    return (
+    after_userinfo = (
         _schemeless_url(url)
         .partition("/")[0]
         .partition("?")[0]
         .partition("#")[0]
         .rpartition("@")[-1]
-        .partition(":")[0]
-        .strip()
-        .rstrip(".\u3002\uff0e\uff61")
     )
+    if after_userinfo and after_userinfo[0] == "[":
+        maybe_ipv6 = after_userinfo.partition("]")
+        if maybe_ipv6[1] == "]":
+            return f"{maybe_ipv6[0]}]"
+    return after_userinfo.partition(":")[0].strip().rstrip(".\u3002\uff0e\uff61")
 
 
 def _schemeless_url(url: str) -> str:
@@ -66,3 +69,20 @@ def looks_like_ip(
         except OSError:
             return False
     return IP_RE.fullmatch(maybe_ip) is not None
+
+
+def looks_like_ipv6(
+    maybe_ip: str, pton: Callable[[int, str], bytes] | None = inet_pton
+) -> bool:
+    """Check whether the given str looks like an IPv6 address."""
+    if pton is not None:
+        try:
+            pton(AF_INET6, maybe_ip)
+            return True
+        except OSError:
+            return False
+    try:
+        IPv6Address(maybe_ip)
+    except AddressValueError:
+        return False
+    return True

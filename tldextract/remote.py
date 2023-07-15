@@ -35,11 +35,15 @@ def lenient_netloc(url: str) -> str:
         .partition("#")[0]
         .rpartition("@")[-1]
     )
+
     if after_userinfo and after_userinfo[0] == "[":
         maybe_ipv6 = after_userinfo.partition("]")
         if maybe_ipv6[1] == "]":
             return f"{maybe_ipv6[0]}]"
-    return after_userinfo.partition(":")[0].strip().rstrip(".\u3002\uff0e\uff61")
+
+    hostname = after_userinfo.partition(":")[0].strip()
+    without_root_label = hostname.rstrip(".\u3002\uff0e\uff61")
+    return without_root_label
 
 
 def _schemeless_url(url: str) -> str:

@@ -146,11 +146,12 @@ class ExtractResult(NamedTuple):
         >>> extract('http://[aBcD:ef01:2345:6789:aBcD:ef01:256.0.0.1]').ipv6
         ''
         """
+        min_num_ipv6_chars = 4
         if (
-            len(self.domain) >= 4
+            len(self.domain) >= min_num_ipv6_chars
             and self.domain[0] == "["
             and self.domain[-1] == "]"
-            and not (self.suffix or self.subdomain)  # Shortest ipv6 address is "[::]"
+            and not (self.suffix or self.subdomain)
         ):
             debracketed = self.domain[1:-1]
             if looks_like_ipv6(debracketed):
@@ -284,8 +285,9 @@ class TLDExtract:
             .replace("\uff61", "\u002e")
         )
 
+        min_num_ipv6_chars = 4
         if (
-            len(netloc_with_ascii_dots) >= 4
+            len(netloc_with_ascii_dots) >= min_num_ipv6_chars
             and netloc_with_ascii_dots[0] == "["
             and netloc_with_ascii_dots[-1] == "]"
         ):
@@ -298,7 +300,10 @@ class TLDExtract:
             labels, include_psl_private_domains=include_psl_private_domains
         )
 
-        if suffix_index == len(labels) == 4 and looks_like_ip(netloc_with_ascii_dots):
+        num_ipv4_labels = 4
+        if suffix_index == len(labels) == num_ipv4_labels and looks_like_ip(
+            netloc_with_ascii_dots
+        ):
             return ExtractResult("", netloc_with_ascii_dots, "")
 
         suffix = ".".join(labels[suffix_index:]) if suffix_index != len(labels) else ""

@@ -96,12 +96,6 @@ disallow_untyped_calls = true
 module = ["tldextract.*"]
 disallow_untyped_defs = true
 
-[tool.pycodestyle]
-# E203 - whitespace before; disagrees with PEP8 https://github.com/psf/black/issues/354#issuecomment-397684838
-# E501 - line too long
-# W503 - line break before binary operator; disagrees with PEP8 https://github.com/psf/black/issues/52
-ignore = "E203, E501, W503"
-
 [tool.pylint.master]
 disable = "fixme"
 no-docstring-rgx = "(^_|test_.*)"

@@ -1,0 +1,107 @@
+[project]
+name = "tldextract"
+authors = [{name = "John Kurkowski", email = "john.kurkowski@gmail.com"}]
+license = {text = "BSD-3-Clause"}
+description = "Accurately separates a URL's subdomain, domain, and public suffix, using the Public Suffix List (PSL). By default, this includes the public ICANN TLDs and their exceptions. You can optionally support the Public Suffix List's private domains as well."
+keywords = [
+    "tld",
+    "domain",
+    "subdomain",
+    "url",
+    "parse",
+    "extract",
+    "urlparse",
+    "urlsplit",
+    "public",
+    "suffix",
+    "list",
+    "publicsuffix",
+    "publicsuffixlist",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "idna",
+    "requests>=2.1.0",
+    "requests-file>=1.4",
+    "filelock>=3.0.8",
+]
+dynamic = ["version"]
+
+[project.readme]
+text = """
+`tldextract` accurately separates a URL's subdomain, domain, and public suffix.
+It does this via the Public Suffix List (PSL).
+>>> import tldextract
+>>> tldextract.extract('http://forums.news.cnn.com/')
+ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
+>>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
+ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
+>>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
+ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
+`ExtractResult` is a namedtuple, so it's simple to access the parts you want.
+>>> ext = tldextract.extract('http://forums.bbc.co.uk')
+>>> (ext.subdomain, ext.domain, ext.suffix)
+('forums', 'bbc', 'co.uk')
+>>> # rejoin subdomain and domain
+>>> '.'.join(ext[:2])
+'forums.bbc'
+>>> # a common alias
+>>> ext.registered_domain
+'bbc.co.uk'
+By default, this package supports the public ICANN TLDs and their exceptions.
+You can optionally support the Public Suffix List's private domains as well."""
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://github.com/john-kurkowski/tldextract"
+
+[project.scripts]
+tldextract = "tldextract.cli:main"
+
+[build-system]
+requires = [
+    "setuptools>=61.2",
+    "setuptools_scm[toml]>=6.2",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["tldextract"]
+include-package-data = true
+license-files = ["LICENSE"]
+
+[tool.setuptools_scm]
+write_to = "tldextract/_version.py"
+
+[tool.setuptools.dynamic]
+version = {attr = "setuptools_scm.get_version"}
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_calls = true
+
+[[tool.mypy.overrides]]
+module = ["tldextract.*"]
+disallow_untyped_defs = true
+
+[tool.pycodestyle]
+# E203 - whitespace before; disagrees with PEP8 https://github.com/psf/black/issues/354#issuecomment-397684838
+# E501 - line too long
+# W503 - line break before binary operator; disagrees with PEP8 https://github.com/psf/black/issues/52
+ignore = "E203, E501, W503"
+
+[tool.pylint.master]
+disable = "fixme"
+no-docstring-rgx = "(^_|test_.*)"

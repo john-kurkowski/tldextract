@@ -4,17 +4,17 @@ It does this via the Public Suffix List (PSL).
 
     >>> import tldextract
     >>> tldextract.extract('http://forums.news.cnn.com/')
-    ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
+    ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
     >>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
-    ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
+    ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
     >>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
-    ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
+    ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg', is_private=False)
 
 `ExtractResult` is a namedtuple, so it's simple to access the parts you want.
 
     >>> ext = tldextract.extract('http://forums.bbc.co.uk')
-    >>> (ext.subdomain, ext.domain, ext.suffix)
-    ('forums', 'bbc', 'co.uk')
+    >>> (ext.subdomain, ext.domain, ext.suffix, ext.is_private)
+    ('forums', 'bbc', 'co.uk', False)
     >>> # rejoin subdomain and domain
     >>> '.'.join(ext[:2])
     'forums.bbc'

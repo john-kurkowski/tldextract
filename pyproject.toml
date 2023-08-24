@@ -37,31 +37,7 @@ dependencies = [
     "filelock>=3.0.8",
 ]
 dynamic = ["version"]
-
-[project.readme]
-text = """
-`tldextract` accurately separates a URL's subdomain, domain, and public suffix.
-It does this via the Public Suffix List (PSL).
->>> import tldextract
->>> tldextract.extract('http://forums.news.cnn.com/')
-ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
->>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
-ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
->>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
-ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
-`ExtractResult` is a namedtuple, so it's simple to access the parts you want.
->>> ext = tldextract.extract('http://forums.bbc.co.uk')
->>> (ext.subdomain, ext.domain, ext.suffix)
-('forums', 'bbc', 'co.uk')
->>> # rejoin subdomain and domain
->>> '.'.join(ext[:2])
-'forums.bbc'
->>> # a common alias
->>> ext.registered_domain
-'bbc.co.uk'
-By default, this package supports the public ICANN TLDs and their exceptions.
-You can optionally support the Public Suffix List's private domains as well."""
-content-type = "text/markdown"
+readme = "README.md"
 
 [project.urls]
 Homepage = "https://github.com/john-kurkowski/tldextract"

@@ -42,10 +42,10 @@ or suffix were found:
 
     >>> ext = tldextract.extract('http://127.0.0.1:8080/deployed/')
     >>> # this has unwanted dots
-    >>> '.'.join(part for part in ext if isinstance(part, str))
+    >>> '.'.join(part for part in ext[:3])
     '.127.0.0.1.'
     >>> # join part only if truthy
-    >>> '.'.join(part for part in ext if part and isinstance(part, str))
+    >>> '.'.join(part for part in ext[:3] if part)
     '127.0.0.1'
 """
 
@@ -112,8 +112,8 @@ class ExtractResult(NamedTuple):
         """
         if self.suffix and (self.domain or self.is_private):
             # Disable bogus lint error (https://github.com/PyCQA/pylint/issues/2568)
-            # pylint: disable-next=not-an-iterable
-            return ".".join(i for i in self if i and isinstance(i, str))
+            # pylint: disable-next=not-an-iterable,unsubscriptable-object
+            return ".".join(i for i in self[:3] if i)
         return ""
 
     @property

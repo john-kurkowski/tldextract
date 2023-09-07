@@ -459,7 +459,7 @@ class _PublicSuffixListTLDExtractor:
     def suffix_index(
         self, spl: list[str], include_psl_private_domains: bool | None = None
     ) -> tuple[int, bool]:
-        """Return the index of the first suffix label.
+        """Return the index of the first suffix label, and whether it is private.
 
         Returns len(spl) if no suffix is found.
         """

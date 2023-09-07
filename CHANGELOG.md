@@ -3,6 +3,17 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.5.0 (2023-09-06)
+
+* Features
+    * Support IPv6 addresses ([#298](https://github.com/john-kurkowski/tldextract/issues/298))
+* Bugfixes
+    * Accept only 4 decimal octet IPv4 addresses ([#292](https://github.com/john-kurkowski/tldextract/issues/292))
+    * Support IPv4 addresses with unicode dots ([#292](https://github.com/john-kurkowski/tldextract/issues/292))
+    * Reject IPv4 addresses with trailing whitespaces + non-whitespaces ([#293](https://github.com/john-kurkowski/tldextract/issues/293))
+* Misc.
+    * Migrate setup.py to pyproject.toml ([#299](https://github.com/john-kurkowski/tldextract/issues/299))
+
 ## 3.4.4 (2023-05-19)
 
 * Bugfixes

@@ -88,4 +88,5 @@ def main() -> None:
         sys.exit(1)
 
     for i in args.input:
-        print(" ".join(tld_extract(i)))
+        subdomain, domain, suffix, _ = tld_extract(i)
+        print(f"{subdomain} {domain} {suffix}")

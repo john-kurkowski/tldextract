@@ -22,13 +22,13 @@ A public suffix is also sometimes called an effective TLD (eTLD).
 >>> import tldextract
 
 >>> tldextract.extract('http://forums.news.cnn.com/')
-ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
+ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
 
 >>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
-ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
+ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
 
 >>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
-ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
+ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg', is_private=False)
 ```
 
 `ExtractResult` is a namedtuple, so it's simple to access the parts you want.
@@ -50,13 +50,13 @@ subdomain or a valid suffix.
 
 ```python
 >>> tldextract.extract('google.com')
-ExtractResult(subdomain='', domain='google', suffix='com')
+ExtractResult(subdomain='', domain='google', suffix='com', is_private=False)
 
 >>> tldextract.extract('google.notavalidsuffix')
-ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='')
+ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='', is_private=False)
 
 >>> tldextract.extract('http://127.0.0.1:8080/deployed/')
-ExtractResult(subdomain='', domain='127.0.0.1', suffix='')
+ExtractResult(subdomain='', domain='127.0.0.1', suffix='', is_private=False)
 ```
 
 If you want to rejoin the whole namedtuple, regardless of whether a subdomain
@@ -161,21 +161,21 @@ By default, `tldextract` treats public and private domains the same.
 ```python
 >>> extract = tldextract.TLDExtract()
 >>> extract('waiterrant.blogspot.com')
-ExtractResult(subdomain='waiterrant', domain='blogspot', suffix='com')
+ExtractResult(subdomain='waiterrant', domain='blogspot', suffix='com', is_private=False)
 ```
 
 The following overrides this.
 ```python
 >>> extract = tldextract.TLDExtract()
 >>> extract('waiterrant.blogspot.com', include_psl_private_domains=True)
-ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com')
+ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com', is_private=True)
 ```
 
 or to change the default for all extract calls,
 ```python
 >>> extract = tldextract.TLDExtract( include_psl_private_domains=True)
 >>> extract('waiterrant.blogspot.com')
-ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com')
+ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com', is_private=True)
 ```
 
 The thinking behind the default is, it's the more common case when people

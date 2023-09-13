@@ -5,13 +5,13 @@ It does this via the Public Suffix List (PSL).
     >>> import tldextract
 
     >>> tldextract.extract('http://forums.news.cnn.com/')
-    ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
+    ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
 
     >>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
-    ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
+    ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
 
     >>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
-    ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
+    ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg', is_private=False)
 
 `ExtractResult` is a namedtuple, so it's simple to access the parts you want.
 
@@ -29,23 +29,23 @@ Note subdomain and suffix are _optional_. Not all URL-like inputs have a
 subdomain or a valid suffix.
 
     >>> tldextract.extract('google.com')
-    ExtractResult(subdomain='', domain='google', suffix='com')
+    ExtractResult(subdomain='', domain='google', suffix='com', is_private=False)
 
     >>> tldextract.extract('google.notavalidsuffix')
-    ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='')
+    ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='', is_private=False)
 
     >>> tldextract.extract('http://127.0.0.1:8080/deployed/')
-    ExtractResult(subdomain='', domain='127.0.0.1', suffix='')
+    ExtractResult(subdomain='', domain='127.0.0.1', suffix='', is_private=False)
 
 If you want to rejoin the whole namedtuple, regardless of whether a subdomain
 or suffix were found:
 
     >>> ext = tldextract.extract('http://127.0.0.1:8080/deployed/')
     >>> # this has unwanted dots
-    >>> '.'.join(ext)
+    >>> '.'.join(part for part in ext[:3])
     '.127.0.0.1.'
     >>> # join part only if truthy
-    >>> '.'.join(part for part in ext if part)
+    >>> '.'.join(part for part in ext[:3] if part)
     '127.0.0.1'
 """
 
@@ -78,11 +78,13 @@ PUBLIC_SUFFIX_LIST_URLS = (
 
 
 class ExtractResult(NamedTuple):
-    """namedtuple of a URL's subdomain, domain, and suffix."""
+    """namedtuple of a URL's subdomain, domain, suffix,
+    and flag that indicates if URL has private suffix."""
 
     subdomain: str
     domain: str
     suffix: str
+    is_private: bool = False
 
     @property
     def registered_domain(self) -> str:
@@ -108,10 +110,10 @@ class ExtractResult(NamedTuple):
         >>> extract('http://localhost:8080').fqdn
         ''
         """
-        if self.suffix and self.domain:
+        if self.suffix and (self.domain or self.is_private):
             # Disable bogus lint error (https://github.com/PyCQA/pylint/issues/2568)
-            # pylint: disable-next=not-an-iterable
-            return ".".join(i for i in self if i)
+            # pylint: disable-next=not-an-iterable,unsubscriptable-object
+            return ".".join(i for i in self[:3] if i)
         return ""
 
     @property
@@ -249,9 +251,9 @@ class TLDExtract:
 
         >>> extractor = TLDExtract()
         >>> extractor.extract_str('http://forums.news.cnn.com/')
-        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
+        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
         >>> extractor.extract_str('http://forums.bbc.co.uk/')
-        ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
+        ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
         """
         return self._extract_netloc(lenient_netloc(url), include_psl_private_domains)
 
@@ -270,9 +272,9 @@ class TLDExtract:
 
         >>> extractor = TLDExtract()
         >>> extractor.extract_urllib(urllib.parse.urlsplit('http://forums.news.cnn.com/'))
-        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
+        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
         >>> extractor.extract_urllib(urllib.parse.urlsplit('http://forums.bbc.co.uk/'))
-        ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk')
+        ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
         """
         return self._extract_netloc(url.netloc, include_psl_private_domains)
 
@@ -296,7 +298,7 @@ class TLDExtract:
 
         labels = netloc_with_ascii_dots.split(".")
 
-        suffix_index = self._get_tld_extractor().suffix_index(
+        suffix_index, is_private = self._get_tld_extractor().suffix_index(
             labels, include_psl_private_domains=include_psl_private_domains
         )
 
@@ -304,12 +306,12 @@ class TLDExtract:
         if suffix_index == len(labels) == num_ipv4_labels and looks_like_ip(
             netloc_with_ascii_dots
         ):
-            return ExtractResult("", netloc_with_ascii_dots, "")
+            return ExtractResult("", netloc_with_ascii_dots, "", is_private)
 
         suffix = ".".join(labels[suffix_index:]) if suffix_index != len(labels) else ""
         subdomain = ".".join(labels[: suffix_index - 1]) if suffix_index >= 2 else ""
         domain = labels[suffix_index - 1] if suffix_index else ""
-        return ExtractResult(subdomain, domain, suffix)
+        return ExtractResult(subdomain, domain, suffix, is_private)
 
     def update(self, fetch_now: bool = False) -> None:
         """Force fetch the latest suffix list definitions."""
@@ -366,25 +368,38 @@ TLD_EXTRACTOR = TLDExtract()
 class Trie:
     """Trie for storing eTLDs with their labels in reverse-order."""
 
-    def __init__(self, matches: dict | None = None, end: bool = False) -> None:
+    def __init__(
+        self, matches: dict | None = None, end: bool = False, is_private: bool = False
+    ) -> None:
         self.matches = matches if matches else {}
         self.end = end
+        self.is_private = is_private
 
     @staticmethod
-    def create(suffixes: Collection[str]) -> Trie:
+    def create(
+        public_suffixes: Collection[str],
+        private_suffixes: Collection[str] | None = None,
+    ) -> Trie:
         """Create a Trie from a list of suffixes and return its root node."""
         root_node = Trie()
 
-        for suffix in suffixes:
-            suffix_labels = suffix.split(".")
-            suffix_labels.reverse()
-            root_node.add_suffix(suffix_labels)
+        for suffix in public_suffixes:
+            root_node.add_suffix(suffix)
+
+        if private_suffixes is None:
+            private_suffixes = []
+
+        for suffix in private_suffixes:
+            root_node.add_suffix(suffix, True)
 
         return root_node
 
-    def add_suffix(self, labels: list[str]) -> None:
+    def add_suffix(self, suffix: str, is_private: bool = False) -> None:
         """Append a suffix's labels to this Trie node."""
         node = self
+
+        labels = suffix.split(".")
+        labels.reverse()
 
         for label in labels:
             if label not in node.matches:
@@ -392,6 +407,7 @@ class Trie:
             node = node.matches[label]
 
         node.end = True
+        node.is_private = is_private
 
 
 @wraps(TLD_EXTRACTOR.__call__)
@@ -424,7 +440,9 @@ class _PublicSuffixListTLDExtractor:
         self.private_tlds = private_tlds
         self.tlds_incl_private = frozenset(public_tlds + private_tlds + extra_tlds)
         self.tlds_excl_private = frozenset(public_tlds + extra_tlds)
-        self.tlds_incl_private_trie = Trie.create(self.tlds_incl_private)
+        self.tlds_incl_private_trie = Trie.create(
+            self.tlds_excl_private, frozenset(private_tlds)
+        )
         self.tlds_excl_private_trie = Trie.create(self.tlds_excl_private)
 
     def tlds(self, include_psl_private_domains: bool | None = None) -> frozenset[str]:
@@ -440,8 +458,8 @@ class _PublicSuffixListTLDExtractor:
 
     def suffix_index(
         self, spl: list[str], include_psl_private_domains: bool | None = None
-    ) -> int:
-        """Return the index of the first suffix label.
+    ) -> tuple[int, bool]:
+        """Return the index of the first suffix label, and whether it is private.
 
         Returns len(spl) if no suffix is found.
         """
@@ -459,21 +477,21 @@ class _PublicSuffixListTLDExtractor:
             decoded_label = _decode_punycode(label)
             if decoded_label in node.matches:
                 j -= 1
-                if node.matches[decoded_label].end:
-                    i = j
                 node = node.matches[decoded_label]
+                if node.end:
+                    i = j
                 continue
 
             is_wildcard = "*" in node.matches
             if is_wildcard:
                 is_wildcard_exception = "!" + decoded_label in node.matches
                 if is_wildcard_exception:
-                    return j
-                return j - 1
+                    return j, node.matches["*"].is_private
+                return j - 1, node.matches["*"].is_private
 
             break
 
-        return i
+        return i, node.is_private
 
 
 def _decode_punycode(label: str) -> str:

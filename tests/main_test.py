@@ -418,7 +418,12 @@ def test_result_as_dict():
     result = extract(
         "http://admin:password1@www.google.com:666/secret/admin/interface?param1=42"
     )
-    expected_dict = {"subdomain": "www", "domain": "google", "suffix": "com"}
+    expected_dict = {
+        "subdomain": "www",
+        "domain": "google",
+        "suffix": "com",
+        "is_private": False,
+    }
     assert result._asdict() == expected_dict
 
 
@@ -460,10 +465,10 @@ def test_include_psl_private_domain_attr():
     extract_private = tldextract.TLDExtract(include_psl_private_domains=True)
     extract_public = tldextract.TLDExtract(include_psl_private_domains=False)
     assert extract_private("foo.uk.com") == ExtractResult(
-        subdomain="", domain="foo", suffix="uk.com"
+        subdomain="", domain="foo", suffix="uk.com", is_private=True
     )
     assert extract_public("foo.uk.com") == ExtractResult(
-        subdomain="foo", domain="uk", suffix="com"
+        subdomain="foo", domain="uk", suffix="com", is_private=False
     )
 
 
@@ -478,38 +483,92 @@ def test_tlds_property():
 
 
 def test_global_extract():
-    assert tldextract.extract("foo.blogspot.com") == ExtractResult(
-        subdomain="foo", domain="blogspot", suffix="com"
-    )
+    assert tldextract.extract(
+        "blogspot.com", include_psl_private_domains=True
+    ) == ExtractResult(subdomain="", domain="", suffix="blogspot.com", is_private=True)
     assert tldextract.extract(
         "foo.blogspot.com", include_psl_private_domains=True
-    ) == ExtractResult(subdomain="", domain="foo", suffix="blogspot.com")
-    assert tldextract.extract(
-        "s3.ap-south-1.amazonaws.com", include_psl_private_domains=True
-    ) == ExtractResult(subdomain="", domain="", suffix="s3.ap-south-1.amazonaws.com")
+    ) == ExtractResult(
+        subdomain="", domain="foo", suffix="blogspot.com", is_private=True
+    )
     assert tldextract.extract(
         "the-quick-brown-fox.ap-south-1.amazonaws.com", include_psl_private_domains=True
     ) == ExtractResult(
-        subdomain="the-quick-brown-fox.ap-south-1", domain="amazonaws", suffix="com"
+        subdomain="the-quick-brown-fox.ap-south-1",
+        domain="amazonaws",
+        suffix="com",
+        is_private=False,
     )
     assert tldextract.extract(
         "ap-south-1.amazonaws.com", include_psl_private_domains=True
-    ) == ExtractResult(subdomain="ap-south-1", domain="amazonaws", suffix="com")
+    ) == ExtractResult(
+        subdomain="ap-south-1", domain="amazonaws", suffix="com", is_private=False
+    )
     assert tldextract.extract(
         "amazonaws.com", include_psl_private_domains=True
-    ) == ExtractResult(subdomain="", domain="amazonaws", suffix="com")
-    assert tldextract.extract(
-        "s3.cn-north-1.amazonaws.com.cn", include_psl_private_domains=True
-    ) == ExtractResult(subdomain="", domain="", suffix="s3.cn-north-1.amazonaws.com.cn")
+    ) == ExtractResult(subdomain="", domain="amazonaws", suffix="com", is_private=False)
     assert tldextract.extract(
         "the-quick-brown-fox.cn-north-1.amazonaws.com.cn",
         include_psl_private_domains=True,
     ) == ExtractResult(
-        subdomain="the-quick-brown-fox.cn-north-1", domain="amazonaws", suffix="com.cn"
+        subdomain="the-quick-brown-fox.cn-north-1",
+        domain="amazonaws",
+        suffix="com.cn",
+        is_private=False,
     )
     assert tldextract.extract(
         "cn-north-1.amazonaws.com.cn", include_psl_private_domains=True
-    ) == ExtractResult(subdomain="cn-north-1", domain="amazonaws", suffix="com.cn")
+    ) == ExtractResult(
+        subdomain="cn-north-1", domain="amazonaws", suffix="com.cn", is_private=False
+    )
     assert tldextract.extract(
         "amazonaws.com.cn", include_psl_private_domains=True
-    ) == ExtractResult(subdomain="", domain="amazonaws", suffix="com.cn")
+    ) == ExtractResult(
+        subdomain="", domain="amazonaws", suffix="com.cn", is_private=False
+    )
+    assert tldextract.extract(
+        "another.icann.compute.amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(
+        subdomain="",
+        domain="another",
+        suffix="icann.compute.amazonaws.com",
+        is_private=True,
+    )
+    assert tldextract.extract(
+        "another.s3.dualstack.us-east-1.amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(
+        subdomain="",
+        domain="another",
+        suffix="s3.dualstack.us-east-1.amazonaws.com",
+        is_private=True,
+    )
+
+    assert tldextract.extract(
+        "s3.ap-south-1.amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(
+        subdomain="", domain="", suffix="s3.ap-south-1.amazonaws.com", is_private=True
+    )
+    assert tldextract.extract(
+        "s3.cn-north-1.amazonaws.com.cn", include_psl_private_domains=True
+    ) == ExtractResult(
+        subdomain="",
+        domain="",
+        suffix="s3.cn-north-1.amazonaws.com.cn",
+        is_private=True,
+    )
+    assert tldextract.extract(
+        "icann.compute.amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(
+        subdomain="", domain="", suffix="icann.compute.amazonaws.com", is_private=True
+    )
+
+    # Entire URL is private suffix which ends with another private suffix
+    # i.e. "s3.dualstack.us-east-1.amazonaws.com" ends with "us-east-1.amazonaws.com"
+    assert tldextract.extract(
+        "s3.dualstack.us-east-1.amazonaws.com", include_psl_private_domains=True
+    ) == ExtractResult(
+        subdomain="",
+        domain="",
+        suffix="s3.dualstack.us-east-1.amazonaws.com",
+        is_private=True,
+    )

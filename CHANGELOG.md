@@ -3,6 +3,20 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 3.6.0 (unreleased)
+
+* **Breaking** bugfixes
+    * Always include suffix if private suffix enabled and private suffix exists ([#300](https://github.com/john-kurkowski/tldextract/issues/300))
+        * Add a 4th field `is_private: bool`, to the `ExtractResult`
+          `namedtuple`, indicating whether the extraction came from the PSL's
+          private domains or not.
+        * **This could cause issues when iterating over the tuple and assuming
+          only 3 fields.**
+        * Previously, the docs promoted iteration to rejoin parts of the tuple.
+          This is better achieved by individual access of fields of interest
+          (e.g. `ExtractResult.subdomain`) or convenience properties (e.g.
+          `ExtractResult.{fqdn,registered_domain}`).
+
 ## 3.5.0 (2023-09-06)
 
 * Features

@@ -21,7 +21,7 @@ LOG = logging.getLogger(__name__)
 
 _DID_LOG_UNABLE_TO_CACHE = False
 
-T = TypeVar("T")  # pylint: disable=invalid-name
+T = TypeVar("T")
 
 
 def get_pkg_unique_identifier() -> str:
@@ -32,7 +32,6 @@ def get_pkg_unique_identifier() -> str:
     a new version of tldextract
     """
     try:
-        # pylint: disable=import-outside-toplevel
         from tldextract._version import version
     except ImportError:
         version = "dev"
@@ -100,7 +99,6 @@ class DiskCache:
         if not os.path.isfile(cache_filepath):
             raise KeyError("namespace: " + namespace + " key: " + repr(key))
         try:
-            # pylint: disable-next=unspecified-encoding
             with open(cache_filepath) as cache_file:
                 return json.load(cache_file)
         except (OSError, ValueError) as exc:
@@ -118,11 +116,10 @@ class DiskCache:
 
         try:
             _make_dir(cache_filepath)
-            # pylint: disable-next=unspecified-encoding
             with open(cache_filepath, "w") as cache_file:
                 json.dump(value, cache_file)
         except OSError as ioe:
-            global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement
+            global _DID_LOG_UNABLE_TO_CACHE
             if not _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
                     "unable to cache %s.%s in %s. This could refresh the "
@@ -180,7 +177,7 @@ class DiskCache:
         try:
             _make_dir(cache_filepath)
         except OSError as ioe:
-            global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement
+            global _DID_LOG_UNABLE_TO_CACHE
             if not _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
                     "unable to cache %s.%s in %s. This could refresh the "
@@ -196,8 +193,6 @@ class DiskCache:
 
             return func(**kwargs)
 
-        # Disable lint of 3rd party (see also https://github.com/tox-dev/py-filelock/issues/102)
-        # pylint: disable-next=abstract-class-instantiated
         with FileLock(lock_path, timeout=self.lock_timeout):
             try:
                 result = cast(T, self.get(namespace=namespace, key=key_args))

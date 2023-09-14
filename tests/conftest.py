@@ -13,7 +13,5 @@ def reset_log_level():
 
     Generally want test output the Unix way: silence is golden.
     """
-    tldextract.cache._DID_LOG_UNABLE_TO_CACHE = (  # pylint: disable=protected-access
-        False
-    )
+    tldextract.cache._DID_LOG_UNABLE_TO_CACHE = False
     logging.getLogger().setLevel(logging.WARN)

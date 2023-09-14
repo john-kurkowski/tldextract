@@ -110,8 +110,6 @@ class ExtractResult(NamedTuple):
         ''
         """
         if self.suffix and (self.domain or self.is_private):
-            # Disable bogus lint error (https://github.com/PyCQA/pylint/issues/2568)
-            # pylint: disable-next=not-an-iterable,unsubscriptable-object
             return ".".join(i for i in self[:3] if i)
         return ""
 
@@ -163,8 +161,8 @@ class ExtractResult(NamedTuple):
 class TLDExtract:
     """A callable for extracting, subdomain, domain, and suffix components from a URL."""
 
-    # TODO: Agreed with Pylint: too-many-arguments
-    def __init__(  # pylint: disable=too-many-arguments
+    # TODO: too-many-arguments
+    def __init__(
         self,
         cache_dir: str | None = get_cache_dir(),
         suffix_list_urls: Sequence[str] = PUBLIC_SUFFIX_LIST_URLS,

@@ -78,8 +78,7 @@ PUBLIC_SUFFIX_LIST_URLS = (
 
 
 class ExtractResult(NamedTuple):
-    """namedtuple of a URL's subdomain, domain, suffix,
-    and flag that indicates if URL has private suffix."""
+    """namedtuple of a URL's subdomain, domain, suffix, and flag that indicates if URL has private suffix."""
 
     subdomain: str
     domain: str
@@ -371,6 +370,7 @@ class Trie:
     def __init__(
         self, matches: dict | None = None, end: bool = False, is_private: bool = False
     ) -> None:
+        """TODO."""
         self.matches = matches if matches else {}
         self.end = end
         self.is_private = is_private
@@ -411,16 +411,14 @@ class Trie:
 
 
 @wraps(TLD_EXTRACTOR.__call__)
-def extract(  # pylint: disable=missing-function-docstring
+def extract(  # noqa: D103
     url: str, include_psl_private_domains: bool | None = False
 ) -> ExtractResult:
     return TLD_EXTRACTOR(url, include_psl_private_domains=include_psl_private_domains)
 
 
 @wraps(TLD_EXTRACTOR.update)
-def update(  # type: ignore[no-untyped-def]
-    *args, **kwargs
-):  # pylint: disable=missing-function-docstring
+def update(*args, **kwargs):  # type: ignore[no-untyped-def]  # noqa: D103
     return TLD_EXTRACTOR.update(*args, **kwargs)
 
 

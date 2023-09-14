@@ -83,6 +83,7 @@ class DiskCache:
     """Disk _cache that only works for jsonable values."""
 
     def __init__(self, cache_dir: str | None, lock_timeout: int = 20):
+        """Construct a disk cache in the given directory."""
         self.enabled = bool(cache_dir)
         self.cache_dir = os.path.expanduser(str(cache_dir) or "")
         self.lock_timeout = lock_timeout
@@ -106,7 +107,7 @@ class DiskCache:
             LOG.error("error reading TLD cache file %s: %s", cache_filepath, exc)
             raise KeyError("namespace: " + namespace + " key: " + repr(key)) from None
 
-    def set(
+    def set(  # noqa: A003
         self, namespace: str, key: str | dict[str, Hashable], value: object
     ) -> None:
         """Set a value in the disk cache."""
@@ -124,12 +125,10 @@ class DiskCache:
             global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement
             if not _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
-                    (
-                        "unable to cache %s.%s in %s. This could refresh the "
-                        "Public Suffix List over HTTP every app startup. "
-                        "Construct your `TLDExtract` with a writable `cache_dir` or "
-                        "set `cache_dir=None` to silence this warning. %s"
-                    ),
+                    "unable to cache %s.%s in %s. This could refresh the "
+                    "Public Suffix List over HTTP every app startup. "
+                    "Construct your `TLDExtract` with a writable `cache_dir` or "
+                    "set `cache_dir=None` to silence this warning. %s",
                     namespace,
                     key,
                     cache_filepath,
@@ -184,12 +183,10 @@ class DiskCache:
             global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement
             if not _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
-                    (
-                        "unable to cache %s.%s in %s. This could refresh the "
-                        "Public Suffix List over HTTP every app startup. "
-                        "Construct your `TLDExtract` with a writable `cache_dir` or "
-                        "set `cache_dir=None` to silence this warning. %s"
-                    ),
+                    "unable to cache %s.%s in %s. This could refresh the "
+                    "Public Suffix List over HTTP every app startup. "
+                    "Construct your `TLDExtract` with a writable `cache_dir` or "
+                    "set `cache_dir=None` to silence this warning. %s",
                     namespace,
                     key_args,
                     cache_filepath,

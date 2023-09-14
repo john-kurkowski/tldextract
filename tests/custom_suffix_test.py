@@ -23,7 +23,7 @@ extract_using_extra_suffixes = tldextract.TLDExtract(
 )
 
 
-def test_private_extraction():
+def test_private_extraction() -> None:
     tld = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp(), suffix_list_urls=[])
 
     assert tld("foo.blogspot.com") == ("foo", "blogspot", "com", False)
@@ -35,7 +35,7 @@ def test_private_extraction():
     )
 
 
-def test_suffix_which_is_not_in_custom_list():
+def test_suffix_which_is_not_in_custom_list() -> None:
     for fun in (
         extract_using_fake_suffix_list,
         extract_using_fake_suffix_list_no_cache,
@@ -44,7 +44,7 @@ def test_suffix_which_is_not_in_custom_list():
         assert result.suffix == ""
 
 
-def test_custom_suffixes():
+def test_custom_suffixes() -> None:
     for fun in (
         extract_using_fake_suffix_list,
         extract_using_fake_suffix_list_no_cache,
@@ -54,12 +54,12 @@ def test_custom_suffixes():
             assert result.suffix == custom_suffix
 
 
-def test_suffix_which_is_not_in_extra_list():
+def test_suffix_which_is_not_in_extra_list() -> None:
     result = extract_using_extra_suffixes("www.google.com")
     assert result.suffix == ""
 
 
-def test_extra_suffixes():
+def test_extra_suffixes() -> None:
     for custom_suffix in EXTRA_SUFFIXES:
         netloc = "www.foo.bar.baz.quux" + "." + custom_suffix
         result = extract_using_extra_suffixes(netloc)

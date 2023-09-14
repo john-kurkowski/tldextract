@@ -8,7 +8,7 @@ from tldextract.cli import main
 from tldextract.tldextract import PUBLIC_SUFFIX_LIST_URLS
 
 
-def test_cli_no_input(monkeypatch):
+def test_cli_no_input(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "argv", ["tldextract"])
     with pytest.raises(SystemExit) as ex:
         main()
@@ -16,7 +16,7 @@ def test_cli_no_input(monkeypatch):
     assert ex.value.code == 1
 
 
-def test_cli_parses_args(monkeypatch):
+def test_cli_parses_args(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "argv", ["tldextract", "--some", "nonsense"])
     with pytest.raises(SystemExit) as ex:
         main()
@@ -24,7 +24,9 @@ def test_cli_parses_args(monkeypatch):
     assert ex.value.code == 2
 
 
-def test_cli_posargs(capsys, monkeypatch):
+def test_cli_posargs(
+    capsys: pytest.CaptureFixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(
         sys, "argv", ["tldextract", "example.com", "bbc.co.uk", "forums.bbc.co.uk"]
     )
@@ -36,7 +38,9 @@ def test_cli_posargs(capsys, monkeypatch):
     assert stdout == " example com\n bbc co.uk\nforums bbc co.uk\n"
 
 
-def test_cli_namedargs(capsys, monkeypatch):
+def test_cli_namedargs(
+    capsys: pytest.CaptureFixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr(
         sys,
         "argv",

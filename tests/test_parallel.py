@@ -2,42 +2,46 @@
 import os
 import os.path
 from multiprocessing import Pool
+from pathlib import Path
 
+import pytest
 import responses
 
 from tldextract import TLDExtract
 from tldextract.tldextract import PUBLIC_SUFFIX_LIST_URLS
 
 
-def test_multiprocessing_makes_one_request(tmpdir):
+def test_multiprocessing_makes_one_request(tmp_path: Path) -> None:
     """Ensure there aren't duplicate download requests."""
     process_count = 3
     with Pool(processes=process_count) as pool:
-        http_request_counts = pool.map(_run_extractor, [str(tmpdir)] * process_count)
+        http_request_counts = pool.map(_run_extractor, [tmp_path] * process_count)
     assert sum(http_request_counts) == 1
 
 
 @responses.activate
-def _run_extractor(cache_dir):
+def _run_extractor(cache_dir: Path) -> int:
     """Run the extractor."""
     responses.add(responses.GET, PUBLIC_SUFFIX_LIST_URLS[0], status=208, body="uk.co")
-    extract = TLDExtract(cache_dir=cache_dir)
+    extract = TLDExtract(cache_dir=str(cache_dir))
 
     extract("bar.uk.com", include_psl_private_domains=True)
     return len(responses.calls)
 
 
 @responses.activate
-def test_cache_cleared_by_other_process(tmpdir, monkeypatch):
+def test_cache_cleared_by_other_process(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Simulate a file being deleted after we check for existence but before we try to delete it."""
     responses.add(responses.GET, PUBLIC_SUFFIX_LIST_URLS[0], status=208, body="uk.com")
 
-    cache_dir = str(tmpdir)
+    cache_dir = str(tmp_path)
     extract = TLDExtract(cache_dir=cache_dir)
     extract("google.com")
     orig_unlink = os.unlink
 
-    def evil_unlink(filename):
+    def evil_unlink(filename: str) -> None:
         """Simulate someone deletes the file right before we try to."""
         if filename.startswith(cache_dir):
             orig_unlink(filename)

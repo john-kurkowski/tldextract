@@ -8,7 +8,7 @@ import tldextract.cache
 
 
 @pytest.fixture(autouse=True)
-def reset_log_level():
+def reset_log_level() -> None:
     """Automatically reset log level verbosity between tests.
 
     Generally want test output the Unix way: silence is golden.

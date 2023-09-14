@@ -5,7 +5,7 @@ import pytest
 import tldextract
 
 
-def test_bad_kwargs():
+def test_bad_kwargs() -> None:
     with pytest.raises(ValueError):
         tldextract.TLDExtract(
             cache_dir=None, suffix_list_urls=(), fallback_to_snapshot=False

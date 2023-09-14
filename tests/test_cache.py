@@ -5,6 +5,7 @@ import os.path
 import sys
 import types
 from collections.abc import Hashable
+from pathlib import Path
 from typing import Any, cast
 from unittest.mock import Mock
 
@@ -14,8 +15,8 @@ import tldextract.cache
 from tldextract.cache import DiskCache, get_cache_dir, get_pkg_unique_identifier
 
 
-def test_disk_cache(tmpdir):
-    cache = DiskCache(tmpdir)
+def test_disk_cache(tmp_path: Path) -> None:
+    cache = DiskCache(str(tmp_path))
     cache.set("testing", "foo", "bar")
     assert cache.get("testing", "foo") == "bar"
 
@@ -28,7 +29,7 @@ def test_disk_cache(tmpdir):
     assert cache.get("testing", "foo") == "baz"
 
 
-def test_get_pkg_unique_identifier(monkeypatch):
+def test_get_pkg_unique_identifier(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "version_info", (3, 8, 1, "final", 0))
     monkeypatch.setattr(sys, "prefix", "/home/john/.pyenv/versions/myvirtualenv")
 
@@ -42,7 +43,7 @@ def test_get_pkg_unique_identifier(monkeypatch):
     )
 
 
-def test_get_cache_dir(monkeypatch):
+def test_get_cache_dir(monkeypatch: pytest.MonkeyPatch) -> None:
     pkg_identifier = "3.8.1.final__myvirtualenv__f01a7b__tldextract-1.2.3"
     monkeypatch.setattr(
         tldextract.cache, "get_pkg_unique_identifier", lambda: pkg_identifier
@@ -79,8 +80,8 @@ def test_get_cache_dir(monkeypatch):
     assert get_cache_dir() == "/alt-tld-cache"
 
 
-def test_run_and_cache(tmpdir):
-    cache = DiskCache(tmpdir)
+def test_run_and_cache(tmp_path: Path) -> None:
+    cache = DiskCache(str(tmp_path))
 
     return_value1 = "unique return value"
     some_fn = Mock(return_value=return_value1)

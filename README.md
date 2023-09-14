@@ -65,10 +65,10 @@ or suffix were found:
 ```python
 >>> ext = tldextract.extract('http://127.0.0.1:8080/deployed/')
 >>> # this has unwanted dots
->>> '.'.join(ext)
+>>> '.'.join(ext[:3])
 '.127.0.0.1.'
 >>> # join each part only if it's truthy
->>> '.'.join(part for part in ext if part)
+>>> '.'.join(part for part in ext[:3] if part)
 '127.0.0.1'
 ```
 

@@ -16,6 +16,7 @@ from tldextract.cache import DiskCache, get_cache_dir, get_pkg_unique_identifier
 
 
 def test_disk_cache(tmp_path: Path) -> None:
+    """Test DiskCache class basic use."""
     cache = DiskCache(str(tmp_path))
     cache.set("testing", "foo", "bar")
     assert cache.get("testing", "foo") == "bar"
@@ -30,6 +31,7 @@ def test_disk_cache(tmp_path: Path) -> None:
 
 
 def test_get_pkg_unique_identifier(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test generating a unique identifier for the version of this package."""
     monkeypatch.setattr(sys, "version_info", (3, 8, 1, "final", 0))
     monkeypatch.setattr(sys, "prefix", "/home/john/.pyenv/versions/myvirtualenv")
 
@@ -44,6 +46,7 @@ def test_get_pkg_unique_identifier(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_get_cache_dir(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test finding the cache directory."""
     pkg_identifier = "3.8.1.final__myvirtualenv__f01a7b__tldextract-1.2.3"
     monkeypatch.setattr(
         tldextract.cache, "get_pkg_unique_identifier", lambda: pkg_identifier
@@ -81,6 +84,11 @@ def test_get_cache_dir(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_run_and_cache(tmp_path: Path) -> None:
+    """Test cache hits and misses.
+
+    Repeated cache requests with the same arguments should hit the cache and
+    not increment the call count of the underlying function.
+    """
     cache = DiskCache(str(tmp_path))
 
     return_value1 = "unique return value"

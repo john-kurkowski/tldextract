@@ -5,6 +5,7 @@ from tldextract.tldextract import Trie
 
 
 def test_nested_dict() -> None:
+    """Test Trie class, built from a list of dot-delimited strings."""
     suffixes = ["a", "d.a", "b.a", "c.b.a", "c", "b.c", "f.d"]
     for suffixes_sequence in permutations(suffixes):
         trie = Trie()

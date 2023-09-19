@@ -3,7 +3,7 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
-## 3.6.0 (unreleased)
+## 3.6.0 (2023-09-19)
 
 * **Breaking** bugfixes
     * Always include suffix if private suffix enabled and private suffix exists ([#300](https://github.com/john-kurkowski/tldextract/issues/300))

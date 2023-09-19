@@ -72,6 +72,9 @@ disallow_untyped_calls = true
 module = ["tldextract.*"]
 disallow_untyped_defs = true
 
+[tool.pytest.ini_options]
+addopts = "--doctest-modules"
+
 [tool.ruff]
 select = [
   "A",

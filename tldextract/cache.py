@@ -21,7 +21,7 @@ LOG = logging.getLogger(__name__)
 
 _DID_LOG_UNABLE_TO_CACHE = False
 
-T = TypeVar("T")  # pylint: disable=invalid-name
+T = TypeVar("T")
 
 
 def get_pkg_unique_identifier() -> str:
@@ -32,7 +32,6 @@ def get_pkg_unique_identifier() -> str:
     a new version of tldextract
     """
     try:
-        # pylint: disable=import-outside-toplevel
         from tldextract._version import version
     except ImportError:
         version = "dev"
@@ -83,6 +82,7 @@ class DiskCache:
     """Disk _cache that only works for jsonable values."""
 
     def __init__(self, cache_dir: str | None, lock_timeout: int = 20):
+        """Construct a disk cache in the given directory."""
         self.enabled = bool(cache_dir)
         self.cache_dir = os.path.expanduser(str(cache_dir) or "")
         self.lock_timeout = lock_timeout
@@ -99,14 +99,13 @@ class DiskCache:
         if not os.path.isfile(cache_filepath):
             raise KeyError("namespace: " + namespace + " key: " + repr(key))
         try:
-            # pylint: disable-next=unspecified-encoding
             with open(cache_filepath) as cache_file:
                 return json.load(cache_file)
         except (OSError, ValueError) as exc:
             LOG.error("error reading TLD cache file %s: %s", cache_filepath, exc)
             raise KeyError("namespace: " + namespace + " key: " + repr(key)) from None
 
-    def set(
+    def set(  # noqa: A003
         self, namespace: str, key: str | dict[str, Hashable], value: object
     ) -> None:
         """Set a value in the disk cache."""
@@ -117,19 +116,16 @@ class DiskCache:
 
         try:
             _make_dir(cache_filepath)
-            # pylint: disable-next=unspecified-encoding
             with open(cache_filepath, "w") as cache_file:
                 json.dump(value, cache_file)
         except OSError as ioe:
-            global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement
+            global _DID_LOG_UNABLE_TO_CACHE
             if not _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
-                    (
-                        "unable to cache %s.%s in %s. This could refresh the "
-                        "Public Suffix List over HTTP every app startup. "
-                        "Construct your `TLDExtract` with a writable `cache_dir` or "
-                        "set `cache_dir=None` to silence this warning. %s"
-                    ),
+                    "unable to cache %s.%s in %s. This could refresh the "
+                    "Public Suffix List over HTTP every app startup. "
+                    "Construct your `TLDExtract` with a writable `cache_dir` or "
+                    "set `cache_dir=None` to silence this warning. %s",
                     namespace,
                     key,
                     cache_filepath,
@@ -181,15 +177,13 @@ class DiskCache:
         try:
             _make_dir(cache_filepath)
         except OSError as ioe:
-            global _DID_LOG_UNABLE_TO_CACHE  # pylint: disable=global-statement
+            global _DID_LOG_UNABLE_TO_CACHE
             if not _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
-                    (
-                        "unable to cache %s.%s in %s. This could refresh the "
-                        "Public Suffix List over HTTP every app startup. "
-                        "Construct your `TLDExtract` with a writable `cache_dir` or "
-                        "set `cache_dir=None` to silence this warning. %s"
-                    ),
+                    "unable to cache %s.%s in %s. This could refresh the "
+                    "Public Suffix List over HTTP every app startup. "
+                    "Construct your `TLDExtract` with a writable `cache_dir` or "
+                    "set `cache_dir=None` to silence this warning. %s",
                     namespace,
                     key_args,
                     cache_filepath,
@@ -199,8 +193,6 @@ class DiskCache:
 
             return func(**kwargs)
 
-        # Disable lint of 3rd party (see also https://github.com/tox-dev/py-filelock/issues/102)
-        # pylint: disable-next=abstract-class-instantiated
         with FileLock(lock_path, timeout=self.lock_timeout):
             try:
                 result = cast(T, self.get(namespace=namespace, key=key_args))

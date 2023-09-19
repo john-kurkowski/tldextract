@@ -72,6 +72,25 @@ disallow_untyped_calls = true
 module = ["tldextract.*"]
 disallow_untyped_defs = true
 
-[tool.pylint.master]
-disable = "fixme"
-no-docstring-rgx = "(^_|test_.*)"
+[tool.ruff]
+select = [
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "I",
+  "N",
+  "UP",
+  "W",
+]
+ignore = [
+  "E501", # line too long; if Black does its job, not worried about the rare long line
+]
+
+[tool.ruff.per-file-ignores]
+"**/tests/**/*" = ["D103"]
+
+[tool.ruff.pydocstyle]
+convention = "pep257"

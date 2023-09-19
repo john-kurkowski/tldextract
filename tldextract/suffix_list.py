@@ -19,7 +19,7 @@ PUBLIC_SUFFIX_RE = re.compile(r"^(?P<suffix>[.*!]*\w[\S]*)", re.UNICODE | re.MUL
 PUBLIC_PRIVATE_SUFFIX_SEPARATOR = "// ===BEGIN PRIVATE DOMAINS==="
 
 
-class SuffixListNotFound(LookupError):
+class SuffixListNotFound(LookupError):  # noqa: N818
     """A recoverable error while looking up a suffix list.
 
     Recoverable because you can specify backups, or use this library's bundled

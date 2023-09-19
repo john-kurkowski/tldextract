@@ -1,4 +1,0 @@
-include tldextract/.tld_set_snapshot
-include tldextract/py.typed
-include LICENSE
-recursive-include tests *.py *.dat

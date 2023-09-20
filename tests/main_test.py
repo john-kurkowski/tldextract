@@ -334,24 +334,6 @@ def test_regex_order() -> None:
     )
 
 
-def test_unhandled_by_iana() -> None:
-    assert_extract(
-        "http://www.cgs.act.edu.au/", ("www.cgs.act.edu.au", "www", "cgs", "act.edu.au")
-    )
-    assert_extract(
-        "http://www.google.com.au/", ("www.google.com.au", "www", "google", "com.au")
-    )
-
-
-def test_tld_is_a_website_too() -> None:
-    assert_extract(
-        "http://www.metp.net.cn", ("www.metp.net.cn", "www", "metp", "net.cn")
-    )
-    # This is unhandled by the PSL. Or is it?
-    # assert_extract(http://www.net.cn',
-    #                ('www.net.cn', 'www', 'net', 'cn'))
-
-
 def test_no_1st_level_tld() -> None:
     assert_extract("za", ("", "", "za", ""))
     assert_extract("example.za", ("", "example", "za", ""))

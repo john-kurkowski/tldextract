@@ -2,8 +2,6 @@ dist: focal
 language: python
 matrix:
   include:
-    - python: "3.7"
-      env: TOXENV=py37
     - python: "3.8"
       env: TOXENV=py38
     - python: "3.9"
@@ -12,7 +10,7 @@ matrix:
       env: TOXENV=py310
     - python: "3.11"
       env: TOXENV=py311
-    - python: pypy3.7-7.3.9
+    - python: pypy3.8-7.3.9
       dist: xenial
       env: TOXENV=pypy3
     - env: TOXENV=codestyle

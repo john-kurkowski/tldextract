@@ -435,7 +435,7 @@ def test_cache_permission(
     def no_permission_makedirs(*args: Any, **kwargs: Any) -> None:
         raise PermissionError(
             """[Errno 13] Permission denied:
-            '/usr/local/lib/python3.7/site-packages/tldextract/.suffix_cache"""
+            '/usr/local/lib/python3.11/site-packages/tldextract/.suffix_cache"""
         )
 
     monkeypatch.setattr(os, "makedirs", no_permission_makedirs)

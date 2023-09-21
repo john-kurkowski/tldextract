@@ -278,7 +278,7 @@ Run all tests against a specific Python environment configuration:
 
 ```zsh
 tox -l
-tox -e py37
+tox -e py311
 ```
 
 ### Code Style

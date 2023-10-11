@@ -3,6 +3,30 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 5.0.0 (2023-10-11)
+
+* Breaking Changes
+    * Migrate `ExtractResult` from `namedtuple` to `dataclass` ([#306](https://github.com/john-kurkowski/tldextract/issues/306))
+        * This means no more iterating/indexing/slicing/unpacking the result
+          object returned by this library. You must directly reference the
+          fields you're interested in. For example, instead of
+          ```python
+          tldextract.extract("example.com")[1:3]
+          ```
+          you must use
+          ```python
+          ext = tldextract.extract("example.com")
+          (ext.domain, ext.suffix)
+          ```
+* Bugfixes
+    * Drop support for EOL Python 3.7
+* Misc.
+    * Switch from pycodestyle and Pylint to Ruff ([#304](https://github.com/john-kurkowski/tldextract/issues/304))
+    * Consolidate config files
+    * Type tests
+    * Require docstrings in tests
+    * Remove obsolete tests
+
 ## 4.0.0 (2023-10-11)
 
 * **Breaking** bugfixes

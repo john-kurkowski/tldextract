@@ -13,18 +13,6 @@ It does this via the Public Suffix List (PSL).
     >>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
     ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg', is_private=False)
 
-`ExtractResult` is a namedtuple, so it's simple to access the parts you want.
-
-    >>> ext = tldextract.extract('http://forums.bbc.co.uk')
-    >>> (ext.subdomain, ext.domain, ext.suffix)
-    ('forums', 'bbc', 'co.uk')
-    >>> # rejoin subdomain and domain
-    >>> '.'.join(ext[:2])
-    'forums.bbc'
-    >>> # a common alias
-    >>> ext.registered_domain
-    'bbc.co.uk'
-
 Note subdomain and suffix are _optional_. Not all URL-like inputs have a
 subdomain or a valid suffix.
 
@@ -37,16 +25,13 @@ subdomain or a valid suffix.
     >>> tldextract.extract('http://127.0.0.1:8080/deployed/')
     ExtractResult(subdomain='', domain='127.0.0.1', suffix='', is_private=False)
 
-If you want to rejoin the whole namedtuple, regardless of whether a subdomain
-or suffix were found:
+To rejoin the original hostname, if it was indeed a valid, registered hostname:
 
-    >>> ext = tldextract.extract('http://127.0.0.1:8080/deployed/')
-    >>> # this has unwanted dots
-    >>> '.'.join(part for part in ext[:3])
-    '.127.0.0.1.'
-    >>> # join part only if truthy
-    >>> '.'.join(part for part in ext[:3] if part)
-    '127.0.0.1'
+    >>> ext = tldextract.extract('http://forums.bbc.co.uk')
+    >>> ext.registered_domain
+    'bbc.co.uk'
+    >>> ext.fqdn
+    'forums.bbc.co.uk'
 """
 
 from __future__ import annotations
@@ -55,10 +40,8 @@ import logging
 import os
 import urllib.parse
 from collections.abc import Collection, Sequence
+from dataclasses import dataclass
 from functools import wraps
-from typing import (
-    NamedTuple,
-)
 
 import idna
 
@@ -77,13 +60,17 @@ PUBLIC_SUFFIX_LIST_URLS = (
 )
 
 
-class ExtractResult(NamedTuple):
-    """namedtuple of a URL's subdomain, domain, suffix, and flag that indicates if URL has private suffix."""
+@dataclass(order=True)
+class ExtractResult:
+    """A URL's extracted subdomain, domain, and suffix.
+
+    Also contains metadata, like a flag that indicates if the URL has a private suffix.
+    """
 
     subdomain: str
     domain: str
     suffix: str
-    is_private: bool = False
+    is_private: bool
 
     @property
     def registered_domain(self) -> str:
@@ -110,7 +97,7 @@ class ExtractResult(NamedTuple):
         ''
         """
         if self.suffix and (self.domain or self.is_private):
-            return ".".join(i for i in self[:3] if i)
+            return ".".join(i for i in (self.subdomain, self.domain, self.suffix) if i)
         return ""
 
     @property
@@ -291,7 +278,7 @@ class TLDExtract:
             and netloc_with_ascii_dots[-1] == "]"
         ):
             if looks_like_ipv6(netloc_with_ascii_dots[1:-1]):
-                return ExtractResult("", netloc_with_ascii_dots, "")
+                return ExtractResult("", netloc_with_ascii_dots, "", is_private=False)
 
         labels = netloc_with_ascii_dots.split(".")
 

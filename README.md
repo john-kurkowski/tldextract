@@ -31,20 +31,6 @@ ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False
 ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg', is_private=False)
 ```
 
-`ExtractResult` is a namedtuple, so it's simple to access the parts you want.
-
-```python
->>> ext = tldextract.extract('http://forums.bbc.co.uk')
->>> (ext.subdomain, ext.domain, ext.suffix)
-('forums', 'bbc', 'co.uk')
->>> # rejoin subdomain and domain
->>> '.'.join(ext[:2])
-'forums.bbc'
->>> # a common alias
->>> ext.registered_domain
-'bbc.co.uk'
-```
-
 Note subdomain and suffix are _optional_. Not all URL-like inputs have a
 subdomain or a valid suffix.
 
@@ -59,17 +45,14 @@ ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='', is_privat
 ExtractResult(subdomain='', domain='127.0.0.1', suffix='', is_private=False)
 ```
 
-If you want to rejoin the whole namedtuple, regardless of whether a subdomain
-or suffix were found:
+To rejoin the original hostname, if it was indeed a valid, registered hostname:
 
 ```python
->>> ext = tldextract.extract('http://127.0.0.1:8080/deployed/')
->>> # this has unwanted dots
->>> '.'.join(ext[:3])
-'.127.0.0.1.'
->>> # join each part only if it's truthy
->>> '.'.join(part for part in ext[:3] if part)
-'127.0.0.1'
+>>> ext = tldextract.extract('http://forums.bbc.co.uk')
+>>> ext.registered_domain
+'bbc.co.uk'
+>>> ext.fqdn
+'forums.bbc.co.uk'
 ```
 
 By default, this package supports the public ICANN TLDs and their exceptions.

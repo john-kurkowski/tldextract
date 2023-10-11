@@ -4,6 +4,7 @@ import os
 import tempfile
 
 import tldextract
+from tldextract.tldextract import ExtractResult
 
 FAKE_SUFFIX_LIST_URL = "file://" + os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "fixtures/fake_suffix_list_fixture.dat"
@@ -27,8 +28,8 @@ def test_private_extraction() -> None:
     """Test this library's uncached, offline, private domain extraction."""
     tld = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp(), suffix_list_urls=[])
 
-    assert tld("foo.blogspot.com") == ("foo", "blogspot", "com", False)
-    assert tld("foo.blogspot.com", include_psl_private_domains=True) == (
+    assert tld("foo.blogspot.com") == ExtractResult("foo", "blogspot", "com", False)
+    assert tld("foo.blogspot.com", include_psl_private_domains=True) == ExtractResult(
         "",
         "foo",
         "blogspot.com",

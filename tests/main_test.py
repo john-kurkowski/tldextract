@@ -412,20 +412,6 @@ def test_ipv4_lookalike() -> None:
     )
 
 
-def test_result_as_dict() -> None:
-    """Test that the result is a namedtuple."""
-    result = extract(
-        "http://admin:password1@www.google.com:666/secret/admin/interface?param1=42"
-    )
-    expected_dict = {
-        "subdomain": "www",
-        "domain": "google",
-        "suffix": "com",
-        "is_private": False,
-    }
-    assert result._asdict() == expected_dict
-
-
 def test_cache_permission(
     mocker: pytest_mock.MockerFixture, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

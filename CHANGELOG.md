@@ -8,12 +8,16 @@ After upgrading, update your cache file by deleting it or via `tldextract
 * Breaking Changes
     * Migrate `ExtractResult` from `namedtuple` to `dataclass` ([#306](https://github.com/john-kurkowski/tldextract/issues/306))
         * This means no more iterating/indexing/slicing/unpacking the result
-          object returned by this library. You must directly reference the
-          fields you're interested in. For example, instead of
+          object returned by this library. It is no longer a tuple. You must
+          directly reference the fields you're interested in.
+
+          For example, the
+          following will no longer work.
           ```python
           tldextract.extract("example.com")[1:3]
+          # TypeError: 'ExtractResult' object is not subscriptable
           ```
-          you must use
+          Instead, use the following.
           ```python
           ext = tldextract.extract("example.com")
           (ext.domain, ext.suffix)

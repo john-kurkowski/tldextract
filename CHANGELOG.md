@@ -3,7 +3,7 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
-## 3.6.0 (2023-09-19)
+## 4.0.0 (2023-10-11)
 
 * **Breaking** bugfixes
     * Always include suffix if private suffix enabled and private suffix exists ([#300](https://github.com/john-kurkowski/tldextract/issues/300))
@@ -16,6 +16,9 @@ After upgrading, update your cache file by deleting it or via `tldextract
           This is better achieved by individual access of fields of interest
           (e.g. `ExtractResult.subdomain`) or convenience properties (e.g.
           `ExtractResult.{fqdn,registered_domain}`).
+
+This is the same content as version 3.6.0, originally released 2023-09-19,
+which was yanked.
 
 ## 3.5.0 (2023-09-06)
 

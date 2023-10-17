@@ -3,6 +3,13 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 5.0.1 (2023-10-17)
+
+* Bugfixes
+    * Indicate MD5 not used in a security context (FIPS compliance) ([#309](https://github.com/john-kurkowski/tldextract/issues/309))
+* Misc.
+    * Increase typecheck aggression
+
 ## 5.0.0 (2023-10-11)
 
 * Breaking Changes

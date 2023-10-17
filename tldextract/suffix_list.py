@@ -9,7 +9,7 @@ from collections.abc import Sequence
 from typing import cast
 
 import requests
-from requests_file import FileAdapter  # type: ignore[import]
+from requests_file import FileAdapter  # type: ignore[import-untyped]
 
 from .cache import DiskCache
 

@@ -27,7 +27,7 @@ def test_cli_parses_args(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_cli_posargs(
-    capsys: pytest.CaptureFixture, monkeypatch: pytest.MonkeyPatch
+    capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test CLI with basic, positional args."""
     monkeypatch.setattr(
@@ -42,7 +42,7 @@ def test_cli_posargs(
 
 
 def test_cli_namedargs(
-    capsys: pytest.CaptureFixture, monkeypatch: pytest.MonkeyPatch
+    capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test CLI with basic, positional args, and that it parses an optional argument (though it doesn't change output)."""
     monkeypatch.setattr(

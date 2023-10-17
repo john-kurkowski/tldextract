@@ -353,7 +353,10 @@ class Trie:
     """Trie for storing eTLDs with their labels in reverse-order."""
 
     def __init__(
-        self, matches: dict | None = None, end: bool = False, is_private: bool = False
+        self,
+        matches: dict[str, Trie] | None = None,
+        end: bool = False,
+        is_private: bool = False,
     ) -> None:
         """TODO."""
         self.matches = matches if matches else {}

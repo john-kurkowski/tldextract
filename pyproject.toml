@@ -63,10 +63,7 @@ write_to = "tldextract/_version.py"
 version = {attr = "setuptools_scm.get_version"}
 
 [tool.mypy]
-check_untyped_defs = true
-disallow_incomplete_defs = true
-disallow_untyped_calls = true
-disallow_untyped_defs = true
+strict = true
 
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"

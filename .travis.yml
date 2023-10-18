@@ -17,5 +17,7 @@ matrix:
     - env: TOXENV=lint
     - env: TOXENV=typecheck
 python: "3.10"
-install: pip install --upgrade --editable '.[testing]'
+install:
+    - pip install --upgrade pip
+    - pip install --upgrade --editable '.[testing]'
 script: tox

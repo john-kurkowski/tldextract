@@ -11,6 +11,7 @@ from typing import Any
 
 import pytest
 import pytest_mock
+import requests
 import responses
 
 import tldextract
@@ -447,6 +448,24 @@ def test_cache_timeouts(tmp_path: Path) -> None:
 
     with pytest.raises(SuffixListNotFound):
         tldextract.suffix_list.find_first_response(cache, [server], 5)
+
+
+@responses.activate
+def test_find_first_response(tmp_path: Path) -> None:
+    """Test it is able to find first response."""
+    server = "http://some-server.com"
+    response_text = "server response"
+    responses.add(responses.GET, server, status=200, body=response_text)
+    cache = DiskCache(str(tmp_path))
+
+    # without session passed in
+    result = tldextract.suffix_list.find_first_response(cache, [server], 5)
+    assert result == response_text
+
+    # with session passed in
+    session = requests.Session()
+    result = tldextract.suffix_list.find_first_response(cache, [server], 5, session)
+    assert result == response_text
 
 
 def test_include_psl_private_domain_attr() -> None:

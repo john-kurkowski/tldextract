@@ -228,7 +228,7 @@ class TLDExtract:
         self,
         url: str,
         include_psl_private_domains: bool | None = None,
-        session: requests.Session = None,
+        session: requests.Session | None = None,
     ) -> ExtractResult:
         """Alias for `extract_str`."""
         return self.extract_str(url, include_psl_private_domains, session=session)
@@ -237,7 +237,7 @@ class TLDExtract:
         self,
         url: str,
         include_psl_private_domains: bool | None = None,
-        session: requests.Session = None,
+        session: requests.Session | None = None,
     ) -> ExtractResult:
         """Take a string URL and splits it into its subdomain, domain, and suffix components.
 
@@ -257,7 +257,7 @@ class TLDExtract:
         self,
         url: urllib.parse.ParseResult | urllib.parse.SplitResult,
         include_psl_private_domains: bool | None = None,
-        session: requests.Session = None,
+        session: requests.Session | None = None,
     ) -> ExtractResult:
         """Take the output of urllib.parse URL parsing methods and further splits the parsed URL.
 
@@ -281,7 +281,7 @@ class TLDExtract:
         self,
         netloc: str,
         include_psl_private_domains: bool | None,
-        session: requests.Session = None,
+        session: requests.Session | None = None,
     ) -> ExtractResult:
         netloc_with_ascii_dots = (
             netloc.replace("\u3002", "\u002e")
@@ -315,7 +315,9 @@ class TLDExtract:
         domain = labels[suffix_index - 1] if suffix_index else ""
         return ExtractResult(subdomain, domain, suffix, is_private)
 
-    def update(self, fetch_now: bool = False, session: requests.Session = None) -> None:
+    def update(
+        self, fetch_now: bool = False, session: requests.Session | None = None
+    ) -> None:
         """Force fetch the latest suffix list definitions."""
         self._extractor = None
         self._cache.clear()
@@ -323,7 +325,7 @@ class TLDExtract:
             self._get_tld_extractor(session=session)
 
     @property
-    def tlds(self, session: requests.Session = None) -> list[str]:
+    def tlds(self, session: requests.Session | None = None) -> list[str]:
         """
         Returns the list of tld's used by default.
 
@@ -332,7 +334,7 @@ class TLDExtract:
         return list(self._get_tld_extractor(session=session).tlds())
 
     def _get_tld_extractor(
-        self, session: requests.Session = None
+        self, session: requests.Session | None = None
     ) -> _PublicSuffixListTLDExtractor:
         """Get or compute this object's TLDExtractor.
 
@@ -423,7 +425,7 @@ class Trie:
 def extract(  # noqa: D103
     url: str,
     include_psl_private_domains: bool | None = False,
-    session: requests.Session = None,
+    session: requests.Session | None = None,
 ) -> ExtractResult:
     return TLD_EXTRACTOR(
         url, include_psl_private_domains=include_psl_private_domains, session=session

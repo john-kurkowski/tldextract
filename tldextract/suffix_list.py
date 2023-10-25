@@ -31,10 +31,9 @@ def find_first_response(
     cache: DiskCache,
     urls: Sequence[str],
     cache_fetch_timeout: float | int | None = None,
-    session: requests.Session = None,
+    session: requests.Session | None = None,
 ) -> str:
     """Decode the first successfully fetched URL, from UTF-8 encoding to Python unicode."""
-
     if session is None:
         session = requests.Session()
         session.mount("file://", FileAdapter())
@@ -73,7 +72,7 @@ def get_suffix_lists(
     urls: Sequence[str],
     cache_fetch_timeout: float | int | None,
     fallback_to_snapshot: bool,
-    session: requests.Session = None,
+    session: requests.Session | None = None,
 ) -> tuple[list[str], list[str]]:
     """Fetch, parse, and cache the suffix lists."""
     return cache.run_and_cache(
@@ -95,7 +94,7 @@ def _get_suffix_lists(
     urls: Sequence[str],
     cache_fetch_timeout: float | int | None,
     fallback_to_snapshot: bool,
-    session: requests.Session = None,
+    session: requests.Session | None = None,
 ) -> tuple[list[str], list[str]]:
     """Fetch, parse, and cache the suffix lists."""
     try:

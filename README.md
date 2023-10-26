@@ -247,7 +247,7 @@ receiving exceptions or error metadata on results.
 
 1. `git clone` this repository.
 2. Change into the new directory.
-3. `pip install tox`
+3. `pip install --upgrade --editable '.[testing]'`
 
 ### Running the test suite
 
@@ -269,6 +269,5 @@ tox -e py311
 Automatically format all code:
 
 ```zsh
-pip install black
 black .
 ```

@@ -29,14 +29,29 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 requires-python = ">=3.8"
+dynamic = ["version"]
+readme = "README.md"
+
 dependencies = [
     "idna",
     "requests>=2.1.0",
     "requests-file>=1.4",
     "filelock>=3.0.8",
 ]
-dynamic = ["version"]
-readme = "README.md"
+
+[project.optional-dependencies]
+testing = [
+    "black",
+    "mypy",
+    "pytest",
+    "pytest-gitignore",
+    "pytest-mock",
+    "responses",
+    "ruff",
+    "tox",
+    "types-filelock",
+    "types-requests",
+]
 
 [project.urls]
 Homepage = "https://github.com/john-kurkowski/tldextract"

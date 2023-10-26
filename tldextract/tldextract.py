@@ -173,9 +173,6 @@ class TLDExtract:
         its mirror, but any similar document could be specified. Local files can be specified by
         using the `file://` protocol. (See `urllib2` documentation.)
 
-        If you need proxy to access the URLs in `suffix_list_urls`, an optional `session` can be
-        passed in with proxy configured.
-
         If there is no cached version loaded and no data is found from the `suffix_list_urls`,
         the module will fall back to the included TLD set snapshot. If you do not want
         this behavior, you may set `fallback_to_snapshot` to False, and an exception will be
@@ -248,6 +245,10 @@ class TLDExtract:
         ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
         >>> extractor.extract_str('http://forums.bbc.co.uk/')
         ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
+
+        Allows configuring the HTTP request via the optional `session`
+        parameter. For example, if you need to use a HTTP proxy. See also
+        `requests.Session`.
         """
         return self._extract_netloc(
             lenient_netloc(url), include_psl_private_domains, session=session

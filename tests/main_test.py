@@ -8,6 +8,7 @@ import tempfile
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 import pytest_mock
@@ -451,8 +452,8 @@ def test_cache_timeouts(tmp_path: Path) -> None:
 
 
 @responses.activate
-def test_find_first_response(tmp_path: Path) -> None:
-    """Test it is able to find first response."""
+def test_find_first_response_without_session(tmp_path: Path) -> None:
+    """Test it is able to find first response without session passed in."""
     server = "http://some-server.com"
     response_text = "server response"
     responses.add(responses.GET, server, status=200, body=response_text)
@@ -462,10 +463,21 @@ def test_find_first_response(tmp_path: Path) -> None:
     result = tldextract.suffix_list.find_first_response(cache, [server], 5)
     assert result == response_text
 
-    # with session passed in
-    session = requests.Session()
-    result = tldextract.suffix_list.find_first_response(cache, [server], 5, session)
+
+def test_find_first_response_with_session(tmp_path: Path) -> None:
+    """Test it is able to find first response with passed in session."""
+    server = "http://some-server.com"
+    response_text = "server response"
+    cache = DiskCache(str(tmp_path))
+    mock_session = Mock()
+    mock_session.get.return_value.text = response_text
+
+    result = tldextract.suffix_list.find_first_response(
+        cache, [server], 5, mock_session
+    )
     assert result == response_text
+    mock_session.get.assert_called_once_with(server, timeout=5)
+    mock_session.close.assert_not_called()
 
 
 def test_include_psl_private_domain_attr() -> None:

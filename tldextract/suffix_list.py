@@ -34,9 +34,11 @@ def find_first_response(
     session: requests.Session | None = None,
 ) -> str:
     """Decode the first successfully fetched URL, from UTF-8 encoding to Python unicode."""
+    session_created = False
     if session is None:
         session = requests.Session()
         session.mount("file://", FileAdapter())
+        session_created = True
 
     try:
         for url in urls:
@@ -47,8 +49,9 @@ def find_first_response(
             except requests.exceptions.RequestException:
                 LOG.exception("Exception reading Public Suffix List url %s", url)
     finally:
-        # Ensure the session is always closed
-        session.close()
+        # Ensure the session is always closed if it's constructed in the method
+        if session_created:
+            session.close()
 
     raise SuffixListNotFound(
         "No remote Public Suffix List found. Consider using a mirror, or avoid this"

@@ -12,7 +12,6 @@ from unittest.mock import Mock
 
 import pytest
 import pytest_mock
-import requests
 import responses
 
 import tldextract

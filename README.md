@@ -186,7 +186,7 @@ If you want to use input data from your local filesystem, just use the `file://`
 
 ```python
 extract = tldextract.TLDExtract(
-    suffix_list_urls=["file://absolute/path/to/your/local/suffix/list/file"],
+    suffix_list_urls=["file://" + "/absolute/path/to/your/local/suffix/list/file"],
     cache_dir='/path/to/your/cache/',
     fallback_to_snapshot=False)
 ```

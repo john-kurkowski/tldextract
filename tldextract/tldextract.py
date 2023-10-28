@@ -44,6 +44,7 @@ from dataclasses import dataclass
 from functools import wraps
 
 import idna
+import requests
 
 from .cache import DiskCache, get_cache_dir
 from .remote import lenient_netloc, looks_like_ip, looks_like_ipv6
@@ -221,13 +222,19 @@ class TLDExtract:
         self._cache = DiskCache(cache_dir)
 
     def __call__(
-        self, url: str, include_psl_private_domains: bool | None = None
+        self,
+        url: str,
+        include_psl_private_domains: bool | None = None,
+        session: requests.Session | None = None,
     ) -> ExtractResult:
         """Alias for `extract_str`."""
-        return self.extract_str(url, include_psl_private_domains)
+        return self.extract_str(url, include_psl_private_domains, session=session)
 
     def extract_str(
-        self, url: str, include_psl_private_domains: bool | None = None
+        self,
+        url: str,
+        include_psl_private_domains: bool | None = None,
+        session: requests.Session | None = None,
     ) -> ExtractResult:
         """Take a string URL and splits it into its subdomain, domain, and suffix components.
 
@@ -238,13 +245,27 @@ class TLDExtract:
         ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
         >>> extractor.extract_str('http://forums.bbc.co.uk/')
         ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
+
+        Allows configuring the HTTP request via the optional `session`
+        parameter. For example, if you need to use a HTTP proxy. See also
+        `requests.Session`.
+
+        >>> import requests
+        >>> session = requests.Session()
+        >>> # customize your session here
+        >>> with session:
+        ...     extractor.extract_str("http://forums.news.cnn.com/", session=session)
+        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
         """
-        return self._extract_netloc(lenient_netloc(url), include_psl_private_domains)
+        return self._extract_netloc(
+            lenient_netloc(url), include_psl_private_domains, session=session
+        )
 
     def extract_urllib(
         self,
         url: urllib.parse.ParseResult | urllib.parse.SplitResult,
         include_psl_private_domains: bool | None = None,
+        session: requests.Session | None = None,
     ) -> ExtractResult:
         """Take the output of urllib.parse URL parsing methods and further splits the parsed URL.
 
@@ -260,10 +281,15 @@ class TLDExtract:
         >>> extractor.extract_urllib(urllib.parse.urlsplit('http://forums.bbc.co.uk/'))
         ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
         """
-        return self._extract_netloc(url.netloc, include_psl_private_domains)
+        return self._extract_netloc(
+            url.netloc, include_psl_private_domains, session=session
+        )
 
     def _extract_netloc(
-        self, netloc: str, include_psl_private_domains: bool | None
+        self,
+        netloc: str,
+        include_psl_private_domains: bool | None,
+        session: requests.Session | None = None,
     ) -> ExtractResult:
         netloc_with_ascii_dots = (
             netloc.replace("\u3002", "\u002e")
@@ -282,9 +308,9 @@ class TLDExtract:
 
         labels = netloc_with_ascii_dots.split(".")
 
-        suffix_index, is_private = self._get_tld_extractor().suffix_index(
-            labels, include_psl_private_domains=include_psl_private_domains
-        )
+        suffix_index, is_private = self._get_tld_extractor(
+            session=session
+        ).suffix_index(labels, include_psl_private_domains=include_psl_private_domains)
 
         num_ipv4_labels = 4
         if suffix_index == len(labels) == num_ipv4_labels and looks_like_ip(
@@ -297,23 +323,27 @@ class TLDExtract:
         domain = labels[suffix_index - 1] if suffix_index else ""
         return ExtractResult(subdomain, domain, suffix, is_private)
 
-    def update(self, fetch_now: bool = False) -> None:
+    def update(
+        self, fetch_now: bool = False, session: requests.Session | None = None
+    ) -> None:
         """Force fetch the latest suffix list definitions."""
         self._extractor = None
         self._cache.clear()
         if fetch_now:
-            self._get_tld_extractor()
+            self._get_tld_extractor(session=session)
 
     @property
-    def tlds(self) -> list[str]:
+    def tlds(self, session: requests.Session | None = None) -> list[str]:
         """
         Returns the list of tld's used by default.
 
         This will vary based on `include_psl_private_domains` and `extra_suffixes`
         """
-        return list(self._get_tld_extractor().tlds())
+        return list(self._get_tld_extractor(session=session).tlds())
 
-    def _get_tld_extractor(self) -> _PublicSuffixListTLDExtractor:
+    def _get_tld_extractor(
+        self, session: requests.Session | None = None
+    ) -> _PublicSuffixListTLDExtractor:
         """Get or compute this object's TLDExtractor.
 
         Looks up the TLDExtractor in roughly the following order, based on the
@@ -332,6 +362,7 @@ class TLDExtract:
             urls=self.suffix_list_urls,
             cache_fetch_timeout=self.cache_fetch_timeout,
             fallback_to_snapshot=self.fallback_to_snapshot,
+            session=session,
         )
 
         if not any([public_tlds, private_tlds, self.extra_suffixes]):
@@ -400,9 +431,13 @@ class Trie:
 
 @wraps(TLD_EXTRACTOR.__call__)
 def extract(  # noqa: D103
-    url: str, include_psl_private_domains: bool | None = False
+    url: str,
+    include_psl_private_domains: bool | None = False,
+    session: requests.Session | None = None,
 ) -> ExtractResult:
-    return TLD_EXTRACTOR(url, include_psl_private_domains=include_psl_private_domains)
+    return TLD_EXTRACTOR(
+        url, include_psl_private_domains=include_psl_private_domains, session=session
+    )
 
 
 @wraps(TLD_EXTRACTOR.update)

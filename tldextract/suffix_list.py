@@ -31,11 +31,16 @@ def find_first_response(
     cache: DiskCache,
     urls: Sequence[str],
     cache_fetch_timeout: float | int | None = None,
+    session: requests.Session | None = None,
 ) -> str:
     """Decode the first successfully fetched URL, from UTF-8 encoding to Python unicode."""
-    with requests.Session() as session:
+    session_created = False
+    if session is None:
+        session = requests.Session()
         session.mount("file://", FileAdapter())
+        session_created = True
 
+    try:
         for url in urls:
             try:
                 return cache.cached_fetch_url(
@@ -43,6 +48,11 @@ def find_first_response(
                 )
             except requests.exceptions.RequestException:
                 LOG.exception("Exception reading Public Suffix List url %s", url)
+    finally:
+        # Ensure the session is always closed if it's constructed in the method
+        if session_created:
+            session.close()
+
     raise SuffixListNotFound(
         "No remote Public Suffix List found. Consider using a mirror, or avoid this"
         " fetch by constructing your TLDExtract with `suffix_list_urls=()`."
@@ -65,6 +75,7 @@ def get_suffix_lists(
     urls: Sequence[str],
     cache_fetch_timeout: float | int | None,
     fallback_to_snapshot: bool,
+    session: requests.Session | None = None,
 ) -> tuple[list[str], list[str]]:
     """Fetch, parse, and cache the suffix lists."""
     return cache.run_and_cache(
@@ -75,6 +86,7 @@ def get_suffix_lists(
             "urls": urls,
             "cache_fetch_timeout": cache_fetch_timeout,
             "fallback_to_snapshot": fallback_to_snapshot,
+            "session": session,
         },
         hashed_argnames=["urls", "fallback_to_snapshot"],
     )
@@ -85,10 +97,13 @@ def _get_suffix_lists(
     urls: Sequence[str],
     cache_fetch_timeout: float | int | None,
     fallback_to_snapshot: bool,
+    session: requests.Session | None = None,
 ) -> tuple[list[str], list[str]]:
     """Fetch, parse, and cache the suffix lists."""
     try:
-        text = find_first_response(cache, urls, cache_fetch_timeout=cache_fetch_timeout)
+        text = find_first_response(
+            cache, urls, cache_fetch_timeout=cache_fetch_timeout, session=session
+        )
     except SuffixListNotFound as exc:
         if fallback_to_snapshot:
             maybe_pkg_data = pkgutil.get_data("tldextract", ".tld_set_snapshot")

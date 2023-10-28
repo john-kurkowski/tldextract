@@ -458,7 +458,6 @@ def test_find_first_response_without_session(tmp_path: Path) -> None:
     responses.add(responses.GET, server, status=200, body=response_text)
     cache = DiskCache(str(tmp_path))
 
-    # without session passed in
     result = tldextract.suffix_list.find_first_response(cache, [server], 5)
     assert result == response_text
 

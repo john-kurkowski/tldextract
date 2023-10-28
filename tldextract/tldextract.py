@@ -249,6 +249,13 @@ class TLDExtract:
         Allows configuring the HTTP request via the optional `session`
         parameter. For example, if you need to use a HTTP proxy. See also
         `requests.Session`.
+
+        >>> import requests
+        >>> session = requests.Session()
+        >>> # customize your session here
+        >>> with session:
+        ...     extractor.extract_str("http://forums.news.cnn.com/", session=session)
+        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
         """
         return self._extract_netloc(
             lenient_netloc(url), include_psl_private_domains, session=session

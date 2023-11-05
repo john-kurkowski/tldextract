@@ -4,7 +4,6 @@ import os
 import os.path
 from multiprocessing import Pool
 from pathlib import Path
-from typing import Callable, cast
 
 import pytest
 import responses
@@ -17,20 +16,19 @@ def test_multiprocessing_makes_one_request(tmp_path: Path) -> None:
     """Ensure there aren't duplicate download requests."""
     process_count = 3
     with Pool(processes=process_count) as pool:
-        http_request_counts = pool.map(
-            cast(Callable[[Path], int], _run_extractor), [tmp_path] * process_count
-        )
+        http_request_counts = pool.map(_run_extractor, [tmp_path] * process_count)
     assert sum(http_request_counts) == 1
 
 
-@responses.activate
 def _run_extractor(cache_dir: Path) -> int:
     """Run the extractor."""
-    responses.add(responses.GET, PUBLIC_SUFFIX_LIST_URLS[0], status=208, body="uk.co")
-    extract = TLDExtract(cache_dir=str(cache_dir))
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as rsps:
+        rsps.add(responses.GET, PUBLIC_SUFFIX_LIST_URLS[0], status=208, body="uk.co")
+        extract = TLDExtract(cache_dir=str(cache_dir))
 
-    extract("bar.uk.com", include_psl_private_domains=True)
-    return len(responses.calls)
+        extract("bar.uk.com", include_psl_private_domains=True)
+        num_calls = len(rsps.calls)
+    return num_calls
 
 
 @responses.activate

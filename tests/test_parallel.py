@@ -1,8 +1,10 @@
 """Test ability to run in parallel with shared cache."""
+
 import os
 import os.path
 from multiprocessing import Pool
 from pathlib import Path
+from typing import Any, Callable, cast
 
 import pytest
 import responses
@@ -15,7 +17,9 @@ def test_multiprocessing_makes_one_request(tmp_path: Path) -> None:
     """Ensure there aren't duplicate download requests."""
     process_count = 3
     with Pool(processes=process_count) as pool:
-        http_request_counts = pool.map(_run_extractor, [tmp_path] * process_count)
+        http_request_counts = pool.map(
+            cast(Callable[[Path], int], _run_extractor), [tmp_path] * process_count
+        )
     assert sum(http_request_counts) == 1
 
 

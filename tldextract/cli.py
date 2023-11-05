@@ -98,12 +98,16 @@ def main() -> None:
     for i in args.input:
         ext = tld_extract(i)
         if args.json:
-            print(json.dumps({
-                "subdomain": ext.subdomain,
-                "domain": ext.domain,
-                "suffix": ext.suffix,
-                "fqdn": ext.fqdn,
-                "registered_domain": ext.registered_domain,
-            }))
+            print(
+                json.dumps(
+                    {
+                        "subdomain": ext.subdomain,
+                        "domain": ext.domain,
+                        "suffix": ext.suffix,
+                        "fqdn": ext.fqdn,
+                        "registered_domain": ext.registered_domain,
+                    }
+                )
+            )
         else:
             print(f"{ext.subdomain} {ext.domain} {ext.suffix}")

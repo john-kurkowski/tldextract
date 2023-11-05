@@ -4,7 +4,7 @@ import os
 import os.path
 from multiprocessing import Pool
 from pathlib import Path
-from typing import Any, Callable, cast
+from typing import Callable, cast
 
 import pytest
 import responses

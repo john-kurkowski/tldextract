@@ -2,6 +2,7 @@
 
 
 import argparse
+import json
 import logging
 import os.path
 import pathlib
@@ -21,6 +22,13 @@ def main() -> None:
 
     parser.add_argument(
         "--version", action="version", version="%(prog)s " + __version__
+    )
+    parser.add_argument(
+        "-j",
+        "--json",
+        default=False,
+        action="store_true",
+        help="output in json format",
     )
     parser.add_argument(
         "input", metavar="fqdn|url", type=str, nargs="*", help="fqdn or url"
@@ -89,4 +97,17 @@ def main() -> None:
 
     for i in args.input:
         ext = tld_extract(i)
-        print(f"{ext.subdomain} {ext.domain} {ext.suffix}")
+        if args.json:
+            print(
+                json.dumps(
+                    {
+                        "subdomain": ext.subdomain,
+                        "domain": ext.domain,
+                        "suffix": ext.suffix,
+                        "fqdn": ext.fqdn,
+                        "registered_domain": ext.registered_domain,
+                    }
+                )
+            )
+        else:
+            print(f"{ext.subdomain} {ext.domain} {ext.suffix}")

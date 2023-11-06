@@ -1,5 +1,6 @@
 """tldextract integration tests."""
 
+import json
 import sys
 
 import pytest
@@ -63,3 +64,22 @@ def test_cli_namedargs(
     stdout, stderr = capsys.readouterr()
     assert not stderr
     assert stdout == " example com\n bbc co.uk\nforums bbc co.uk\n"
+
+
+def test_cli_json_output(
+    capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Test CLI with --json option."""
+    monkeypatch.setattr(sys, "argv", ["tldextract", "--json", "www.bbc.co.uk"])
+
+    main()
+
+    stdout, stderr = capsys.readouterr()
+    assert not stderr
+    assert json.loads(stdout) == {
+        "subdomain": "www",
+        "domain": "bbc",
+        "suffix": "co.uk",
+        "fqdn": "www.bbc.co.uk",
+        "registered_domain": "bbc.co.uk",
+    }

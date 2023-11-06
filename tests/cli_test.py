@@ -81,5 +81,8 @@ def test_cli_json_output(
         "domain": "bbc",
         "suffix": "co.uk",
         "fqdn": "www.bbc.co.uk",
+        "ipv4": "",
+        "ipv6": "",
+        "is_private": False,
         "registered_domain": "bbc.co.uk",
     }

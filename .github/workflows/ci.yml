@@ -3,6 +3,7 @@ on: [push, pull_request]
 jobs:
   test-and-coverage:
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
         python-version:

@@ -2,12 +2,13 @@
 
 import os
 import tempfile
+from pathlib import Path
 
 import tldextract
 from tldextract.tldextract import ExtractResult
 
-FAKE_SUFFIX_LIST_URL = "file://" + os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "fixtures/fake_suffix_list_fixture.dat"
+FAKE_SUFFIX_LIST_URL = os.path.join(
+Path(os.path.dirname(os.path.abspath(__file__))).as_uri(), "fixtures", "fake_suffix_list_fixture.dat"
 )
 EXTRA_SUFFIXES = ["foo1", "bar1", "baz1"]
 

@@ -44,10 +44,22 @@ def test_cache_cleared_by_other_process(
     extract("google.com")
     orig_unlink = os.unlink
 
+    def is_relative_to(path, other_path):
+        """Return True if path is relative to other_path or False.
+
+        Taken from standard library (Python 3.9+ required).
+        Reference: https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.is_relative_to
+        """
+        try:
+            path.relative_to(other_path)
+            return True
+        except ValueError:
+            return False
+
     def evil_unlink(filename: str | Path) -> None:
         """Simulate someone deletes the file right before we try to."""
         if (isinstance(filename, str) and filename.startswith(cache_dir)) or (
-            isinstance(filename, Path) and filename.is_relative_to(cache_dir)
+            isinstance(filename, Path) and is_relative_to(filename, cache_dir)
         ):
             orig_unlink(filename)
         orig_unlink(filename)

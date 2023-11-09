@@ -1,7 +1,6 @@
 """Test the caching functionality."""
 from __future__ import annotations
 
-import os.path
 import sys
 import types
 from collections.abc import Hashable

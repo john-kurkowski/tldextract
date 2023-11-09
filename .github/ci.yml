@@ -1,0 +1,35 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test-and-coverage:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        python-version:
+          [
+            ["3.8", "py38"],
+            ["3.9", "py39"],
+            ["3.10", "py310"],
+            ["3.11", "py311"],
+            ["3.12", "py312"],
+            ["pypy3.8", "pypy3"],
+            ["3.10", "codestyle"],
+            ["3.10", "lint"],
+            ["3.10", "typecheck"],
+          ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version[0] }}
+      - name: Install Python requirements
+        run: |
+          pip install --upgrade pip
+          pip install --upgrade --editable '.[testing]'
+      - name: Test
+        run: tox
+        env:
+          TOXENV: ${{ matrix.python-version[1] }}

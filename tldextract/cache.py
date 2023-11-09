@@ -7,9 +7,9 @@ import json
 import logging
 import os
 import os.path
-from pathlib import Path
 import sys
 from collections.abc import Callable, Hashable, Iterable
+from pathlib import Path
 from typing import (
     TypeVar,
     cast,
@@ -83,9 +83,9 @@ def get_cache_dir() -> str:
             xdg_cache_home = str(Path(user_home, ".cache"))
 
     if xdg_cache_home is not None:
-        return str(Path(
-            xdg_cache_home, "python-tldextract", get_pkg_unique_identifier()
-        ))
+        return str(
+            Path(xdg_cache_home, "python-tldextract", get_pkg_unique_identifier())
+        )
 
     # fallback to trying to use package directory itself
     return str(Path(os.path.dirname(__file__), ".suffix_cache"))

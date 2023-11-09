@@ -1,7 +1,8 @@
 """tldextract CLI."""
 
-
 import argparse
+import dataclasses
+import json
 import logging
 import os.path
 import pathlib
@@ -21,6 +22,13 @@ def main() -> None:
 
     parser.add_argument(
         "--version", action="version", version="%(prog)s " + __version__
+    )
+    parser.add_argument(
+        "-j",
+        "--json",
+        default=False,
+        action="store_true",
+        help="output in json format",
     )
     parser.add_argument(
         "input", metavar="fqdn|url", type=str, nargs="*", help="fqdn or url"
@@ -89,4 +97,15 @@ def main() -> None:
 
     for i in args.input:
         ext = tld_extract(i)
-        print(f"{ext.subdomain} {ext.domain} {ext.suffix}")
+        if args.json:
+            properties = ("fqdn", "ipv4", "ipv6", "registered_domain")
+            print(
+                json.dumps(
+                    {
+                        **dataclasses.asdict(ext),
+                        **{prop: getattr(ext, prop) for prop in properties},
+                    }
+                )
+            )
+        else:
+            print(f"{ext.subdomain} {ext.domain} {ext.suffix}")

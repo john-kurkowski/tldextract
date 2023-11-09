@@ -3,6 +3,17 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 5.1.0 (2023-11-05)
+
+* Features
+    * Allow passing in `requests.Session` ([#311](https://github.com/john-kurkowski/tldextract/issues/311))
+    * Add "-j, --json" option to support output in json format ([#313](https://github.com/john-kurkowski/tldextract/issues/313))
+* Docs
+    * Improve clarity of absolute path ([#312](https://github.com/john-kurkowski/tldextract/issues/312))
+* Misc.
+    * Extract all testing deps from tox.ini to pyproject.toml extras ([#310](https://github.com/john-kurkowski/tldextract/issues/310))
+    * Work around responses type union error, in tests
+
 ## 5.0.1 (2023-10-17)
 
 * Bugfixes

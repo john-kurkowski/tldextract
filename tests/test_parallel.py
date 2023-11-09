@@ -42,9 +42,11 @@ def test_cache_cleared_by_other_process(
     extract("google.com")
     orig_unlink = os.unlink
 
-    def evil_unlink(filename: str) -> None:
+    def evil_unlink(filename: str | Path) -> None:
         """Simulate someone deletes the file right before we try to."""
-        if filename.startswith(cache_dir):
+        if (isinstance(filename, str) and filename.startswith(cache_dir)) or (
+            isinstance(filename, Path) and filename.is_relative_to(cache_dir)
+        ):
             orig_unlink(filename)
         orig_unlink(filename)
 

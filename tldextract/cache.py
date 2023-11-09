@@ -87,7 +87,7 @@ def get_cache_dir() -> str:
         )
 
     # fallback to trying to use package directory itself
-    return os.path.join(os.path.dirname(__file__), ".suffix_cache/")
+    return os.path.join(os.path.dirname(__file__), ".suffix_cache")
 
 
 class DiskCache:

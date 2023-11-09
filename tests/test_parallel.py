@@ -1,7 +1,6 @@
 """Test ability to run in parallel with shared cache."""
 
 import os
-import os.path
 from multiprocessing import Pool
 from pathlib import Path
 

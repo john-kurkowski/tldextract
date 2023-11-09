@@ -8,7 +8,11 @@ import tldextract
 from tldextract.tldextract import ExtractResult
 
 FAKE_SUFFIX_LIST_URL = os.path.join(
-Path(os.path.dirname(os.path.abspath(__file__))).as_uri(), "fixtures", "fake_suffix_list_fixture.dat"
+    Path(
+        os.path.dirname(os.path.abspath(__file__)),
+        "fixtures",
+        "fake_suffix_list_fixture.dat",
+    ).as_uri(),
 )
 EXTRA_SUFFIXES = ["foo1", "bar1", "baz1"]
 

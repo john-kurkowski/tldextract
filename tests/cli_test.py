@@ -34,7 +34,7 @@ def test_cli_posargs(
     monkeypatch.setattr(
         sys, "argv", ["tldextract", "example.com", "bbc.co.uk", "forums.bbc.co.uk"]
     )
-    capsys.readouterr()
+
     main()
 
     stdout, stderr = capsys.readouterr()
@@ -58,7 +58,7 @@ def test_cli_namedargs(
             "forums.bbc.co.uk",
         ],
     )
-    capsys.readouterr()
+
     main()
 
     stdout, stderr = capsys.readouterr()
@@ -71,7 +71,7 @@ def test_cli_json_output(
 ) -> None:
     """Test CLI with --json option."""
     monkeypatch.setattr(sys, "argv", ["tldextract", "--json", "www.bbc.co.uk"])
-    capsys.readouterr()
+
     main()
 
     stdout, stderr = capsys.readouterr()

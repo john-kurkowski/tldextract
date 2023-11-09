@@ -13,9 +13,9 @@ jobs:
             ["3.11", "py311"],
             ["3.12", "py312"],
             ["pypy3.8", "pypy3"],
-            ["3.10", "codestyle"],
-            ["3.10", "lint"],
-            ["3.10", "typecheck"],
+            ["3.8", "codestyle"],
+            ["3.8", "lint"],
+            ["3.8", "typecheck"],
           ]
     runs-on: ${{ matrix.os }}
     steps:

@@ -44,7 +44,7 @@ def test_cache_cleared_by_other_process(
     extract("google.com")
     orig_unlink = os.unlink
 
-    def is_relative_to(path, other_path):
+    def is_relative_to(path: Path, other_path: str | Path) -> bool:
         """Return True if path is relative to other_path or False.
 
         Taken from standard library (Python 3.9+ required).

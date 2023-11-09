@@ -1,6 +1,7 @@
 """tldextract integration tests."""
 
 import json
+import logging
 import sys
 
 import pytest
@@ -34,7 +35,7 @@ def test_cli_posargs(
     monkeypatch.setattr(
         sys, "argv", ["tldextract", "example.com", "bbc.co.uk", "forums.bbc.co.uk"]
     )
-
+    logging.getLogger("requests").setLevel(logging.WARNING)
     main()
 
     stdout, stderr = capsys.readouterr()

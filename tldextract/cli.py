@@ -5,8 +5,8 @@ import dataclasses
 import json
 import logging
 import os.path
-import pathlib
 import sys
+from pathlib import Path
 
 from ._version import version as __version__
 from .tldextract import TLDExtract
@@ -80,7 +80,7 @@ def main() -> None:
         suffix_list_urls = []
         for source in args.suffix_list_url:
             if os.path.isfile(source):
-                as_path_uri = pathlib.Path(os.path.abspath(source)).as_uri()
+                as_path_uri = Path(os.path.abspath(source)).as_uri()
                 suffix_list_urls.append(as_path_uri)
             else:
                 suffix_list_urls.append(source)

@@ -6,9 +6,9 @@ import hashlib
 import json
 import logging
 import os
-import os.path
 import sys
 from collections.abc import Callable, Hashable, Iterable
+from pathlib import Path
 from typing import (
     TypeVar,
     cast,
@@ -79,15 +79,15 @@ def get_cache_dir() -> str:
     if xdg_cache_home is None:
         user_home = os.getenv("HOME", None)
         if user_home:
-            xdg_cache_home = os.path.join(user_home, ".cache")
+            xdg_cache_home = str(Path(user_home, ".cache"))
 
     if xdg_cache_home is not None:
-        return os.path.join(
-            xdg_cache_home, "python-tldextract", get_pkg_unique_identifier()
+        return str(
+            Path(xdg_cache_home, "python-tldextract", get_pkg_unique_identifier())
         )
 
     # fallback to trying to use package directory itself
-    return os.path.join(os.path.dirname(__file__), ".suffix_cache")
+    return str(Path(os.path.dirname(__file__), ".suffix_cache"))
 
 
 class DiskCache:
@@ -153,7 +153,7 @@ class DiskCache:
                     self.file_ext + ".lock"
                 ):
                     try:
-                        os.unlink(os.path.join(root, filename))
+                        os.unlink(str(Path(root, filename)))
                     except FileNotFoundError:
                         pass
                     except OSError as exc:
@@ -165,10 +165,10 @@ class DiskCache:
     def _key_to_cachefile_path(
         self, namespace: str, key: str | dict[str, Hashable]
     ) -> str:
-        namespace_path = os.path.join(self.cache_dir, namespace)
+        namespace_path = str(Path(self.cache_dir, namespace))
         hashed_key = _make_cache_key(key)
 
-        cache_path = os.path.join(namespace_path, hashed_key + self.file_ext)
+        cache_path = str(Path(namespace_path, hashed_key + self.file_ext))
 
         return cache_path
 

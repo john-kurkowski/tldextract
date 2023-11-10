@@ -18,6 +18,19 @@ jobs:
             ["3.8", "lint"],
             ["3.8", "typecheck"],
           ]
+        exclude:
+          - os: "macos-latest"
+            python-version: ["3.8", "codestyle"]
+          - os: "macos-latest"
+            python-version: ["3.8", "lint"]
+          - os: "macos-latest"
+            python-version: ["3.8", "typecheck"]
+          - os: "windows-latest"
+            python-version: ["3.8", "codestyle"]
+          - os: "windows-latest"
+            python-version: ["3.8", "lint"]
+          - os: "windows-latest"
+            python-version: ["3.8", "typecheck"]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repository

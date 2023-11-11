@@ -34,9 +34,9 @@ readme = "README.md"
 
 dependencies = [
     "idna",
-    "requests>=2.1.0",
-    "requests-file>=1.4",
-    "filelock>=3.0.8",
+    "requests>=2.31.0",
+    "requests-file>=1.5",
+    "filelock>=3.13.1",
 ]
 
 [project.optional-dependencies]

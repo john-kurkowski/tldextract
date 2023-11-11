@@ -1,4 +1,4 @@
-# tldextract [![PyPI version](https://badge.fury.io/py/tldextract.svg)](https://badge.fury.io/py/tldextract) [![Build Status](https://travis-ci.com/john-kurkowski/tldextract.svg?branch=master)](https://app.travis-ci.com/github/john-kurkowski/tldextract)
+# tldextract [![PyPI version](https://badge.fury.io/py/tldextract.svg)](https://badge.fury.io/py/tldextract) [![Build Status](https://github.com/john-kurkowski/tldextract/actions/workflows/ci.yml/badge.svg)](https://github.com/john-kurkowski/tldextract/actions/workflows/ci.yml)
 
 `tldextract` accurately separates a URL's subdomain, domain, and public suffix,
 using [the Public Suffix List (PSL)](https://publicsuffix.org).

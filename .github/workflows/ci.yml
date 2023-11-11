@@ -14,14 +14,14 @@ jobs:
             ["3.11", "py311"],
             ["3.12", "py312"],
             ["pypy3.8", "pypy38"],
-            ["3.8", "codestyle"],
-            ["3.8", "lint"],
-            ["3.8", "typecheck"],
           ]
-        non-ubuntu-format:
-          - ${{ (matrix.os != 'ubuntu-latest') && !startsWith(matrix.python-version[1], 'py') }}
-        exclude:
-          - non-ubuntu-format: true
+        include:
+          - os: ubuntu-latest
+            python-version: ["3.8", "codestyle"]
+          - os: ubuntu-latest
+            python-version: ["3.8", "lint"]
+          - os: ubuntu-latest
+            python-version: ["3.8", "typecheck"]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repository

@@ -1,7 +1,8 @@
 """Test ability to run in parallel with shared cache."""
 
+from __future__ import annotations
+
 import os
-import os.path
 from multiprocessing import Pool
 from pathlib import Path
 
@@ -43,9 +44,23 @@ def test_cache_cleared_by_other_process(
     extract("google.com")
     orig_unlink = os.unlink
 
-    def evil_unlink(filename: str) -> None:
+    def is_relative_to(path: Path, other_path: str | Path) -> bool:
+        """Return True if path is relative to other_path or False.
+
+        Taken from the Python 3.9 standard library.
+        Reference: https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.is_relative_to
+        """
+        try:
+            path.relative_to(other_path)
+            return True
+        except ValueError:
+            return False
+
+    def evil_unlink(filename: str | Path) -> None:
         """Simulate someone deletes the file right before we try to."""
-        if filename.startswith(cache_dir):
+        if (isinstance(filename, str) and filename.startswith(cache_dir)) or (
+            isinstance(filename, Path) and is_relative_to(filename, cache_dir)
+        ):
             orig_unlink(filename)
         orig_unlink(filename)
 

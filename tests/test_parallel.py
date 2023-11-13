@@ -47,7 +47,7 @@ def test_cache_cleared_by_other_process(
     def is_relative_to(path: Path, other_path: str | Path) -> bool:
         """Return True if path is relative to other_path or False.
 
-        Taken from standard library (Python 3.9+ required).
+        Taken from the Python 3.9 standard library.
         Reference: https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.is_relative_to
         """
         try:

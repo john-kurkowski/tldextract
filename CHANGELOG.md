@@ -3,6 +3,12 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 5.1.1 (2023-11-16)
+
+* Bugfixes
+  * Fix path join on Windows ([#314](https://github.com/john-kurkowski/tldextract/issues/314))
+  * Support Python 3.12
+
 ## 5.1.0 (2023-11-05)
 
 * Features

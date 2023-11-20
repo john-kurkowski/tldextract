@@ -44,6 +44,14 @@ def verify_build() -> None:
     except subprocess.CalledProcessError as error:
         print(f"Failed to verify build: {error}")
         sys.exit(1)
+    try:
+        subprocess.run(["parallel", "-j", "1", "-t", "tar", "-tvf", ":::", "/dist*"], check=True)
+        # TODO: Remove this print statement after testing
+        print("Build verified successfully.")
+    except subprocess.CalledProcessError as error:
+        print(f"Failed to verify build: {error}")
+        sys.exit(1)
+
 
 def get_github_client() -> Github:
     """Get a Github client."""

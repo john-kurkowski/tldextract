@@ -39,15 +39,29 @@ def verify_build() -> None:
     """Verify the build."""
     try:
         subprocess.run(["ls", "-l", "dist/"], check=True)
-        # TODO: Remove this print statement after testing
-        print("Build verified successfully.")
+        confirmation = input("Does the build look correct? (y/n): ")
+        if confirmation == "y":
+            # TODO: Remove this print statement after testing
+            print("Build verified successfully.")
+            upload_build_to_pypi()
+            push_git_tags()
+        else:
+            print("Build not uploaded.")
+            sys.exit(1)
     except subprocess.CalledProcessError as error:
         print(f"Failed to verify build: {error}")
         sys.exit(1)
     try:
         subprocess.run(["parallel", "-j", "1", "-t", "tar", "-tvf", ":::", "/dist*"], check=True)
-        # TODO: Remove this print statement after testing
-        print("Build verified successfully.")
+        confirmation = input("Does the build look correct? (y/n): ")
+        if confirmation == "y":
+            # TODO: Remove this print statement after testing
+            print("Build verified successfully.")
+            upload_build_to_pypi()
+            push_git_tags()
+        else:
+            print("Build not uploaded.")
+            sys.exit(1)
     except subprocess.CalledProcessError as error:
         print(f"Failed to verify build: {error}")
         sys.exit(1)

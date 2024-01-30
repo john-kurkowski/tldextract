@@ -1,25 +1,23 @@
 import subprocess
 import sys
-from github import Github
+# from github import Github
 from getpass import getpass
 
 def add_git_tag_for_version(version: str) -> None:
     """Add a git tag for the given version."""
     try:
         subprocess.run(["git", "tag", "-a", version, "-m", version], check=True)
-        # TODO: Remove this print statement after testing
         print(f"Version {version} tag added successfully.")
     except subprocess.CalledProcessError as error:
         print(f"Failed to add version tag: {error}")
         sys.exit(1)
 
 
-def clean_repo() -> None:
-    """Clean the repo."""
+def remove_previous_dist() -> None:
+    """Check for dist folder, and if it exists, remove it."""
     try:
-        subprocess.run(["git", "clean", "-fdx"], check=True)
-        # TODO: Remove this print statement after testing
-        print("Repo cleaned successfully.")
+        subprocess.run(["rm", "-rf", "dist/"], check=True)
+        print("Dist folder sucessfully removed.")
     except subprocess.CalledProcessError as error:
         print(f"Failed to clean repo: {error}")
         sys.exit(1)
@@ -29,11 +27,11 @@ def create_build() -> None:
     """Create a build."""
     try:
         subprocess.run(["python", "-m", "build"], check=True)
-        # TODO: Remove this print statement after testing
         print("Build created successfully.")
     except subprocess.CalledProcessError as error:
         print(f"Failed to create build: {error}")
         sys.exit(1)
+
 
 def verify_build() -> None:
     """Verify the build."""
@@ -41,7 +39,6 @@ def verify_build() -> None:
         subprocess.run(["ls", "-l", "dist/"], check=True)
         confirmation = input("Does the build look correct? (y/n): ")
         if confirmation == "y":
-            # TODO: Remove this print statement after testing
             print("Build verified successfully.")
             upload_build_to_pypi()
             push_git_tags()
@@ -55,7 +52,6 @@ def verify_build() -> None:
         subprocess.run(["parallel", "-j", "1", "-t", "tar", "-tvf", ":::", "/dist*"], check=True)
         confirmation = input("Does the build look correct? (y/n): ")
         if confirmation == "y":
-            # TODO: Remove this print statement after testing
             print("Build verified successfully.")
             upload_build_to_pypi()
             push_git_tags()
@@ -67,17 +63,16 @@ def verify_build() -> None:
         sys.exit(1)
 
 
-def get_github_client() -> Github:
+# def get_github_client() -> Github:
     """Get a Github client."""
     
 
 
 def upload_build_to_pypi() -> None:
     """Upload the build to PyPI."""
-    # TODO: This needs to be updated to use the token and password from env variables.
     try:
-        subprocess.run(["twine", "upload", "dist/*"], check=True)
-        # TODO: Remove this print statement after testing
+        # Note current version uses the testpypi repository
+        subprocess.run(["twine", "upload", "--repository", "testpypi", "dist/*"], check=True)
         print("Build uploaded successfully.")
     except subprocess.CalledProcessError as error:
         print(f"Failed to upload build: {error}")
@@ -87,7 +82,6 @@ def push_git_tags() -> None:
     """Push all git tags to the remote."""
     try:
         subprocess.run(["git", "push", "--tags", "origin", "master"], check=True)
-        # TODO: Remove this print statement after testing
         print("Tags pushed successfully.")
     except subprocess.CalledProcessError as error:
         print(f"Failed to push tags: {error}")
@@ -103,7 +97,11 @@ version_number = input("Enter the version number: ")
 
 def main() -> None:
     """Run the main program."""
+    print("Starting the upload process...")
     add_git_tag_for_version(version_number)
-    clean_repo()
+    remove_previous_dist()
     create_build()
     verify_build()
+
+if __name__ == "__main__":
+    main()

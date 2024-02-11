@@ -17,7 +17,6 @@ def remove_previous_dist() -> None:
     """Check for dist folder, and if it exists, remove it."""
     try:
         subprocess.run(["rm", "-rf", "dist/"], check=True)
-        print("Dist folder sucessfully removed.")
     except subprocess.CalledProcessError as error:
         print(f"Failed to clean repo: {error}")
         sys.exit(1)
@@ -49,7 +48,7 @@ def verify_build() -> None:
         print(f"Failed to verify build: {error}")
         sys.exit(1)
     try:
-        subprocess.run(["parallel", "-j", "1", "-t", "tar", "-tvf", ":::", "/dist*"], check=True)
+        subprocess.run(["parallel", "-j", "1", "-t", "tar", "-tvf", ":::", "dist*"], check=True)
         confirmation = input("Does the build look correct? (y/n): ")
         if confirmation == "y":
             print("Build verified successfully.")

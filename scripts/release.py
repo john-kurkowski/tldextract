@@ -3,6 +3,9 @@ import sys
 import json
 import re
 from getpass import getpass
+import os
+
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 
 
 def add_git_tag_for_version(version: str) -> None:
@@ -50,7 +53,9 @@ def verify_build() -> None:
         print(f"Failed to verify build: {error}")
         sys.exit(1)
     try:
-        subprocess.run(["parallel", "-j", "1", "-t", "tar", "-tvf", ":::", "dist*"], check=True)
+        subprocess.run(
+            ["parallel", "-j", "1", "-t", "tar", "-tvf", ":::", "dist*"], check=True
+        )
         confirmation = input("Does the build look correct? (y/n): ")
         if confirmation == "y":
             print("Build verified successfully.")
@@ -80,10 +85,10 @@ def generate_github_release_notes_body(version) -> str:
             "X-GitHub-Api-Version: 2022-11-28",
             "https://api.github.com/repos/ekcorso/releasetestrepo2/releases/generate-notes",
             "-d",
-            '{"tag_name":"${version_number}"}',
+            f'{{"tag_name":"{version_number}"}}',
         ]
         response_json = subprocess.run(command, check=True, capture_output=True)
-        parsed_json = json.loads(response_json)
+        parsed_json = json.loads(response_json.stdout)
         body = parsed_json["body"]
         return body
     except subprocess.CalledProcessError as error:
@@ -93,7 +98,7 @@ def generate_github_release_notes_body(version) -> str:
 
 def get_release_notes_url(body) -> str:
     """Parse the release notes content to get the changelog URL."""
-    url_pattern = re.compile(r"\*\*Full Changelog\*\*: (.*?)\n")
+    url_pattern = re.compile(r"\*\*Full Changelog\*\*: (.*)$")
     match = url_pattern.search(body)
     if match:
         return match.group(1)
@@ -106,12 +111,12 @@ def get_release_notes_url(body) -> str:
 def get_changelog_release_notes() -> str:
     """Get the changelog release notes."""
     changelog_text = None
-    with open("../CHANGELOG.md", "r", encoding="utf-8") as file:
+    with open("CHANGELOG.md", "r", encoding="utf-8") as file:
         changelog_text = file.read()
-    pattern = re.compile(rf"## {version_number}(?:\n(.*?))?##", re.DOTALL)
+    pattern = re.compile(rf"## {re.escape(version_number)}[^\n]*(.*?)##", re.DOTALL)
     match = pattern.search(changelog_text)
     if match:
-        return match.group(1)
+        return str(match.group(1)).strip()
     else:
         print("Failed to parse changelog release notes.")
         return ""
@@ -133,11 +138,14 @@ def upload_build_to_pypi() -> None:
     """Upload the build to PyPI."""
     try:
         # Note current version uses the testpypi repository
-        subprocess.run(["twine", "upload", "--repository", "testpypi", "dist/*"], check=True)
+        subprocess.run(
+            ["twine", "upload", "--repository", "testpypi", "dist/*"], check=True
+        )
         print("Build uploaded successfully.")
     except subprocess.CalledProcessError as error:
         print(f"Failed to upload build: {error}")
         sys.exit(1)
+
 
 def push_git_tags() -> None:
     """Push all git tags to the remote."""

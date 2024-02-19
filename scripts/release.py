@@ -133,6 +133,32 @@ def create_release_notes_body() -> str:
     return full_release_notes
 
 
+def create_github_release_draft() -> None:
+    """Create a release on GitHub."""
+    release_body = create_release_notes_body()
+    release_body = release_body.replace("\n", "\\n")
+    try:
+        command = [
+            "curl",
+            "-L",
+            "-X",
+            "POST",
+            "-H",
+            "Accept: application/vnd.github+json",
+            "-H",
+            f"Authorization: Bearer {GITHUB_TOKEN}",
+            "-H",
+            "X-GitHub-Api-Version: 2022-11-28",
+            "https://api.github.com/repos/ekcorso/releasetestrepo2/releases",
+            "-d",
+            f'{{"tag_name":"{version_number}","name":"{version_number}","body":"{release_body}","draft":true,"prerelease":false}}',
+        ]
+        response_json = subprocess.run(command, check=True, capture_output=True)
+        parsed_json = json.loads(response_json.stdout)
+        print("Release created successfully: " + parsed_json["html_url"])
+    except subprocess.CalledProcessError as error:
+        print(f"Failed to create release: {error}")
+
 
 def upload_build_to_pypi() -> None:
     """Upload the build to PyPI."""
@@ -168,6 +194,9 @@ def main() -> None:
     remove_previous_dist()
     create_build()
     verify_build()
+    create_github_release_draft()
+
+    print("Upload process complete.")
 
 
 if __name__ == "__main__":

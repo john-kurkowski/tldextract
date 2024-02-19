@@ -40,29 +40,24 @@ def create_build() -> None:
 def verify_build() -> None:
     """Verify the build."""
     try:
+        if len(os.listdir("dist")) != 2:
+            print("WARNING: dist folder contains incorrect number of files.")
+        print("Contents of dist folder:")
         subprocess.run(["ls", "-l", "dist/"], check=True)
-        confirmation = input("Does the build look correct? (y/n): ")
-        if confirmation == "y":
-            print("Build verified successfully.")
-            upload_build_to_pypi()
-            push_git_tags()
-        else:
-            print("Build not uploaded.")
-            sys.exit(1)
-    except subprocess.CalledProcessError as error:
-        print(f"Failed to verify build: {error}")
-        sys.exit(1)
-    try:
-        subprocess.run(
-            ["parallel", "-j", "1", "-t", "tar", "-tvf", ":::", "dist*"], check=True
-        )
-        confirmation = input("Does the build look correct? (y/n): ")
-        if confirmation == "y":
-            print("Build verified successfully.")
-            upload_build_to_pypi()
-            push_git_tags()
-        else:
-            print("Build not uploaded.")
+        try:
+            print("Contents of tar files in dist folder:")
+            for dir in os.listdir("dist"):
+                subprocess.run(["tar", "tvf", "dist/" + dir], check=True)
+            confirmation = input("Does the build look correct? (y/n): ")
+            if confirmation == "y":
+                print("Build verified successfully.")
+                upload_build_to_pypi()
+                push_git_tags()
+            else:
+                print("Could not verify. Build was not uploaded.")
+                sys.exit(1)
+        except subprocess.CalledProcessError as error:
+            print(f"Failed to verify build: {error}")
             sys.exit(1)
     except subprocess.CalledProcessError as error:
         print(f"Failed to verify build: {error}")

@@ -174,8 +174,7 @@ def push_git_tags() -> None:
         subprocess.run(["git", "push", "--tags", "origin", "master"], check=True)
         print("Tags pushed successfully.")
     except subprocess.CalledProcessError as error:
-        print(f"Failed to push tags: {error}")
-        sys.exit(1)
+        print(f"Failed to push tag(s) to Github: {error}")
 
 
 version_number = input("Enter the version number: ")

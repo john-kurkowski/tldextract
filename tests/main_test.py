@@ -17,7 +17,7 @@ import responses
 import tldextract
 import tldextract.suffix_list
 from tldextract.cache import DiskCache
-from tldextract.remote import lenient_netloc, looks_like_ip
+from tldextract.remote import lenient_netloc, looks_like_ip, looks_like_ipv6
 from tldextract.suffix_list import SuffixListNotFound
 from tldextract.tldextract import ExtractResult
 
@@ -159,6 +159,16 @@ def test_looks_like_ip() -> None:
     assert looks_like_ip("a.1.1.1") is False
     assert looks_like_ip("1.1.1.1\n") is False
     assert looks_like_ip("256.256.256.256") is False
+
+
+def test_looks_like_ipv6() -> None:
+    """Test function to check if a string looks like an IPv6 address."""
+    assert looks_like_ipv6("::") is True
+    assert looks_like_ipv6("aBcD:ef01:2345:6789:aBcD:ef01:aaaa:2288") is True
+    assert looks_like_ipv6("aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1") is True
+    assert looks_like_ipv6("ZBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1") is False
+    assert looks_like_ipv6("aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.01") is False
+    assert looks_like_ipv6("aBcD:ef01:2345:6789:aBcD:") is False
 
 
 def test_similar_to_ip() -> None:

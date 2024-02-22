@@ -8,7 +8,7 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
         language:
           [
-            {python-version: "3.8", toxenv: "py38"},
+            {python-version: "3.8.1", toxenv: "py38"},
             {python-version: "3.9", toxenv: "py39"},
             {python-version: "3.10", toxenv: "py310"},
             {python-version: "3.11", toxenv: "py311"},

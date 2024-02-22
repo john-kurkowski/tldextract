@@ -53,7 +53,7 @@ def _schemeless_url(url: str) -> str:
 
 
 def looks_like_ip(maybe_ip: str) -> bool:
-    """Check whether the given str looks like an IP address."""
+    """Check whether the given str looks like an IPv4 address."""
     if not maybe_ip[0].isdigit():
         return False
 

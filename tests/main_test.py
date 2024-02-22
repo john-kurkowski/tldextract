@@ -17,7 +17,7 @@ import responses
 import tldextract
 import tldextract.suffix_list
 from tldextract.cache import DiskCache
-from tldextract.remote import inet_pton, lenient_netloc, looks_like_ip
+from tldextract.remote import lenient_netloc, looks_like_ip
 from tldextract.suffix_list import SuffixListNotFound
 from tldextract.tldextract import ExtractResult
 
@@ -152,17 +152,7 @@ def test_lenient_netloc() -> None:
     )
 
 
-@pytest.mark.skipif(not inet_pton, reason="inet_pton unavailable")
-def test_looks_like_ip_with_inet_pton() -> None:
-    """Test preferred function to check if a string looks like an IP address."""
-    assert looks_like_ip("1.1.1.1", inet_pton) is True
-    assert looks_like_ip("1.1.1.01", inet_pton) is False
-    assert looks_like_ip("a.1.1.1", inet_pton) is False
-    assert looks_like_ip("1.1.1.1\n", inet_pton) is False
-    assert looks_like_ip("256.256.256.256", inet_pton) is False
-
-
-def test_looks_like_ip_without_inet_pton() -> None:
+def test_looks_like_ip() -> None:
     """Test fallback function to check if a string looks like an IP address."""
     assert looks_like_ip("1.1.1.1", None) is True
     assert looks_like_ip("1.1.1.01", None) is False

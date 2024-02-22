@@ -3,15 +3,9 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Callable
 from ipaddress import AddressValueError, IPv6Address
 from urllib.parse import scheme_chars
 
-inet_pton: Callable[[int, str], bytes] | None
-try:
-    from socket import AF_INET, AF_INET6, inet_pton  # Availability: Unix, Windows.
-except ImportError:
-    inet_pton = None
 
 IP_RE = re.compile(
     r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)"
@@ -59,32 +53,16 @@ def _schemeless_url(url: str) -> str:
     return url[double_slashes_start + 2 :]
 
 
-def looks_like_ip(
-    maybe_ip: str, pton: Callable[[int, str], bytes] | None = inet_pton
-) -> bool:
+def looks_like_ip(maybe_ip: str) -> bool:
     """Check whether the given str looks like an IP address."""
     if not maybe_ip[0].isdigit():
         return False
 
-    if pton is not None:
-        try:
-            pton(AF_INET, maybe_ip)
-            return True
-        except OSError:
-            return False
     return IP_RE.fullmatch(maybe_ip) is not None
 
 
-def looks_like_ipv6(
-    maybe_ip: str, pton: Callable[[int, str], bytes] | None = inet_pton
-) -> bool:
+def looks_like_ipv6(maybe_ip: str) -> bool:
     """Check whether the given str looks like an IPv6 address."""
-    if pton is not None:
-        try:
-            pton(AF_INET6, maybe_ip)
-            return True
-        except OSError:
-            return False
     try:
         IPv6Address(maybe_ip)
     except AddressValueError:

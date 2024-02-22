@@ -85,7 +85,7 @@ strict = true
 addopts = "--doctest-modules"
 
 [tool.ruff]
-select = [
+lint.select = [
   "A",
   "B",
   "C",
@@ -97,9 +97,9 @@ select = [
   "UP",
   "W",
 ]
-ignore = [
+lint.ignore = [
   "E501", # line too long; if Black does its job, not worried about the rare long line
 ]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "pep257"

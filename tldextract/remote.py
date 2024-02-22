@@ -6,7 +6,6 @@ import re
 from ipaddress import AddressValueError, IPv6Address
 from urllib.parse import scheme_chars
 
-
 IP_RE = re.compile(
     r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)"
     r"{3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"

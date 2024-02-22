@@ -150,7 +150,10 @@ def create_github_release_draft() -> None:
         ]
         response_json = subprocess.run(command, check=True, capture_output=True)
         parsed_json = json.loads(response_json.stdout)
-        print("Release created successfully: " + parsed_json["html_url"])
+        if "html_url" in parsed_json:
+            print("Release created successfully: " + parsed_json["html_url"])
+        else:
+            print("There may have been an error creating this release. Visit https://github.com/john-kurkowski/tldextract/releases to confirm release was created.")
     except subprocess.CalledProcessError as error:
         print(f"Failed to create release: {error}")
 

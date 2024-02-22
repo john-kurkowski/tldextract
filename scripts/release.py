@@ -22,6 +22,7 @@ def remove_previous_dist() -> None:
     """Check for dist folder, and if it exists, remove it."""
     try:
         subprocess.run(["rm", "-rf", "dist/"], check=True)
+        print("Previous dist folder removed successfully.")
     except subprocess.CalledProcessError as error:
         print(f"Failed to clean repo: {error}")
         sys.exit(1)
@@ -87,7 +88,7 @@ def generate_github_release_notes_body(version) -> str:
         body = parsed_json["body"]
         return body
     except subprocess.CalledProcessError as error:
-        print(f"Failed to generate release notes: {error}")
+        print(f"Failed to generate release notes from Github: {error}")
         return ""
 
 
@@ -153,7 +154,9 @@ def create_github_release_draft() -> None:
         if "html_url" in parsed_json:
             print("Release created successfully: " + parsed_json["html_url"])
         else:
-            print("There may have been an error creating this release. Visit https://github.com/john-kurkowski/tldextract/releases to confirm release was created.")
+            print(
+                "There may have been an error creating this release. Visit https://github.com/john-kurkowski/tldextract/releases to confirm release was created."
+            )
     except subprocess.CalledProcessError as error:
         print(f"Failed to create release: {error}")
 
@@ -185,7 +188,11 @@ version_number = input("Enter the version number: ")
 
 def main() -> None:
     """Run the main program."""
-    print("Starting the upload process...")
+    print("Starting the release process...")
+    print("Checking for github token  environment variable...")
+    if not GITHUB_TOKEN:
+        print("GITHUB_TOKEN environment variable not set.")
+        sys.exit(1)
 
     add_git_tag_for_version(version_number)
     remove_previous_dist()
@@ -193,7 +200,7 @@ def main() -> None:
     verify_build()
     create_github_release_draft()
 
-    print("Upload process complete.")
+    print("Release process complete.")
 
 
 if __name__ == "__main__":

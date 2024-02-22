@@ -5,7 +5,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [macos-latest, windows-latest, ubuntu-20.04]
         language:
           [
             {python-version: "3.8.7", toxenv: "py38"},
@@ -16,11 +16,11 @@ jobs:
             {python-version: "pypy3.8", toxenv: "pypy38"},
           ]
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             language: {python-version: "3.8", toxenv: "codestyle"}
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             language: {python-version: "3.8", toxenv: "lint"}
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             language: {python-version: "3.8", toxenv: "typecheck"}
     runs-on: ${{ matrix.os }}
     steps:

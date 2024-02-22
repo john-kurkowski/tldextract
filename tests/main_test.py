@@ -154,11 +154,11 @@ def test_lenient_netloc() -> None:
 
 def test_looks_like_ip() -> None:
     """Test fallback function to check if a string looks like an IP address."""
-    assert looks_like_ip("1.1.1.1", None) is True
-    assert looks_like_ip("1.1.1.01", None) is False
-    assert looks_like_ip("a.1.1.1", None) is False
-    assert looks_like_ip("1.1.1.1\n", None) is False
-    assert looks_like_ip("256.256.256.256", None) is False
+    assert looks_like_ip("1.1.1.1") is True
+    assert looks_like_ip("1.1.1.01") is False
+    assert looks_like_ip("a.1.1.1") is False
+    assert looks_like_ip("1.1.1.1\n") is False
+    assert looks_like_ip("256.256.256.256") is False
 
 
 def test_similar_to_ip() -> None:

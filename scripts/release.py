@@ -163,10 +163,14 @@ def create_github_release_draft() -> None:
 
 def upload_build_to_pypi() -> None:
     """Upload the build to PyPI."""
+    target_repository = "pypi"
+    if is_test == "y":
+        target_repository = "testpypi"
     try:
         # Note current version uses the testpypi repository
         subprocess.run(
-            ["twine", "upload", "--repository", "testpypi", "dist/*"], check=True
+            ["twine", "upload", "--repository", f"{target_repository}", "dist/*"],
+            check=True,
         )
         print("Build uploaded successfully.")
     except subprocess.CalledProcessError as error:
@@ -183,6 +187,7 @@ def push_git_tags() -> None:
         print(f"Failed to push tag(s) to Github: {error}")
 
 
+is_test = input("Is this a test release? (y/n): ")
 version_number = input("Enter the version number: ")
 
 

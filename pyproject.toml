@@ -40,6 +40,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+release = [
+    "build",
+    "twine",
+]
 testing = [
     "black",
     "mypy",

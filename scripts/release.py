@@ -6,6 +6,8 @@ from getpass import getpass
 import os
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+is_test = None
+version_number = None
 
 
 def add_git_tag_for_version(version: str) -> None:
@@ -187,17 +189,24 @@ def push_git_tags() -> None:
         print(f"Failed to push tag(s) to Github: {error}")
 
 
-is_test = input("Is this a test release? (y/n): ")
-version_number = input("Enter the version number: ")
-
-
 def main() -> None:
     """Run the main program."""
+    global is_test, version_number
+
     print("Starting the release process...")
-    print("Checking for github token  environment variable...")
+    print("Checking for github token environment variable...")
     if not GITHUB_TOKEN:
         print("GITHUB_TOKEN environment variable not set.")
         sys.exit(1)
+    else:
+        print("GITHUB_TOKEN environment variable is good to go.")
+
+    is_test = input("Is this a test release? (y/n): ")
+    while is_test not in ["y", "n"]:
+        print("Invalid input. Please enter 'y' or 'n'.")
+        is_test = input("Is this a test release? (y/n): ")
+
+    version_number = input("Enter the version number: ")
 
     add_git_tag_for_version(version_number)
     remove_previous_dist()

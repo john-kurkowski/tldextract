@@ -1,6 +1,8 @@
 """Test ability to run in parallel with shared cache."""
+
+from __future__ import annotations
+
 import os
-import os.path
 from multiprocessing import Pool
 from pathlib import Path
 
@@ -19,14 +21,15 @@ def test_multiprocessing_makes_one_request(tmp_path: Path) -> None:
     assert sum(http_request_counts) == 1
 
 
-@responses.activate
 def _run_extractor(cache_dir: Path) -> int:
     """Run the extractor."""
-    responses.add(responses.GET, PUBLIC_SUFFIX_LIST_URLS[0], status=208, body="uk.co")
-    extract = TLDExtract(cache_dir=str(cache_dir))
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as rsps:
+        rsps.add(responses.GET, PUBLIC_SUFFIX_LIST_URLS[0], status=208, body="uk.co")
+        extract = TLDExtract(cache_dir=str(cache_dir))
 
-    extract("bar.uk.com", include_psl_private_domains=True)
-    return len(responses.calls)
+        extract("bar.uk.com", include_psl_private_domains=True)
+        num_calls = len(rsps.calls)
+    return num_calls
 
 
 @responses.activate
@@ -41,9 +44,23 @@ def test_cache_cleared_by_other_process(
     extract("google.com")
     orig_unlink = os.unlink
 
-    def evil_unlink(filename: str) -> None:
+    def is_relative_to(path: Path, other_path: str | Path) -> bool:
+        """Return True if path is relative to other_path or False.
+
+        Taken from the Python 3.9 standard library.
+        Reference: https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.is_relative_to
+        """
+        try:
+            path.relative_to(other_path)
+            return True
+        except ValueError:
+            return False
+
+    def evil_unlink(filename: str | Path) -> None:
         """Simulate someone deletes the file right before we try to."""
-        if filename.startswith(cache_dir):
+        if (isinstance(filename, str) and filename.startswith(cache_dir)) or (
+            isinstance(filename, Path) and is_relative_to(filename, cache_dir)
+        ):
             orig_unlink(filename)
         orig_unlink(filename)
 

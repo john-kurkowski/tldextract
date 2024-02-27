@@ -1,7 +1,7 @@
 """Test the caching functionality."""
+
 from __future__ import annotations
 
-import os.path
 import sys
 import types
 from collections.abc import Hashable
@@ -56,14 +56,14 @@ def test_get_cache_dir(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("HOME", raising=False)
     monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
     monkeypatch.delenv("TLDEXTRACT_CACHE", raising=False)
-    assert get_cache_dir().endswith("tldextract/.suffix_cache/")
+    assert get_cache_dir().endswith(str(Path("tldextract", ".suffix_cache")))
 
     # with home set, but not anything else specified, use XDG_CACHE_HOME default
     monkeypatch.setenv("HOME", "/home/john")
     monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
     monkeypatch.delenv("TLDEXTRACT_CACHE", raising=False)
-    assert get_cache_dir() == os.path.join(
-        "/home/john", ".cache/python-tldextract", pkg_identifier
+    assert get_cache_dir() == str(
+        Path("/home/john", ".cache/python-tldextract", pkg_identifier)
     )
 
     # if XDG_CACHE_HOME is set, use it
@@ -71,8 +71,8 @@ def test_get_cache_dir(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("XDG_CACHE_HOME", "/my/alt/cache")
     monkeypatch.delenv("TLDEXTRACT_CACHE", raising=False)
 
-    assert get_cache_dir() == os.path.join(
-        "/my/alt/cache/python-tldextract", pkg_identifier
+    assert get_cache_dir() == str(
+        Path("/my/alt/cache/python-tldextract", pkg_identifier)
     )
 
     # if TLDEXTRACT_CACHE is set, use it

@@ -165,19 +165,26 @@ def create_github_release_draft() -> None:
 
 def upload_build_to_pypi() -> None:
     """Upload the build to PyPI."""
-    target_repository = "pypi"
-    if is_test == "y":
-        target_repository = "testpypi"
-    try:
-        # Note current version uses the testpypi repository
-        subprocess.run(
-            ["twine", "upload", "--repository", f"{target_repository}", "dist/*"],
-            check=True,
-        )
-        print("Build uploaded successfully.")
-    except subprocess.CalledProcessError as error:
-        print(f"Failed to upload build: {error}")
-        sys.exit(1)
+    if is_test == "n":
+        try:
+            subprocess.run(
+                ["twine", "upload", "dist/*"],
+                check=True,
+            )
+            print("Build uploaded successfully.")
+        except subprocess.CalledProcessError as error:
+            print(f"Failed to upload build: {error}")
+            sys.exit(1)
+    else:
+        try:
+            subprocess.run(
+                ["twine", "upload", "--repository", "testpypi", "dist/*"],
+                check=True,
+            )
+            print("Build uploaded successfully.")
+        except subprocess.CalledProcessError as error:
+            print(f"Failed to upload build: {error}")
+            sys.exit(1)
 
 
 def push_git_tags() -> None:

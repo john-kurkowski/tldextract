@@ -84,7 +84,7 @@ strict = true
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
 
-[tool.ruff]
+[tool.ruff.lint]
 select = [
   "A",
   "B",
@@ -101,5 +101,5 @@ ignore = [
   "E501", # line too long; if Black does its job, not worried about the rare long line
 ]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "pep257"

@@ -119,7 +119,8 @@ def get_release_notes_url(body) -> str:
 def get_changelog_release_notes() -> str:
     """Get the changelog release notes."""
     changelog_text = None
-    with open("CHANGELOG.md", "r", encoding="utf-8") as file:
+    with open("CHANGELOG.md") as file:
+
         changelog_text = file.read()
     pattern = re.compile(rf"## {re.escape(version_number)}[^\n]*(.*?)##", re.DOTALL)
     match = pattern.search(changelog_text)

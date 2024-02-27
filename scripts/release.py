@@ -1,3 +1,14 @@
+"""
+This script automates the release process for a Python package. It will:
+- Add a git tag for the given version.
+- Remove the previous dist folder.
+- Create a build.
+- Ask the user to verify the build.
+- Upload the build to PyPI.
+- Push all git tags to the remote.
+- Create a draft release on GitHub using the version notes in CHANGELOG.md.
+"""
+
 import subprocess
 import sys
 import json

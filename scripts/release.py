@@ -13,7 +13,6 @@ import subprocess
 import sys
 import json
 import re
-from getpass import getpass
 import os
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")

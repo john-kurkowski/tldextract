@@ -14,6 +14,8 @@ jobs:
             {python-version: "3.11", toxenv: "py311"},
             {python-version: "3.12", toxenv: "py312"},
             {python-version: "pypy3.8", toxenv: "pypy38"},
+            {python-version: "pypy3.9", toxenv: "pypy39"},
+            {python-version: "pypy3.10", toxenv: "pypy310"},
           ]
         include:
           - os: ubuntu-20.04
@@ -27,7 +29,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.language.python-version }}
       - name: Install Python requirements

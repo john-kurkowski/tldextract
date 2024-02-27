@@ -84,8 +84,8 @@ strict = true
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
 
-[tool.ruff]
-lint.select = [
+[tool.ruff.lint]
+select = [
   "A",
   "B",
   "C",
@@ -97,7 +97,7 @@ lint.select = [
   "UP",
   "W",
 ]
-lint.ignore = [
+ignore = [
   "E501", # line too long; if Black does its job, not worried about the rare long line
 ]
 

@@ -59,8 +59,8 @@ def verify_build() -> None:
         subprocess.run(["ls", "-l", "dist/"], check=True)
         try:
             print("Contents of tar files in dist folder:")
-            for dir in os.listdir("dist"):
-                subprocess.run(["tar", "tvf", "dist/" + dir], check=True)
+            for directory in os.listdir("dist"):
+                subprocess.run(["tar", "tvf", "dist/" + directory], check=True)
             confirmation = input("Does the build look correct? (y/n): ")
             if confirmation == "y":
                 print("Build verified successfully.")

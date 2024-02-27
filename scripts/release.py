@@ -9,11 +9,11 @@ This script automates the release process for a Python package. It will:
 - Create a draft release on GitHub using the version notes in CHANGELOG.md.
 """
 
+import json
+import os
+import re
 import subprocess
 import sys
-import json
-import re
-import os
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 is_test = None

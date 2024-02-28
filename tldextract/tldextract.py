@@ -75,8 +75,7 @@ class ExtractResult:
 
     @property
     def registered_domain(self) -> str:
-        """
-        Joins the domain and suffix fields with a dot, if they're both set.
+        """Joins the domain and suffix fields with a dot, if they're both set.
 
         >>> extract('http://forums.bbc.co.uk').registered_domain
         'bbc.co.uk'
@@ -89,8 +88,7 @@ class ExtractResult:
 
     @property
     def fqdn(self) -> str:
-        """
-        Returns a Fully Qualified Domain Name, if there is a proper domain/suffix.
+        """Returns a Fully Qualified Domain Name, if there is a proper domain/suffix.
 
         >>> extract('http://forums.bbc.co.uk/path/to/file').fqdn
         'forums.bbc.co.uk'
@@ -103,8 +101,7 @@ class ExtractResult:
 
     @property
     def ipv4(self) -> str:
-        """
-        Returns the ipv4 if that is what the presented domain/url is.
+        """Returns the ipv4 if that is what the presented domain/url is.
 
         >>> extract('http://127.0.0.1/path/to/file').ipv4
         '127.0.0.1'
@@ -123,8 +120,7 @@ class ExtractResult:
 
     @property
     def ipv6(self) -> str:
-        """
-        Returns the ipv6 if that is what the presented domain/url is.
+        """Returns the ipv6 if that is what the presented domain/url is.
 
         >>> extract('http://[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1]/path/to/file').ipv6
         'aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1'
@@ -334,8 +330,7 @@ class TLDExtract:
 
     @property
     def tlds(self, session: requests.Session | None = None) -> list[str]:
-        """
-        Returns the list of tld's used by default.
+        """Returns the list of tld's used by default.
 
         This will vary based on `include_psl_private_domains` and `extra_suffixes`
         """

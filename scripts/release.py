@@ -22,59 +22,38 @@ version_number = None
 
 def add_git_tag_for_version(version: str) -> None:
     """Add a git tag for the given version."""
-    try:
-        subprocess.run(["git", "tag", "-a", version, "-m", version], check=True)
-        print(f"Version {version} tag added successfully.")
-    except subprocess.CalledProcessError as error:
-        print(f"Failed to add version tag: {error}")
-        sys.exit(1)
+    subprocess.run(["git", "tag", "-a", version, "-m", version], check=True)
+    print(f"Version {version} tag added successfully.")
 
 
 def remove_previous_dist() -> None:
     """Check for dist folder, and if it exists, remove it."""
-    try:
-        subprocess.run(["rm", "-rf", "dist/"], check=True)
-        print("Previous dist folder removed successfully.")
-    except subprocess.CalledProcessError as error:
-        print(f"Failed to clean repo: {error}")
-        sys.exit(1)
+    subprocess.run(["rm", "-rf", "dist/"], check=True)
+    print("Previous dist folder removed successfully.")
 
 
 def create_build() -> None:
     """Create a build."""
-    try:
-        subprocess.run(["python", "-m", "build"], check=True)
-        print("Build created successfully.")
-    except subprocess.CalledProcessError as error:
-        print(f"Failed to create build: {error}")
-        sys.exit(1)
+    subprocess.run(["python", "-m", "build"], check=True)
+    print("Build created successfully.")
 
 
 def verify_build() -> None:
     """Verify the build."""
-    try:
-        if len(os.listdir("dist")) != 2:
-            print("WARNING: dist folder contains incorrect number of files.")
-        print("Contents of dist folder:")
-        subprocess.run(["ls", "-l", "dist/"], check=True)
-        try:
-            print("Contents of tar files in dist folder:")
-            for directory in os.listdir("dist"):
-                subprocess.run(["tar", "tvf", "dist/" + directory], check=True)
-            confirmation = input("Does the build look correct? (y/n): ")
-            if confirmation == "y":
-                print("Build verified successfully.")
-                upload_build_to_pypi()
-                push_git_tags()
-            else:
-                print("Could not verify. Build was not uploaded.")
-                sys.exit(1)
-        except subprocess.CalledProcessError as error:
-            print(f"Failed to verify build: {error}")
-            sys.exit(1)
-    except subprocess.CalledProcessError as error:
-        print(f"Failed to verify build: {error}")
-        sys.exit(1)
+    if len(os.listdir("dist")) != 2:
+        print("WARNING: dist folder contains incorrect number of files.")
+    print("Contents of dist folder:")
+    subprocess.run(["ls", "-l", "dist/"], check=True)
+    print("Contents of tar files in dist folder:")
+    for directory in os.listdir("dist"):
+        subprocess.run(["tar", "tvf", "dist/" + directory], check=True)
+    confirmation = input("Does the build look correct? (y/n): ")
+    if confirmation == "y":
+        print("Build verified successfully.")
+        upload_build_to_pypi()
+        push_git_tags()
+    else:
+        raise Exception("Could not verify. Build was not uploaded.")
 
 
 def generate_github_release_notes_body(version) -> str:
@@ -146,65 +125,51 @@ def create_github_release_draft() -> None:
     """Create a release on GitHub."""
     release_body = create_release_notes_body()
     release_body = release_body.replace("\n", "\\n")
-    try:
-        command = [
-            "curl",
-            "-L",
-            "-X",
-            "POST",
-            "-H",
-            "Accept: application/vnd.github+json",
-            "-H",
-            f"Authorization: Bearer {GITHUB_TOKEN}",
-            "-H",
-            "X-GitHub-Api-Version: 2022-11-28",
-            "https://api.github.com/repos/ekcorso/releasetestrepo2/releases",
-            "-d",
-            f'{{"tag_name":"{version_number}","name":"{version_number}","body":"{release_body}","draft":true,"prerelease":false}}',
-        ]
-        response_json = subprocess.run(command, check=True, capture_output=True)
-        parsed_json = json.loads(response_json.stdout)
-        if "html_url" in parsed_json:
-            print("Release created successfully: " + parsed_json["html_url"])
-        else:
-            print(
-                "There may have been an error creating this release. Visit https://github.com/john-kurkowski/tldextract/releases to confirm release was created."
-            )
-    except subprocess.CalledProcessError as error:
-        print(f"Failed to create release: {error}")
+    command = [
+        "curl",
+        "-L",
+        "-X",
+        "POST",
+        "-H",
+        "Accept: application/vnd.github+json",
+        "-H",
+        f"Authorization: Bearer {GITHUB_TOKEN}",
+        "-H",
+        "X-GitHub-Api-Version: 2022-11-28",
+        "https://api.github.com/repos/ekcorso/releasetestrepo2/releases",
+        "-d",
+        f'{{"tag_name":"{version_number}","name":"{version_number}","body":"{release_body}","draft":true,"prerelease":false}}',
+    ]
+    response_json = subprocess.run(command, check=True, capture_output=True)
+    parsed_json = json.loads(response_json.stdout)
+    if "html_url" in parsed_json:
+        print("Release created successfully: " + parsed_json["html_url"])
+    else:
+        print(
+            "There may have been an error creating this release. Visit https://github.com/john-kurkowski/tldextract/releases to confirm release was created."
+        )
 
 
 def upload_build_to_pypi() -> None:
     """Upload the build to PyPI."""
     if is_test == "n":
-        try:
-            subprocess.run(
-                ["twine", "upload", "dist/*"],
-                check=True,
-            )
-            print("Build uploaded successfully.")
-        except subprocess.CalledProcessError as error:
-            print(f"Failed to upload build: {error}")
-            sys.exit(1)
+        subprocess.run(
+            ["twine", "upload", "dist/*"],
+            check=True,
+        )
+        print("Build uploaded successfully.")
     else:
-        try:
-            subprocess.run(
-                ["twine", "upload", "--repository", "testpypi", "dist/*"],
-                check=True,
-            )
-            print("Build uploaded successfully.")
-        except subprocess.CalledProcessError as error:
-            print(f"Failed to upload build: {error}")
-            sys.exit(1)
+        subprocess.run(
+            ["twine", "upload", "--repository", "testpypi", "dist/*"],
+            check=True,
+        )
+        print("Build uploaded successfully.")
 
 
 def push_git_tags() -> None:
     """Push all git tags to the remote."""
-    try:
-        subprocess.run(["git", "push", "--tags", "origin", "master"], check=True)
-        print("Tags pushed successfully.")
-    except subprocess.CalledProcessError as error:
-        print(f"Failed to push tag(s) to Github: {error}")
+    subprocess.run(["git", "push", "--tags", "origin", "master"], check=True)
+    print("Tags pushed successfully.")
 
 
 def main() -> None:

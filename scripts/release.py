@@ -102,14 +102,17 @@ def get_release_notes_url(body) -> str:
         return ""
 
 
-# TODO: Refactor to use markdown parsing library instead of regex
 def get_changelog_release_notes(release_notes_url) -> str:
-    """Get the changelog release notes."""
+    """Get the changelog release notes.
+
+    Uses a regex starting on a heading beginning with the version number literal, and matching until the next heading. Using regex to match markup is brittle. Consider a Markdown-parsing library instead.
+    """
+
     changelog_text = None
     with open("CHANGELOG.md") as file:
 
         changelog_text = file.read()
-    pattern = re.compile(rf"## {re.escape(version_number)}[^\n]*(.*?)##", re.DOTALL)
+    pattern = re.compile(rf"## {re.escape(version_number)}[^\n]*(.*?)## ", re.DOTALL)
     match = pattern.search(changelog_text)
     if match:
         return str(match.group(1)).strip()

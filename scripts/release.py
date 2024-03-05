@@ -41,7 +41,9 @@ def create_build() -> None:
 def verify_build() -> None:
     """Verify the build."""
     if len(os.listdir("dist")) != 2:
-        print("WARNING: dist folder contains incorrect number of files.")
+        print(
+            "WARNING: dist folder contains incorrect number of files.", file=sys.stderr
+        )
     print("Contents of dist folder:")
     subprocess.run(["ls", "-l", "dist/"], check=True)
     print("Contents of tar files in dist folder:")
@@ -79,7 +81,10 @@ def generate_github_release_notes_body(version) -> str:
         body = parsed_json["body"]
         return body
     except subprocess.CalledProcessError as error:
-        print(f"Failed to generate release notes from Github: {error}")
+        print(
+            f"WARNING: Failed to generate release notes from Github: {error}",
+            file=sys.stderr,
+        )
         return ""
 
 
@@ -90,12 +95,15 @@ def get_release_notes_url(body) -> str:
     if match:
         return match.group(1)
     else:
-        print("Failed to parse release notes URL from GitHub response.")
+        print(
+            "WARNING: Failed to parse release notes URL from GitHub response.",
+            file=sys.stderr,
+        )
         return ""
 
 
 # TODO: Refactor to use markdown parsing library instead of regex
-def get_changelog_release_notes() -> str:
+def get_changelog_release_notes(release_notes_url) -> str:
     """Get the changelog release notes."""
     changelog_text = None
     with open("CHANGELOG.md") as file:
@@ -106,15 +114,18 @@ def get_changelog_release_notes() -> str:
     if match:
         return str(match.group(1)).strip()
     else:
-        print("Failed to parse changelog release notes.")
+        print(
+            f"WARNING: Failed to parse changelog release notes. Manually copy this version's notes from the CHANGELOG.md file to {release_notes_url}.",
+            file=sys.stderr,
+        )
         return ""
 
 
 def create_release_notes_body() -> str:
     """Compile the release notes."""
-    changelog_notes = get_changelog_release_notes()
     github_release_body = generate_github_release_notes_body(version_number)
     release_notes_url = get_release_notes_url(github_release_body)
+    changelog_notes = get_changelog_release_notes(release_notes_url)
     full_release_notes = (
         changelog_notes + "\n\n**Full Changelog**: " + release_notes_url
     )
@@ -146,7 +157,8 @@ def create_github_release_draft() -> None:
         print("Release created successfully: " + parsed_json["html_url"])
     else:
         print(
-            "There may have been an error creating this release. Visit https://github.com/john-kurkowski/tldextract/releases to confirm release was created."
+            "WARNING: There may have been an error creating this release. Visit https://github.com/john-kurkowski/tldextract/releases to confirm release was created.",
+            file=sys.stderr,
         )
 
 
@@ -157,19 +169,16 @@ def upload_build_to_pypi() -> None:
             ["twine", "upload", "dist/*"],
             check=True,
         )
-        print("Build uploaded successfully.")
     else:
         subprocess.run(
             ["twine", "upload", "--repository", "testpypi", "dist/*"],
             check=True,
         )
-        print("Build uploaded successfully.")
 
 
 def push_git_tags() -> None:
     """Push all git tags to the remote."""
     subprocess.run(["git", "push", "--tags", "origin", "master"], check=True)
-    print("Tags pushed successfully.")
 
 
 def main() -> None:
@@ -196,8 +205,6 @@ def main() -> None:
     create_build()
     verify_build()
     create_github_release_draft()
-
-    print("Release process complete.")
 
 
 if __name__ == "__main__":

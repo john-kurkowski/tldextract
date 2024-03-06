@@ -38,8 +38,7 @@ else:
 
 
 def get_pkg_unique_identifier() -> str:
-    """
-    Generate an identifier unique to the python version, tldextract version, and python instance.
+    """Generate an identifier unique to the python version, tldextract version, and python instance.
 
     This will prevent interference between virtualenvs and issues that might arise when installing
     a new version of tldextract
@@ -66,8 +65,7 @@ def get_pkg_unique_identifier() -> str:
 
 
 def get_cache_dir() -> str:
-    """
-    Get a cache dir that we have permission to write to.
+    """Get a cache dir that we have permission to write to.
 
     Try to follow the XDG standard, but if that doesn't work fallback to the package directory
     http://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html

@@ -1,5 +1,11 @@
 name: build
-on: [push, pull_request]
+on:
+  pull_request: {}
+  push:
+    branches:
+      - "master"
+    tags-ignore:
+      - "**"
 jobs:
   test:
     strategy:
@@ -32,6 +38,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.language.python-version }}
+          check-latest: true
       - name: Install Python requirements
         run: |
           pip install --upgrade pip

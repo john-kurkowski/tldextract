@@ -58,7 +58,7 @@ def verify_build() -> None:
         raise Exception("Could not verify. Build was not uploaded.")
 
 
-def generate_github_release_notes_body(version) -> str:
+def generate_github_release_notes_body(version: str) -> str:
     """Generate and grab release notes URL from Github."""
     try:
         command = [
@@ -79,7 +79,7 @@ def generate_github_release_notes_body(version) -> str:
         response_json = subprocess.run(command, check=True, capture_output=True)
         parsed_json = json.loads(response_json.stdout)
         body = parsed_json["body"]
-        return body
+        return str(body)
     except subprocess.CalledProcessError as error:
         print(
             f"WARNING: Failed to generate release notes from Github: {error}",
@@ -88,7 +88,7 @@ def generate_github_release_notes_body(version) -> str:
         return ""
 
 
-def get_release_notes_url(body) -> str:
+def get_release_notes_url(body: str) -> str:
     """Parse the release notes content to get the changelog URL."""
     url_pattern = re.compile(r"\*\*Full Changelog\*\*: (.*)$")
     match = url_pattern.search(body)
@@ -102,15 +102,13 @@ def get_release_notes_url(body) -> str:
         return ""
 
 
-def get_changelog_release_notes(release_notes_url) -> str:
+def get_changelog_release_notes(release_notes_url: str) -> str:
     """Get the changelog release notes.
 
     Uses a regex starting on a heading beginning with the version number literal, and matching until the next heading. Using regex to match markup is brittle. Consider a Markdown-parsing library instead.
     """
 
-    changelog_text = None
     with open("CHANGELOG.md") as file:
-
         changelog_text = file.read()
     pattern = re.compile(rf"## {re.escape(version_number)}[^\n]*(.*?)## ", re.DOTALL)
     match = pattern.search(changelog_text)

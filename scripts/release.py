@@ -17,7 +17,6 @@ import sys
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 is_test = None
-version_number = None
 
 
 def add_git_tag_for_version(version: str) -> None:
@@ -74,7 +73,7 @@ def generate_github_release_notes_body(version: str) -> str:
             "X-GitHub-Api-Version: 2022-11-28",
             "https://api.github.com/repos/ekcorso/releasetestrepo2/releases/generate-notes",
             "-d",
-            f'{{"tag_name":"{version_number}"}}',
+            f'{{"tag_name":"{version}"}}',
         ]
         response_json = subprocess.run(command, check=True, capture_output=True)
         parsed_json = json.loads(response_json.stdout)
@@ -102,7 +101,7 @@ def get_release_notes_url(body: str) -> str:
         return ""
 
 
-def get_changelog_release_notes(release_notes_url: str) -> str:
+def get_changelog_release_notes(release_notes_url: str, version: str) -> str:
     """Get the changelog release notes.
 
     Uses a regex starting on a heading beginning with the version number literal, and matching until the next heading. Using regex to match markup is brittle. Consider a Markdown-parsing library instead.
@@ -110,7 +109,7 @@ def get_changelog_release_notes(release_notes_url: str) -> str:
 
     with open("CHANGELOG.md") as file:
         changelog_text = file.read()
-    pattern = re.compile(rf"## {re.escape(version_number)}[^\n]*(.*?)## ", re.DOTALL)
+    pattern = re.compile(rf"## {re.escape(version)}[^\n]*(.*?)## ", re.DOTALL)
     match = pattern.search(changelog_text)
     if match:
         return str(match.group(1)).strip()
@@ -122,20 +121,20 @@ def get_changelog_release_notes(release_notes_url: str) -> str:
         return ""
 
 
-def create_release_notes_body() -> str:
+def create_release_notes_body(version: str) -> str:
     """Compile the release notes."""
-    github_release_body = generate_github_release_notes_body(version_number)
+    github_release_body = generate_github_release_notes_body(version)
     release_notes_url = get_release_notes_url(github_release_body)
-    changelog_notes = get_changelog_release_notes(release_notes_url)
+    changelog_notes = get_changelog_release_notes(release_notes_url, version)
     full_release_notes = (
         changelog_notes + "\n\n**Full Changelog**: " + release_notes_url
     )
     return full_release_notes
 
 
-def create_github_release_draft() -> None:
+def create_github_release_draft(version: str) -> None:
     """Create a release on GitHub."""
-    release_body = create_release_notes_body()
+    release_body = create_release_notes_body(version)
     release_body = release_body.replace("\n", "\\n")
     command = [
         "curl",
@@ -150,7 +149,7 @@ def create_github_release_draft() -> None:
         "X-GitHub-Api-Version: 2022-11-28",
         "https://api.github.com/repos/ekcorso/releasetestrepo2/releases",
         "-d",
-        f'{{"tag_name":"{version_number}","name":"{version_number}","body":"{release_body}","draft":true,"prerelease":false}}',
+        f'{{"tag_name":"{version}","name":"{version}","body":"{release_body}","draft":true,"prerelease":false}}',
     ]
     response_json = subprocess.run(command, check=True, capture_output=True)
     parsed_json = json.loads(response_json.stdout)
@@ -184,7 +183,7 @@ def push_git_tags() -> None:
 
 def main() -> None:
     """Run the main program."""
-    global is_test, version_number
+    global is_test
 
     print("Starting the release process...")
     print("Checking for github token environment variable...")
@@ -205,7 +204,7 @@ def main() -> None:
     remove_previous_dist()
     create_build()
     verify_build()
-    create_github_release_draft()
+    create_github_release_draft(version_number)
 
 
 if __name__ == "__main__":

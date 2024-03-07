@@ -16,7 +16,6 @@ import subprocess
 import sys
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
-is_test = None
 
 
 def add_git_tag_for_version(version: str) -> None:
@@ -37,7 +36,7 @@ def create_build() -> None:
     print("Build created successfully.")
 
 
-def verify_build() -> None:
+def verify_build(is_test: str) -> None:
     """Verify the build."""
     if len(os.listdir("dist")) != 2:
         print(
@@ -51,7 +50,7 @@ def verify_build() -> None:
     confirmation = input("Does the build look correct? (y/n): ")
     if confirmation == "y":
         print("Build verified successfully.")
-        upload_build_to_pypi()
+        upload_build_to_pypi(is_test)
         push_git_tags()
     else:
         raise Exception("Could not verify. Build was not uploaded.")
@@ -162,7 +161,7 @@ def create_github_release_draft(version: str) -> None:
         )
 
 
-def upload_build_to_pypi() -> None:
+def upload_build_to_pypi(is_test: str) -> None:
     """Upload the build to PyPI."""
     if is_test == "n":
         subprocess.run(
@@ -183,7 +182,6 @@ def push_git_tags() -> None:
 
 def main() -> None:
     """Run the main program."""
-    global is_test
 
     print("Starting the release process...")
     print("Checking for github token environment variable...")
@@ -203,7 +201,7 @@ def main() -> None:
     add_git_tag_for_version(version_number)
     remove_previous_dist()
     create_build()
-    verify_build()
+    verify_build(is_test)
     create_github_release_draft(version_number)
 
 

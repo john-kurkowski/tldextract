@@ -15,7 +15,6 @@ import re
 import subprocess
 import sys
 
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 
 
 def add_git_tag_for_version(version: str) -> None:
@@ -56,7 +55,7 @@ def verify_build(is_test: str) -> None:
         raise Exception("Could not verify. Build was not uploaded.")
 
 
-def generate_github_release_notes_body(version: str) -> str:
+def generate_github_release_notes_body(token:str, version: str) -> str:
     """Generate and grab release notes URL from Github."""
     try:
         command = [
@@ -67,7 +66,7 @@ def generate_github_release_notes_body(version: str) -> str:
             "-H",
             "Accept: application/vnd.github+json",
             "-H",
-            f"Authorization: Bearer {GITHUB_TOKEN}",
+            f"Authorization: Bearer {token}",
             "-H",
             "X-GitHub-Api-Version: 2022-11-28",
             "https://api.github.com/repos/ekcorso/releasetestrepo2/releases/generate-notes",
@@ -120,9 +119,9 @@ def get_changelog_release_notes(release_notes_url: str, version: str) -> str:
         return ""
 
 
-def create_release_notes_body(version: str) -> str:
+def create_release_notes_body(token:str, version: str) -> str:
     """Compile the release notes."""
-    github_release_body = generate_github_release_notes_body(version)
+    github_release_body = generate_github_release_notes_body(token, version)
     release_notes_url = get_release_notes_url(github_release_body)
     changelog_notes = get_changelog_release_notes(release_notes_url, version)
     full_release_notes = (
@@ -131,9 +130,9 @@ def create_release_notes_body(version: str) -> str:
     return full_release_notes
 
 
-def create_github_release_draft(version: str) -> None:
+def create_github_release_draft(token: str, version: str) -> None:
     """Create a release on GitHub."""
-    release_body = create_release_notes_body(version)
+    release_body = create_release_notes_body(token, version)
     release_body = release_body.replace("\n", "\\n")
     command = [
         "curl",
@@ -143,7 +142,7 @@ def create_github_release_draft(version: str) -> None:
         "-H",
         "Accept: application/vnd.github+json",
         "-H",
-        f"Authorization: Bearer {GITHUB_TOKEN}",
+        f"Authorization: Bearer {token}",
         "-H",
         "X-GitHub-Api-Version: 2022-11-28",
         "https://api.github.com/repos/ekcorso/releasetestrepo2/releases",
@@ -183,6 +182,8 @@ def push_git_tags() -> None:
 def main() -> None:
     """Run the main program."""
 
+    GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+
     print("Starting the release process...")
     print("Checking for github token environment variable...")
     if not GITHUB_TOKEN:
@@ -202,7 +203,7 @@ def main() -> None:
     remove_previous_dist()
     create_build()
     verify_build(is_test)
-    create_github_release_draft(version_number)
+    create_github_release_draft(GITHUB_TOKEN, version_number)
 
 
 if __name__ == "__main__":

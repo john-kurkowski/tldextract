@@ -55,7 +55,7 @@ def verify_build(is_test: str) -> None:
         raise Exception("Could not verify. Build was not uploaded.")
 
 
-def generate_github_release_notes_body(token:str, version: str) -> str:
+def generate_github_release_notes_body(token: str, version: str) -> str:
     """Generate and grab release notes URL from Github."""
     try:
         command = [
@@ -119,7 +119,7 @@ def get_changelog_release_notes(release_notes_url: str, version: str) -> str:
         return ""
 
 
-def create_release_notes_body(token:str, version: str) -> str:
+def create_release_notes_body(token: str, version: str) -> str:
     """Compile the release notes."""
     github_release_body = generate_github_release_notes_body(token, version)
     release_notes_url = get_release_notes_url(github_release_body)
@@ -162,16 +162,13 @@ def create_github_release_draft(token: str, version: str) -> None:
 
 def upload_build_to_pypi(is_test: str) -> None:
     """Upload the build to PyPI."""
+    upload_command = ["twine", "upload", "--repository", "testpypi", Path("dist") / "*"]
     if is_test == "n":
-        subprocess.run(
-            ["twine", "upload", Path("dist")],
-            check=True,
-        )
-    else:
-        subprocess.run(
-            ["twine", "upload", "--repository", "testpypi", Path("dist") / "*"],
-            check=True,
-        )
+        upload_command = ["twine", "upload", Path("dist") / "*"]
+    subprocess.run(
+        upload_command,
+        check=True,
+    )
 
 
 def push_git_tags() -> None:

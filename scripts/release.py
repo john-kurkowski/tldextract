@@ -11,10 +11,10 @@ This script automates the release process for a Python package. It will:
 
 import json
 import os
+from pathlib import Path
 import re
 import subprocess
 import sys
-
 
 
 def add_git_tag_for_version(version: str) -> None:
@@ -25,7 +25,7 @@ def add_git_tag_for_version(version: str) -> None:
 
 def remove_previous_dist() -> None:
     """Check for dist folder, and if it exists, remove it."""
-    subprocess.run(["rm", "-rf", "dist/"], check=True)
+    subprocess.run(["rm", "-rf", Path("dist")], check=True)
     print("Previous dist folder removed successfully.")
 
 
@@ -42,10 +42,10 @@ def verify_build(is_test: str) -> None:
             "WARNING: dist folder contains incorrect number of files.", file=sys.stderr
         )
     print("Contents of dist folder:")
-    subprocess.run(["ls", "-l", "dist/"], check=True)
+    subprocess.run(["ls", "-l", Path("dist")], check=True)
     print("Contents of tar files in dist folder:")
     for directory in os.listdir("dist"):
-        subprocess.run(["tar", "tvf", "dist/" + directory], check=True)
+        subprocess.run(["tar", "tvf", Path("dist") / directory], check=True)
     confirmation = input("Does the build look correct? (y/n): ")
     if confirmation == "y":
         print("Build verified successfully.")
@@ -164,12 +164,12 @@ def upload_build_to_pypi(is_test: str) -> None:
     """Upload the build to PyPI."""
     if is_test == "n":
         subprocess.run(
-            ["twine", "upload", "dist/*"],
+            ["twine", "upload", Path("dist")],
             check=True,
         )
     else:
         subprocess.run(
-            ["twine", "upload", "--repository", "testpypi", "dist/*"],
+            ["twine", "upload", "--repository", "testpypi", Path("dist") / "*"],
             check=True,
         )
 

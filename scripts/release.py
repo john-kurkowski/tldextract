@@ -11,6 +11,8 @@ It will:
 - Create a draft release on GitHub using the version notes in CHANGELOG.md.
 """
 
+from __future__ import annotations
+
 import os
 import re
 import subprocess

@@ -1,5 +1,7 @@
 """
-This script automates the release process for a Python package. It will:
+This script automates the release process for a Python package.
+
+It will:
 - Add a git tag for the given version.
 - Remove the previous dist folder.
 - Create a build.
@@ -9,13 +11,13 @@ This script automates the release process for a Python package. It will:
 - Create a draft release on GitHub using the version notes in CHANGELOG.md.
 """
 
-import json
 import os
-from pathlib import Path
 import re
-import requests
 import subprocess
 import sys
+from pathlib import Path
+
+import requests
 
 
 def add_git_tag_for_version(version: str) -> None:
@@ -59,7 +61,7 @@ def verify_build(is_test: str) -> None:
 def generate_github_release_notes_body(token: str, version: str) -> str:
     """Generate and grab release notes URL from Github."""
     response = requests.post(
-        f"https://api.github.com/repos/ekcorso/releasetestrepo2/releases/generate-notes",
+        "https://api.github.com/repos/ekcorso/releasetestrepo2/releases/generate-notes",
         headers={
             "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {token}",
@@ -97,7 +99,6 @@ def get_changelog_release_notes(release_notes_url: str, version: str) -> str:
 
     Uses a regex starting on a heading beginning with the version number literal, and matching until the next heading. Using regex to match markup is brittle. Consider a Markdown-parsing library instead.
     """
-
     with open("CHANGELOG.md") as file:
         changelog_text = file.read()
     pattern = re.compile(rf"## {re.escape(version)}[^\n]*(.*?)## ", re.DOTALL)
@@ -174,12 +175,11 @@ def push_git_tags() -> None:
 
 def main() -> None:
     """Run the main program."""
-
-    GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+    github_token = os.environ.get("GITHUB_TOKEN")
 
     print("Starting the release process...")
     print("Checking for github token environment variable...")
-    if not GITHUB_TOKEN:
+    if not github_token:
         print("GITHUB_TOKEN environment variable not set.")
         sys.exit(1)
     else:
@@ -196,7 +196,7 @@ def main() -> None:
     remove_previous_dist()
     create_build()
     verify_build(is_test)
-    create_github_release_draft(GITHUB_TOKEN, version_number)
+    create_github_release_draft(github_token, version_number)
 
 
 if __name__ == "__main__":

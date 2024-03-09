@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import re
+import requests
 import subprocess
 import sys
 
@@ -57,32 +58,24 @@ def verify_build(is_test: str) -> None:
 
 def generate_github_release_notes_body(token: str, version: str) -> str:
     """Generate and grab release notes URL from Github."""
-    try:
-        command = [
-            "curl",
-            "-L",
-            "-X",
-            "POST",
-            "-H",
-            "Accept: application/vnd.github+json",
-            "-H",
-            f"Authorization: Bearer {token}",
-            "-H",
-            "X-GitHub-Api-Version: 2022-11-28",
-            "https://api.github.com/repos/ekcorso/releasetestrepo2/releases/generate-notes",
-            "-d",
-            f'{{"tag_name":"{version}"}}',
-        ]
-        response_json = subprocess.run(command, check=True, capture_output=True)
-        parsed_json = json.loads(response_json.stdout)
-        body = parsed_json["body"]
-        return str(body)
-    except subprocess.CalledProcessError as error:
+    response = requests.post(
+        f"https://api.github.com/repos/ekcorso/releasetestrepo2/releases/generate-notes",
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+        json={"tag_name": version},
+    )
+    response_json = response.json()
+    if response_json.get("message"):
         print(
-            f"WARNING: Failed to generate release notes from Github: {error}",
+            f"WARNING: Failed to generate release notes from Github: {response_json['message']}",
             file=sys.stderr,
         )
         return ""
+    else:
+        return str(response_json["body"])
 
 
 def get_release_notes_url(body: str) -> str:
@@ -133,26 +126,29 @@ def create_release_notes_body(token: str, version: str) -> str:
 def create_github_release_draft(token: str, version: str) -> None:
     """Create a release on GitHub."""
     release_body = create_release_notes_body(token, version)
+    """
+    print("The release body before mod is:" + release_body)
     release_body = release_body.replace("\n", "\\n")
-    command = [
-        "curl",
-        "-L",
-        "-X",
-        "POST",
-        "-H",
-        "Accept: application/vnd.github+json",
-        "-H",
-        f"Authorization: Bearer {token}",
-        "-H",
-        "X-GitHub-Api-Version: 2022-11-28",
+    print("The release body is:" + release_body)
+    """
+    response = requests.post(
         "https://api.github.com/repos/ekcorso/releasetestrepo2/releases",
-        "-d",
-        f'{{"tag_name":"{version}","name":"{version}","body":"{release_body}","draft":true,"prerelease":false}}',
-    ]
-    response_json = subprocess.run(command, check=True, capture_output=True)
-    parsed_json = json.loads(response_json.stdout)
-    if "html_url" in parsed_json:
-        print("Release created successfully: " + parsed_json["html_url"])
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+        json={
+            "tag_name": version,
+            "name": version,
+            "body": release_body,
+            "draft": True,
+            "prerelease": False,
+        },
+    )
+
+    if "html_url" in response.json():
+        print("Release created successfully: " + response.json()["html_url"])
     else:
         print(
             "WARNING: There may have been an error creating this release. Visit https://github.com/john-kurkowski/tldextract/releases to confirm release was created.",

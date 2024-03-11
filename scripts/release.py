@@ -186,10 +186,12 @@ def main() -> None:
     else:
         print("GITHUB_TOKEN environment variable is good to go.")
 
-    is_test = input("Is this a test release? (y/n): ")
-    while is_test not in ["y", "n"]:
-        print("Invalid input. Please enter 'y' or 'n'.")
+    while True:
         is_test = input("Is this a test release? (y/n): ")
+        if is_test in ["y", "n"]:
+            break
+        else:
+            print("Invalid input. Please enter 'y' or 'n'.")
 
     version_number = input("Enter the version number: ")
 

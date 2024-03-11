@@ -71,15 +71,16 @@ def generate_github_release_notes_body(token: str, version: str) -> str:
         },
         json={"tag_name": version},
     )
-    response_json = response.json()
-    if response_json.get("message"):
+
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
         print(
-            f"WARNING: Failed to generate release notes from Github: {response_json['message']}",
+            f"WARNING: Failed to generate release notes from Github: {err}",
             file=sys.stderr,
         )
         return ""
-    else:
-        return str(response_json["body"])
+    return str(response.json()["body"])
 
 
 def get_release_notes_url(body: str) -> str:
@@ -145,13 +146,15 @@ def create_github_release_draft(token: str, version: str) -> None:
         },
     )
 
-    if "html_url" in response.json():
-        print("Release created successfully: " + response.json()["html_url"])
-    else:
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
         print(
-            "WARNING: There may have been an error creating this release. Visit https://github.com/john-kurkowski/tldextract/releases to confirm release was created.",
+            f"WARNING: Failed to create release on Github: {err}",
             file=sys.stderr,
         )
+        return
+    print("Release created successfully: " + response.json()["html_url"])
 
 
 def upload_build_to_pypi(is_test: str) -> None:

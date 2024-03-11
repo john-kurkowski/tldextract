@@ -50,6 +50,7 @@ testing = [
     "responses",
     "ruff",
     "tox",
+    "tox-uv",
     "types-filelock",
     "types-requests",
 ]

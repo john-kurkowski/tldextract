@@ -129,11 +129,6 @@ def create_release_notes_body(token: str, version: str) -> str:
 def create_github_release_draft(token: str, version: str) -> None:
     """Create a release on GitHub."""
     release_body = create_release_notes_body(token, version)
-    """
-    print("The release body before mod is:" + release_body)
-    release_body = release_body.replace("\n", "\\n")
-    print("The release body is:" + release_body)
-    """
     response = requests.post(
         "https://api.github.com/repos/ekcorso/releasetestrepo2/releases",
         headers={

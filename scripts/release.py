@@ -161,15 +161,10 @@ def create_github_release_draft(token: str, version: str) -> None:
 
 def upload_build_to_pypi(is_test: str) -> None:
     """Upload the build to PyPI."""
-    upload_command: list[str | Path] = [
-        "twine",
-        "upload",
-        "--repository",
-        "testpypi",
-        Path("dist") / "*",
-    ]
-    if is_test == "n":
-        upload_command = ["twine", "upload", Path("dist") / "*"]
+    repository: list[str | Path] = (
+        [] if is_test == "n" else ["--repository", "testpypi"]
+    )
+    upload_command = ["twine", "upload", *repository, Path("dist") / "*"]
     subprocess.run(
         upload_command,
         check=True,

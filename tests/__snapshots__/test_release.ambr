@@ -3,7 +3,21 @@
   _CallList([
     _Call(
       tuple(
-        'dist',
+        'Is this a test release? (y/n): ',
+      ),
+      dict({
+      }),
+    ),
+    _Call(
+      tuple(
+        'Enter the version number: ',
+      ),
+      dict({
+      }),
+    ),
+    _Call(
+      tuple(
+        'Does the build look correct? (y/n): ',
       ),
       dict({
       }),
@@ -11,6 +25,17 @@
   ])
 # ---
 # name: test_happy_path.1
+  _CallList([
+    _Call(
+      tuple(
+        'dist',
+      ),
+      dict({
+      }),
+    ),
+  ])
+# ---
+# name: test_happy_path.2
   _CallList([
     _Call(
       tuple(
@@ -55,7 +80,7 @@
     ),
   ])
 # ---
-# name: test_happy_path.2
+# name: test_happy_path.3
   _CallList([
     _Call(
       tuple(
@@ -151,7 +176,7 @@
     ),
   ])
 # ---
-# name: test_happy_path.3
+# name: test_happy_path.4
   '''
   Version 5.0.1 tag added successfully.
   Previous dist folder removed successfully.
@@ -163,7 +188,7 @@
   
   '''
 # ---
-# name: test_happy_path.4
+# name: test_happy_path.5
   '''
   WARNING: dist folder contains incorrect number of files.
   

@@ -71,15 +71,16 @@ def generate_github_release_notes_body(token: str, version: str) -> str:
         },
         json={"tag_name": version},
     )
-    response_json = response.json()
-    if response_json.get("message"):
+
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
         print(
-            f"WARNING: Failed to generate release notes from Github: {response_json['message']}",
+            f"WARNING: Failed to generate release notes from Github: {err}",
             file=sys.stderr,
         )
         return ""
-    else:
-        return str(response_json["body"])
+    return str(response.json()["body"])
 
 
 def get_release_notes_url(body: str) -> str:
@@ -129,11 +130,6 @@ def create_release_notes_body(token: str, version: str) -> str:
 def create_github_release_draft(token: str, version: str) -> None:
     """Create a release on GitHub."""
     release_body = create_release_notes_body(token, version)
-    """
-    print("The release body before mod is:" + release_body)
-    release_body = release_body.replace("\n", "\\n")
-    print("The release body is:" + release_body)
-    """
     response = requests.post(
         "https://api.github.com/repos/ekcorso/releasetestrepo2/releases",
         headers={
@@ -150,26 +146,23 @@ def create_github_release_draft(token: str, version: str) -> None:
         },
     )
 
-    if "html_url" in response.json():
-        print("Release created successfully: " + response.json()["html_url"])
-    else:
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
         print(
-            "WARNING: There may have been an error creating this release. Visit https://github.com/john-kurkowski/tldextract/releases to confirm release was created.",
+            f"WARNING: Failed to create release on Github: {err}",
             file=sys.stderr,
         )
+        return
+    print("Release created successfully: " + response.json()["html_url"])
 
 
 def upload_build_to_pypi(is_test: str) -> None:
     """Upload the build to PyPI."""
-    upload_command: list[str | Path] = [
-        "twine",
-        "upload",
-        "--repository",
-        "testpypi",
-        Path("dist") / "*",
-    ]
-    if is_test == "n":
-        upload_command = ["twine", "upload", Path("dist") / "*"]
+    repository: list[str | Path] = (
+        [] if is_test == "n" else ["--repository", "testpypi"]
+    )
+    upload_command = ["twine", "upload", *repository, Path("dist") / "*"]
     subprocess.run(
         upload_command,
         check=True,
@@ -193,10 +186,12 @@ def main() -> None:
     else:
         print("GITHUB_TOKEN environment variable is good to go.")
 
-    is_test = input("Is this a test release? (y/n): ")
-    while is_test not in ["y", "n"]:
-        print("Invalid input. Please enter 'y' or 'n'.")
+    while True:
         is_test = input("Is this a test release? (y/n): ")
+        if is_test in ["y", "n"]:
+            break
+        else:
+            print("Invalid input. Please enter 'y' or 'n'.")
 
     version_number = input("Enter the version number: ")
 

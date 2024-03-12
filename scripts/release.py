@@ -72,7 +72,7 @@ def verify_build(is_test: str) -> None:
 def generate_github_release_notes_body(token: str, version: str) -> str:
     """Generate and grab release notes URL from Github."""
     response = requests.post(
-        "https://api.github.com/repos/ekcorso/releasetestrepo2/releases/generate-notes",
+        "https://api.github.com/repos/john-kurkowski/tldextract/releases/generate-notes",
         headers={
             "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {token}",
@@ -138,7 +138,7 @@ def create_github_release_draft(token: str, version: str) -> None:
     """Create a release on GitHub."""
     release_body = create_release_notes_body(token, version)
     response = requests.post(
-        "https://api.github.com/repos/ekcorso/releasetestrepo2/releases",
+        "https://api.github.com/repos/john-kurkowski/tldextract/releases",
         headers={
             "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {token}",

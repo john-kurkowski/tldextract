@@ -53,6 +53,7 @@ testing = [
     "pytest-mock",
     "responses",
     "ruff",
+    "syrupy",
     "tox",
     "types-filelock",
     "types-requests",

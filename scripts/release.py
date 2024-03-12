@@ -9,6 +9,14 @@ It will:
 - Upload the build to PyPI.
 - Push all git tags to the remote.
 - Create a draft release on GitHub using the version notes in CHANGELOG.md.
+
+Prerequisites:
+    - This must be run from the root of the repository.
+    - The repo must have a clean git working tree.
+    - The user must have the GITHUB_TOKEN environment variable set to a valid GitHub personal access token.
+    - The CHANGELOG.md file must already contain an entry for the version being released.
+    - Install requirements with: pip install --upgrade --editable '.[release]'
+
 """
 
 from __future__ import annotations

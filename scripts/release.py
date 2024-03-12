@@ -182,25 +182,43 @@ def push_git_tags() -> None:
     subprocess.run(["git", "push", "--tags", "origin", "master"], check=True)
 
 
-def main() -> None:
-    """Run the main program."""
-    github_token = os.environ.get("GITHUB_TOKEN")
-
-    print("Starting the release process...")
-    print("Checking for github token environment variable...")
-    if not github_token:
-        print("GITHUB_TOKEN environment variable not set.")
+def check_for_clean_working_tree() -> None:
+    """Check for a clean git working tree."""
+    git_status = subprocess.run(
+        ["git", "status", "--porcelain"], capture_output=True, text=True
+    )
+    if git_status.stdout:
+        print(
+            "Git working tree is not clean. Please commit or stash changes.",
+            file=sys.stderr,
+        )
         sys.exit(1)
-    else:
-        print("GITHUB_TOKEN environment variable is good to go.")
 
+
+def get_env_github_token() -> str:
+    """Check for the GITHUB_TOKEN environment variable."""
+    github_token = os.environ.get("GITHUB_TOKEN")
+    if not github_token:
+        print("GITHUB_TOKEN environment variable not set.", file=sys.stderr)
+        sys.exit(1)
+    return github_token
+
+
+def get_is_test_response() -> str:
+    """Ask the user if this is a test release."""
     while True:
         is_test = input("Is this a test release? (y/n): ")
         if is_test in ["y", "n"]:
-            break
+            return is_test
         else:
-            print("Invalid input. Please enter 'y' or 'n'.")
+            print("Invalid input. Please enter 'y' or 'n.'")
 
+
+def main() -> None:
+    """Run the main program."""
+    check_for_clean_working_tree()
+    github_token = get_env_github_token()
+    is_test = get_is_test_response()
     version_number = input("Enter the version number: ")
 
     add_git_tag_for_version(version_number)

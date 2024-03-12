@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from collections.abc import Iterator
 from typing import Any
 from unittest import mock
@@ -41,6 +42,9 @@ def mock_subprocess() -> Iterator[mock.Mock]:
         yield patched
 
 
+@pytest.mark.xfail(
+    sys.platform == "win32", reason="Snapshot paths are different on Windows"
+)
 def test_happy_path(
     capsys: pytest.CaptureFixture[str],
     mock_input: mock.Mock,

@@ -13,21 +13,28 @@ from scripts import release
 
 
 @pytest.fixture
-def listdir() -> Iterator[mock.Mock]:
+def mock_input() -> Iterator[mock.Mock]:
+    """Stub reading user input."""
+    with mock.patch("builtins.input") as patched:
+        yield patched
+
+
+@pytest.fixture
+def mock_listdir() -> Iterator[mock.Mock]:
     """Stub listing directory."""
     with mock.patch("os.listdir") as patched:
         yield patched
 
 
 @pytest.fixture
-def requests() -> Iterator[mock.Mock]:
+def mock_requests() -> Iterator[mock.Mock]:
     """Stub network requests."""
     with mock.patch("requests.post") as patched:
         yield patched
 
 
 @pytest.fixture
-def subprocess() -> Iterator[mock.Mock]:
+def mock_subprocess() -> Iterator[mock.Mock]:
     """Stub running external commands."""
     with mock.patch("subprocess.run") as patched:
         yield patched
@@ -35,11 +42,12 @@ def subprocess() -> Iterator[mock.Mock]:
 
 def test_happy_path(
     capsys: pytest.CaptureFixture[str],
-    listdir: mock.Mock,
+    mock_input: mock.Mock,
+    mock_listdir: mock.Mock,
+    mock_requests: mock.Mock,
+    mock_subprocess: mock.Mock,
     monkeypatch: pytest.MonkeyPatch,
-    requests: mock.Mock,
     snapshot: SnapshotAssertion,
-    subprocess: mock.Mock,
 ) -> None:
     """Test the release script happy path.
 
@@ -52,14 +60,10 @@ def test_happy_path(
     """
     monkeypatch.setenv("GITHUB_TOKEN", "fake-token")
 
-    input_values = iter(["y", "5.0.1", "y"])
-
-    def cycle_input_values(prompt: str) -> str:
-        return next(input_values)
-
-    monkeypatch.setattr("builtins.input", cycle_input_values)
+    mock_input.side_effect = ["y", "5.0.1", "y"]
 
     def mock_post(*args: Any, **kwargs: Any) -> mock.Mock:
+        """Return _one_ response JSON that happens to match expectations for multiple requests."""
         return mock.Mock(
             json=mock.Mock(
                 return_value={
@@ -69,14 +73,15 @@ def test_happy_path(
             ),
         )
 
-    requests.side_effect = mock_post
+    mock_requests.side_effect = mock_post
 
     release.main()
 
     out, err = capsys.readouterr()
 
-    assert listdir.call_args_list == snapshot
-    assert requests.call_args_list == snapshot
-    assert subprocess.call_args_list == snapshot
+    assert mock_input.call_args_list == snapshot
+    assert mock_listdir.call_args_list == snapshot
+    assert mock_requests.call_args_list == snapshot
+    assert mock_subprocess.call_args_list == snapshot
     assert out == snapshot
     assert err == snapshot

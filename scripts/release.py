@@ -50,15 +50,16 @@ def create_build() -> None:
 
 def verify_build(is_test: str) -> None:
     """Verify the build."""
-    if len(os.listdir("dist")) != 2:
+    build_files = os.listdir("dist")
+    if len(build_files) != 2:
         print(
             "WARNING: dist folder contains incorrect number of files.", file=sys.stderr
         )
     print("Contents of dist folder:")
     subprocess.run(["ls", "-l", Path("dist")], check=True)
     print("Contents of tar files in dist folder:")
-    for directory in os.listdir("dist"):
-        subprocess.run(["tar", "tvf", Path("dist") / directory], check=True)
+    for build_file in build_files:
+        subprocess.run(["tar", "tvf", Path("dist") / build_file], check=True)
     confirmation = input("Does the build look correct? (y/n): ")
     if confirmation == "y":
         print("Build verified successfully.")

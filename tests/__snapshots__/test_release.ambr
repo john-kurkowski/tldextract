@@ -61,6 +61,19 @@
       tuple(
         list([
           'git',
+          'status',
+          '--porcelain',
+        ]),
+      ),
+      dict({
+        'capture_output': True,
+        'text': True,
+      }),
+    ),
+    _Call(
+      tuple(
+        list([
+          'git',
           'tag',
           '-a',
           '5.0.1',
@@ -140,9 +153,6 @@
 # ---
 # name: test_happy_path.3
   '''
-  Starting the release process...
-  Checking for github token environment variable...
-  GITHUB_TOKEN environment variable is good to go.
   Version 5.0.1 tag added successfully.
   Previous dist folder removed successfully.
   Build created successfully.

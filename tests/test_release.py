@@ -30,6 +30,7 @@ def requests() -> Iterator[mock.Mock]:
 def subprocess() -> Iterator[mock.Mock]:
     """Stub running external commands."""
     with mock.patch("subprocess.run") as patched:
+        patched.return_value.stdout = ""
         yield patched
 
 

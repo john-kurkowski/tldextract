@@ -100,6 +100,20 @@
         list([
           'git',
           'tag',
+          '--list',
+          '5.0.1',
+        ]),
+      ),
+      dict({
+        'capture_output': True,
+        'text': True,
+      }),
+    ),
+    _Call(
+      tuple(
+        list([
+          'git',
+          'tag',
           '-a',
           '5.0.1',
           '-m',

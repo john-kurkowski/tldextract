@@ -213,12 +213,23 @@ def get_is_test_response() -> str:
             print("Invalid input. Please enter 'y' or 'n.'")
 
 
+def check_if_tag_exists(tag: str) -> None:
+    """Check if the tag already exists."""
+    tag_check = subprocess.run(
+        ["git", "tag", "--list", tag], capture_output=True, text=True
+    )
+    if tag_check.stdout:
+        raise Exception(f"Tag {tag} already exists.")
+
+
 def main() -> None:
     """Run the main program."""
     check_for_clean_working_tree()
     github_token = get_env_github_token()
     is_test = get_is_test_response()
+
     version_number = input("Enter the version number: ")
+    check_if_tag_exists(version_number)
 
     add_git_tag_for_version(version_number)
     remove_previous_dist()

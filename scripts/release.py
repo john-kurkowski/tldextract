@@ -122,9 +122,7 @@ def create_release_notes_body(token: str, version: str) -> str:
     github_release_body = generate_github_release_notes_body(token, version)
     release_notes_url = get_release_notes_url(github_release_body)
     changelog_notes = get_changelog_release_notes(release_notes_url, version)
-    full_release_notes = (
-        changelog_notes + "\n\n**Full Changelog**: " + release_notes_url
-    )
+    full_release_notes = f"{changelog_notes}\n\n**Full Changelog**: {release_notes_url}"
     return full_release_notes
 
 
@@ -155,7 +153,7 @@ def create_github_release_draft(token: str, version: str) -> None:
             file=sys.stderr,
         )
         return
-    print("Release created successfully: " + response.json()["html_url"])
+    print(f'Release created successfully: {response.json()["html_url"]}')
 
 
 def upload_build_to_pypi(is_test: str) -> None:

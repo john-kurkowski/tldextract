@@ -39,7 +39,7 @@
   _CallList([
     _Call(
       tuple(
-        'https://api.github.com/repos/ekcorso/releasetestrepo2/releases/generate-notes',
+        'https://api.github.com/repos/john-kurkowski/tldextract/releases/generate-notes',
       ),
       dict({
         'headers': dict({
@@ -54,7 +54,7 @@
     ),
     _Call(
       tuple(
-        'https://api.github.com/repos/ekcorso/releasetestrepo2/releases',
+        'https://api.github.com/repos/john-kurkowski/tldextract/releases',
       ),
       dict({
         'headers': dict({
@@ -82,6 +82,19 @@
 # ---
 # name: test_happy_path.3
   _CallList([
+    _Call(
+      tuple(
+        list([
+          'git',
+          'status',
+          '--porcelain',
+        ]),
+      ),
+      dict({
+        'capture_output': True,
+        'text': True,
+      }),
+    ),
     _Call(
       tuple(
         list([
@@ -165,9 +178,6 @@
 # ---
 # name: test_happy_path.4
   '''
-  Starting the release process...
-  Checking for github token environment variable...
-  GITHUB_TOKEN environment variable is good to go.
   Version 5.0.1 tag added successfully.
   Previous dist folder removed successfully.
   Build created successfully.
@@ -175,7 +185,7 @@
   Contents of tar files in dist folder:
   Build verified successfully.
   Release created successfully: https://github.com/path/to/release
-  
+
   '''
 # ---
 # name: test_happy_path.5

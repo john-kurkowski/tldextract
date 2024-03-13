@@ -42,7 +42,7 @@ def mock_subprocess() -> Iterator[mock.Mock]:
         yield patched
 
 
-@pytest.mark.xfail(
+@pytest.mark.skipif(
     sys.platform == "win32", reason="Snapshot paths are different on Windows"
 )
 def test_happy_path(

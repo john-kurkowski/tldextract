@@ -39,7 +39,7 @@
   _CallList([
     _Call(
       tuple(
-        'https://api.github.com/repos/ekcorso/releasetestrepo2/releases/generate-notes',
+        'https://api.github.com/repos/john-kurkowski/tldextract/releases/generate-notes',
       ),
       dict({
         'headers': dict({
@@ -54,7 +54,7 @@
     ),
     _Call(
       tuple(
-        'https://api.github.com/repos/ekcorso/releasetestrepo2/releases',
+        'https://api.github.com/repos/john-kurkowski/tldextract/releases',
       ),
       dict({
         'headers': dict({
@@ -88,20 +88,6 @@
           'git',
           'status',
           '--porcelain',
-        ]),
-      ),
-      dict({
-        'capture_output': True,
-        'text': True,
-      }),
-    ),
-    _Call(
-      tuple(
-        list([
-          'git',
-          'tag',
-          '--list',
-          '5.0.1',
         ]),
       ),
       dict({

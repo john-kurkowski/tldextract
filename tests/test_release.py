@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import sys
 from collections.abc import Iterator
 from typing import Any
@@ -13,33 +14,38 @@ from syrupy.assertion import SnapshotAssertion
 from scripts import release
 
 
+@dataclasses.dataclass(kw_only=True)
+class Mocks:
+    """Collection of all mocked objects used in the release script."""
+
+    input: mock.Mock
+    listdir: mock.Mock
+    requests: mock.Mock
+    subprocess: mock.Mock
+
+    @property
+    def mock_calls(self) -> dict[str, Any]:
+        """A dict of _all_ calls to this class's mock objects."""
+        return {
+            k.name: getattr(self, k.name).mock_calls for k in dataclasses.fields(self)
+        }
+
+
 @pytest.fixture
-def mock_input() -> Iterator[mock.Mock]:
+def mocks() -> Iterator[Mocks]:
     """Stub reading user input."""
-    with mock.patch("builtins.input") as patched:
-        yield patched
-
-
-@pytest.fixture
-def mock_listdir() -> Iterator[mock.Mock]:
-    """Stub listing directory."""
-    with mock.patch("os.listdir") as patched:
-        yield patched
-
-
-@pytest.fixture
-def mock_requests() -> Iterator[mock.Mock]:
-    """Stub network requests."""
-    with mock.patch("requests.post") as patched:
-        yield patched
-
-
-@pytest.fixture
-def mock_subprocess() -> Iterator[mock.Mock]:
-    """Stub running external commands."""
-    with mock.patch("subprocess.run") as patched:
-        patched.return_value.stdout = ""
-        yield patched
+    with (
+        mock.patch("builtins.input") as mock_input,
+        mock.patch("os.listdir") as mock_listdir,
+        mock.patch("requests.post") as mock_requests,
+        mock.patch("subprocess.run") as mock_subprocess,
+    ):
+        yield Mocks(
+            input=mock_input,
+            listdir=mock_listdir,
+            requests=mock_requests,
+            subprocess=mock_subprocess,
+        )
 
 
 @pytest.mark.skipif(
@@ -47,10 +53,7 @@ def mock_subprocess() -> Iterator[mock.Mock]:
 )
 def test_happy_path(
     capsys: pytest.CaptureFixture[str],
-    mock_input: mock.Mock,
-    mock_listdir: mock.Mock,
-    mock_requests: mock.Mock,
-    mock_subprocess: mock.Mock,
+    mocks: Mocks,
     monkeypatch: pytest.MonkeyPatch,
     snapshot: SnapshotAssertion,
 ) -> None:
@@ -65,7 +68,7 @@ def test_happy_path(
     """
     monkeypatch.setenv("GITHUB_TOKEN", "fake-token")
 
-    mock_input.side_effect = ["y", "5.0.1", "y"]
+    mocks.input.side_effect = ["y", "5.0.1", "y"]
 
     def mock_post(*args: Any, **kwargs: Any) -> mock.Mock:
         """Return _one_ response JSON that happens to match expectations for multiple requests."""
@@ -78,15 +81,14 @@ def test_happy_path(
             ),
         )
 
-    mock_requests.side_effect = mock_post
+    mocks.requests.side_effect = mock_post
+
+    mocks.subprocess.return_value.stdout = ""
 
     release.main()
 
     out, err = capsys.readouterr()
 
-    assert mock_input.mock_calls == snapshot
-    assert mock_listdir.mock_calls == snapshot
-    assert mock_requests.mock_calls == snapshot
-    assert mock_subprocess.mock_calls == snapshot
+    assert mocks.mock_calls == snapshot
     assert out == snapshot
     assert err == snapshot

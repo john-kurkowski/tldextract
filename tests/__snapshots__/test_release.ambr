@@ -119,7 +119,7 @@
           list([
             'rm',
             '-rf',
-            PosixPath('dist'),
+            'dist',
           ]),
         ),
         dict({
@@ -145,7 +145,7 @@
           list([
             'ls',
             '-l',
-            PosixPath('dist'),
+            'dist',
           ]),
         ),
         dict({
@@ -158,7 +158,7 @@
           list([
             'tar',
             'tvf',
-            PosixPath('dist/archive1'),
+            'dist/archive1',
           ]),
         ),
         dict({
@@ -171,7 +171,7 @@
           list([
             'tar',
             'tvf',
-            PosixPath('dist/archive2'),
+            'dist/archive2',
           ]),
         ),
         dict({
@@ -184,7 +184,7 @@
           list([
             'tar',
             'tvf',
-            PosixPath('dist/archive3'),
+            'dist/archive3',
           ]),
         ),
         dict({
@@ -199,7 +199,7 @@
             'upload',
             '--repository',
             'testpypi',
-            PosixPath('dist/*'),
+            'dist/*',
           ]),
         ),
         dict({

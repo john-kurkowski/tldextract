@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import dataclasses
-import sys
 from collections.abc import Iterator
+from pathlib import Path
 from typing import Any
 from unittest import mock
 
 import pytest
 from syrupy.assertion import SnapshotAssertion
+from syrupy.matchers import path_type
 
 from scripts import release
 
@@ -47,9 +48,18 @@ def mocks() -> Iterator[Mocks]:
         )
 
 
-@pytest.mark.skipif(
-    sys.platform == "win32", reason="Snapshot paths are different on Windows"
-)
+@pytest.fixture
+def snapshot(snapshot: SnapshotAssertion) -> SnapshotAssertion:
+    """Override syrupy's snapshot.
+
+    * Simplify platform-dependent `Path` serialization, so the same snapshot
+      works on multiple platforms.
+    """
+    return snapshot.with_defaults(
+        matcher=path_type(types=(Path,), replacer=lambda data, _: str(data))
+    )
+
+
 def test_happy_path(
     capsys: pytest.CaptureFixture[str],
     mocks: Mocks,

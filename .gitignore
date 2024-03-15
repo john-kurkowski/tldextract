@@ -9,4 +9,3 @@ tldextract.egg-info
 tldextract/.suffix_cache/*
 .tox
 .pytest_cache
-.python-version

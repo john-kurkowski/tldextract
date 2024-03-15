@@ -53,6 +53,7 @@ testing = [
     "pytest-mock",
     "responses",
     "ruff",
+    "syrupy",
     "tox",
     "types-filelock",
     "types-requests",
@@ -83,6 +84,7 @@ write_to = "tldextract/_version.py"
 version = {attr = "setuptools_scm.get_version"}
 
 [tool.mypy]
+explicit_package_bases = true
 strict = true
 
 [tool.pytest.ini_options]

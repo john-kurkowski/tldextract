@@ -50,15 +50,16 @@ def create_build() -> None:
 
 def verify_build(is_test: str) -> None:
     """Verify the build."""
-    if len(os.listdir("dist")) != 2:
+    build_files = os.listdir("dist")
+    if len(build_files) != 2:
         print(
             "WARNING: dist folder contains incorrect number of files.", file=sys.stderr
         )
     print("Contents of dist folder:")
     subprocess.run(["ls", "-l", Path("dist")], check=True)
     print("Contents of tar files in dist folder:")
-    for directory in os.listdir("dist"):
-        subprocess.run(["tar", "tvf", Path("dist") / directory], check=True)
+    for build_file in build_files:
+        subprocess.run(["tar", "tvf", Path("dist") / build_file], check=True)
     confirmation = input("Does the build look correct? (y/n): ")
     if confirmation == "y":
         print("Build verified successfully.")
@@ -129,9 +130,7 @@ def create_release_notes_body(token: str, version: str) -> str:
     github_release_body = generate_github_release_notes_body(token, version)
     release_notes_url = get_release_notes_url(github_release_body)
     changelog_notes = get_changelog_release_notes(release_notes_url, version)
-    full_release_notes = (
-        changelog_notes + "\n\n**Full Changelog**: " + release_notes_url
-    )
+    full_release_notes = f"{changelog_notes}\n\n**Full Changelog**: {release_notes_url}"
     return full_release_notes
 
 
@@ -162,7 +161,7 @@ def create_github_release_draft(token: str, version: str) -> None:
             file=sys.stderr,
         )
         return
-    print("Release created successfully: " + response.json()["html_url"])
+    print(f'Release created successfully: {response.json()["html_url"]}')
 
 
 def upload_build_to_pypi(is_test: str) -> None:

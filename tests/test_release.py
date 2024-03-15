@@ -14,7 +14,7 @@ from syrupy.assertion import SnapshotAssertion
 from scripts import release
 
 
-@dataclasses.dataclass(kw_only=True)
+@dataclasses.dataclass
 class Mocks:
     """Collection of all mocked objects used in the release script."""
 
@@ -33,13 +33,12 @@ class Mocks:
 
 @pytest.fixture
 def mocks() -> Iterator[Mocks]:
-    """Stub reading user input."""
-    with (
-        mock.patch("builtins.input") as mock_input,
-        mock.patch("os.listdir") as mock_listdir,
-        mock.patch("requests.post") as mock_requests,
-        mock.patch("subprocess.run") as mock_subprocess,
-    ):
+    """Stub network and subprocesses."""
+    with mock.patch("builtins.input") as mock_input, mock.patch(
+        "os.listdir"
+    ) as mock_listdir, mock.patch("requests.post") as mock_requests, mock.patch(
+        "subprocess.run"
+    ) as mock_subprocess:
         yield Mocks(
             input=mock_input,
             listdir=mock_listdir,

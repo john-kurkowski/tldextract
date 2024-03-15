@@ -185,7 +185,7 @@
   Contents of tar files in dist folder:
   Build verified successfully.
   Release created successfully: https://github.com/path/to/release
-
+  
   '''
 # ---
 # name: test_happy_path.5

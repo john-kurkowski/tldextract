@@ -70,6 +70,8 @@ def test_happy_path(
 
     mocks.input.side_effect = ["y", "5.0.1", "y"]
 
+    mocks.listdir.return_value = ["archive1", "archive2", "archive3"]
+
     def mock_post(*args: Any, **kwargs: Any) -> mock.Mock:
         """Return _one_ response JSON that happens to match expectations for multiple requests."""
         return mock.Mock(

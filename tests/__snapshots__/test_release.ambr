@@ -36,20 +36,6 @@
         dict({
         }),
       ),
-      _Call(
-        '().__len__',
-        tuple(
-        ),
-        dict({
-        }),
-      ),
-      _Call(
-        '().__iter__',
-        tuple(
-        ),
-        dict({
-        }),
-      ),
     ]),
     'requests': _CallList([
       _Call(
@@ -160,6 +146,45 @@
             'ls',
             '-l',
             PosixPath('dist'),
+          ]),
+        ),
+        dict({
+          'check': True,
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          list([
+            'tar',
+            'tvf',
+            PosixPath('dist/archive1'),
+          ]),
+        ),
+        dict({
+          'check': True,
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          list([
+            'tar',
+            'tvf',
+            PosixPath('dist/archive2'),
+          ]),
+        ),
+        dict({
+          'check': True,
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          list([
+            'tar',
+            'tvf',
+            PosixPath('dist/archive3'),
           ]),
         ),
         dict({

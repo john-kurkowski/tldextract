@@ -1,0 +1,244 @@
+# serializer version: 1
+# name: test_happy_path
+  dict({
+    'input': _CallList([
+      _Call(
+        '',
+        tuple(
+          'Is this a test release? (y/n): ',
+        ),
+        dict({
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          'Enter the version number: ',
+        ),
+        dict({
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          'Does the build look correct? (y/n): ',
+        ),
+        dict({
+        }),
+      ),
+    ]),
+    'listdir': _CallList([
+      _Call(
+        '',
+        tuple(
+          'dist',
+        ),
+        dict({
+        }),
+      ),
+    ]),
+    'requests': _CallList([
+      _Call(
+        '',
+        tuple(
+          'https://api.github.com/repos/john-kurkowski/tldextract/releases/generate-notes',
+        ),
+        dict({
+          'headers': dict({
+            'Accept': 'application/vnd.github+json',
+            'Authorization': 'Bearer fake-token',
+            'X-GitHub-Api-Version': '2022-11-28',
+          }),
+          'json': dict({
+            'tag_name': '5.0.1',
+          }),
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          'https://api.github.com/repos/john-kurkowski/tldextract/releases',
+        ),
+        dict({
+          'headers': dict({
+            'Accept': 'application/vnd.github+json',
+            'Authorization': 'Bearer fake-token',
+            'X-GitHub-Api-Version': '2022-11-28',
+          }),
+          'json': dict({
+            'body': '''
+              * Bugfixes
+                  * Indicate MD5 not used in a security context (FIPS compliance) ([#309](https://github.com/john-kurkowski/tldextract/issues/309))
+              * Misc.
+                  * Increase typecheck aggression
+              
+              **Full Changelog**: fake-body
+            ''',
+            'draft': True,
+            'name': '5.0.1',
+            'prerelease': False,
+            'tag_name': '5.0.1',
+          }),
+        }),
+      ),
+    ]),
+    'subprocess': _CallList([
+      _Call(
+        '',
+        tuple(
+          list([
+            'git',
+            'status',
+            '--porcelain',
+          ]),
+        ),
+        dict({
+          'capture_output': True,
+          'text': True,
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          list([
+            'git',
+            'tag',
+            '-a',
+            '5.0.1',
+            '-m',
+            '5.0.1',
+          ]),
+        ),
+        dict({
+          'check': True,
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          list([
+            'rm',
+            '-rf',
+            PosixPath('dist'),
+          ]),
+        ),
+        dict({
+          'check': True,
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          list([
+            'python',
+            '-m',
+            'build',
+          ]),
+        ),
+        dict({
+          'check': True,
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          list([
+            'ls',
+            '-l',
+            PosixPath('dist'),
+          ]),
+        ),
+        dict({
+          'check': True,
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          list([
+            'tar',
+            'tvf',
+            PosixPath('dist/archive1'),
+          ]),
+        ),
+        dict({
+          'check': True,
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          list([
+            'tar',
+            'tvf',
+            PosixPath('dist/archive2'),
+          ]),
+        ),
+        dict({
+          'check': True,
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          list([
+            'tar',
+            'tvf',
+            PosixPath('dist/archive3'),
+          ]),
+        ),
+        dict({
+          'check': True,
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          list([
+            'twine',
+            'upload',
+            '--repository',
+            'testpypi',
+            PosixPath('dist/*'),
+          ]),
+        ),
+        dict({
+          'check': True,
+        }),
+      ),
+      _Call(
+        '',
+        tuple(
+          list([
+            'git',
+            'push',
+            '--tags',
+            'origin',
+            'master',
+          ]),
+        ),
+        dict({
+          'check': True,
+        }),
+      ),
+    ]),
+  })
+# ---
+# name: test_happy_path.1
+  '''
+  Version 5.0.1 tag added successfully.
+  Previous dist folder removed successfully.
+  Build created successfully.
+  Contents of dist folder:
+  Contents of tar files in dist folder:
+  Build verified successfully.
+  Release created successfully: https://github.com/path/to/release
+  
+  '''
+# ---
+# name: test_happy_path.2
+  '''
+  WARNING: dist folder contains incorrect number of files.
+  
+  '''
+# ---

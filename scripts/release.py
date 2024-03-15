@@ -49,7 +49,11 @@ def create_build() -> None:
 
 
 def verify_build(is_test: str) -> None:
-    """Verify the build."""
+    """Verify the build.
+
+    Print the archives in dist/ and ask the user to manually inspect and
+    confirm they contain the expected files, e.g. source files and test files.
+    """
     build_files = os.listdir("dist")
     if len(build_files) != 2:
         print(
@@ -109,7 +113,9 @@ def get_release_notes_url(body: str) -> str:
 def get_changelog_release_notes(release_notes_url: str, version: str) -> str:
     """Get the changelog release notes.
 
-    Uses a regex starting on a heading beginning with the version number literal, and matching until the next heading. Using regex to match markup is brittle. Consider a Markdown-parsing library instead.
+    Uses a regex starting on a heading beginning with the version number
+    literal, and matching until the next heading. Using regex to match markup
+    is brittle. Consider a Markdown-parsing library instead.
     """
     with open("CHANGELOG.md") as file:
         changelog_text = file.read()

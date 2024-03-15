@@ -2,6 +2,7 @@
 # name: test_happy_path
   _CallList([
     _Call(
+      '',
       tuple(
         'Is this a test release? (y/n): ',
       ),
@@ -9,6 +10,7 @@
       }),
     ),
     _Call(
+      '',
       tuple(
         'Enter the version number: ',
       ),
@@ -16,6 +18,7 @@
       }),
     ),
     _Call(
+      '',
       tuple(
         'Does the build look correct? (y/n): ',
       ),
@@ -27,8 +30,23 @@
 # name: test_happy_path.1
   _CallList([
     _Call(
+      '',
       tuple(
         'dist',
+      ),
+      dict({
+      }),
+    ),
+    _Call(
+      '().__len__',
+      tuple(
+      ),
+      dict({
+      }),
+    ),
+    _Call(
+      '().__iter__',
+      tuple(
       ),
       dict({
       }),
@@ -38,6 +56,7 @@
 # name: test_happy_path.2
   _CallList([
     _Call(
+      '',
       tuple(
         'https://api.github.com/repos/john-kurkowski/tldextract/releases/generate-notes',
       ),
@@ -53,6 +72,7 @@
       }),
     ),
     _Call(
+      '',
       tuple(
         'https://api.github.com/repos/john-kurkowski/tldextract/releases',
       ),
@@ -83,6 +103,7 @@
 # name: test_happy_path.3
   _CallList([
     _Call(
+      '',
       tuple(
         list([
           'git',
@@ -96,6 +117,7 @@
       }),
     ),
     _Call(
+      '',
       tuple(
         list([
           'git',
@@ -111,6 +133,7 @@
       }),
     ),
     _Call(
+      '',
       tuple(
         list([
           'rm',
@@ -123,6 +146,7 @@
       }),
     ),
     _Call(
+      '',
       tuple(
         list([
           'python',
@@ -135,6 +159,7 @@
       }),
     ),
     _Call(
+      '',
       tuple(
         list([
           'ls',
@@ -147,6 +172,7 @@
       }),
     ),
     _Call(
+      '',
       tuple(
         list([
           'twine',
@@ -161,6 +187,7 @@
       }),
     ),
     _Call(
+      '',
       tuple(
         list([
           'git',

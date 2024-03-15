@@ -84,9 +84,9 @@ def test_happy_path(
 
     out, err = capsys.readouterr()
 
-    assert mock_input.call_args_list == snapshot
-    assert mock_listdir.call_args_list == snapshot
-    assert mock_requests.call_args_list == snapshot
-    assert mock_subprocess.call_args_list == snapshot
+    assert mock_input.mock_calls == snapshot
+    assert mock_listdir.mock_calls == snapshot
+    assert mock_requests.mock_calls == snapshot
+    assert mock_subprocess.mock_calls == snapshot
     assert out == snapshot
     assert err == snapshot

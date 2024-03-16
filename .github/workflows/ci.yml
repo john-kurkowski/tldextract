@@ -41,8 +41,7 @@ jobs:
           check-latest: true
       - name: Install Python requirements
         run: |
-          pip install --upgrade pip
-          pip install --upgrade --editable '.[testing]'
+          pip install --upgrade tox
       - name: Test
         run: tox
         env:

@@ -13,7 +13,7 @@ It will:
 Prerequisites:
     - This must be run from the root of the repository.
     - The repo must have a clean git working tree.
-    - The user must have the GITHUB_TOKEN environment variable set to a valid GitHub personal access token.
+    - The user must have the GITHUB_TOKEN environment variable set to a GitHub personal access token with repository "Contents" read and write permission.
     - The user will need credentials for the PyPI repository, which the user will be prompted for during the upload step. The user will need to paste the token manually from a password manager or similar.
     - The CHANGELOG.md file must already contain an entry for the version being released.
     - Install requirements with: pip install --upgrade --editable '.[release]'
@@ -22,19 +22,27 @@ Prerequisites:
 
 from __future__ import annotations
 
+import contextlib
 import os
 import re
 import subprocess
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 
 import requests
 
 
-def add_git_tag_for_version(version: str) -> None:
+@contextlib.contextmanager
+def add_git_tag_for_version(version: str) -> Iterator[None]:
     """Add a git tag for the given version."""
     subprocess.run(["git", "tag", "-a", version, "-m", version], check=True)
     print(f"Version {version} tag added successfully.")
+    try:
+        yield
+    except Exception:
+        subprocess.run(["git", "tag", "-d", version])
+        raise
 
 
 def remove_previous_dist() -> None:
@@ -68,8 +76,6 @@ def verify_build(is_test: str) -> None:
     confirmation = input("Does the build look correct? (y/n): ")
     if confirmation == "y":
         print("Build verified successfully.")
-        upload_build_to_pypi(is_test)
-        push_git_tags()
     else:
         raise Exception("Could not verify. Build was not uploaded.")
 
@@ -227,10 +233,12 @@ def main() -> None:
     is_test = get_is_test_response()
     version_number = input("Enter the version number: ")
 
-    add_git_tag_for_version(version_number)
-    remove_previous_dist()
-    create_build()
-    verify_build(is_test)
+    with add_git_tag_for_version(version_number):
+        remove_previous_dist()
+        create_build()
+        verify_build(is_test)
+        upload_build_to_pypi(is_test)
+    push_git_tags()
     create_github_release_draft(github_token, version_number)
 
 

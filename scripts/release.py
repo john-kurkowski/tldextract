@@ -40,7 +40,7 @@ def add_git_tag_for_version(version: str) -> Iterator[None]:
     print(f"Version {version} tag added successfully.")
     try:
         yield
-    except Exception:
+    except:
         subprocess.run(["git", "tag", "-d", version])
         raise
 

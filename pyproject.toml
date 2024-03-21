@@ -55,6 +55,7 @@ testing = [
     "ruff",
     "syrupy",
     "tox",
+    "tox-uv",
     "types-filelock",
     "types-requests",
 ]

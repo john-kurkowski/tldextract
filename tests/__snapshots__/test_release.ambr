@@ -72,6 +72,9 @@
               * Misc.
                   * Increase typecheck aggression
               
+              ## New Contributors
+              * @jdoe contributed
+              
               **Full Changelog**: fake-body
             ''',
             'draft': True,

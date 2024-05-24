@@ -3,6 +3,16 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 5.1.2 (2024-03-18)
+
+* Bugfixes
+  * Remove `socket.inet_pton`, to fix platform-dependent IP parsing ([#318](https://github.com/john-kurkowski/tldextract/issues/318))
+  * Use non-capturing groups for IPv4 address detection, for a slight speed boost ([#323](https://github.com/john-kurkowski/tldextract/issues/323))
+* Misc.
+  * Add CI for PyPy3.9 and PyPy3.10 ([#316](https://github.com/john-kurkowski/tldextract/issues/316))
+  * Add script to automate package release process ([#325](https://github.com/john-kurkowski/tldextract/issues/325))
+  * Update LICENSE copyright years
+
 ## 5.1.1 (2023-11-16)
 
 * Bugfixes

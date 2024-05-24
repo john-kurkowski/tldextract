@@ -13,7 +13,7 @@ It will:
 Prerequisites:
     - This must be run from the root of the repository.
     - The repo must have a clean git working tree.
-    - The user must have the GITHUB_TOKEN environment variable set to a valid GitHub personal access token.
+    - The user must have the GITHUB_TOKEN environment variable set to a GitHub personal access token with repository "Contents" read and write permission.
     - The user will need credentials for the PyPI repository, which the user will be prompted for during the upload step. The user will need to paste the token manually from a password manager or similar.
     - The CHANGELOG.md file must already contain an entry for the version being released.
     - Install requirements with: pip install --upgrade --editable '.[release]'
@@ -22,19 +22,27 @@ Prerequisites:
 
 from __future__ import annotations
 
+import contextlib
 import os
 import re
 import subprocess
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 
 import requests
 
 
-def add_git_tag_for_version(version: str) -> None:
+@contextlib.contextmanager
+def add_git_tag_for_version(version: str) -> Iterator[None]:
     """Add a git tag for the given version."""
     subprocess.run(["git", "tag", "-a", version, "-m", version], check=True)
     print(f"Version {version} tag added successfully.")
+    try:
+        yield
+    except:
+        subprocess.run(["git", "tag", "-d", version])
+        raise
 
 
 def remove_previous_dist() -> None:
@@ -68,14 +76,16 @@ def verify_build(is_test: str) -> None:
     confirmation = input("Does the build look correct? (y/n): ")
     if confirmation == "y":
         print("Build verified successfully.")
-        upload_build_to_pypi(is_test)
-        push_git_tags()
     else:
         raise Exception("Could not verify. Build was not uploaded.")
 
 
 def generate_github_release_notes_body(token: str, version: str) -> str:
-    """Generate and grab release notes URL from Github."""
+    """Generate and grab release notes URL from Github.
+
+    Delete their first paragraph, because we track its contents in a tighter
+    form in CHANGELOG.md. See `get_changelog_release_notes`.
+    """
     response = requests.post(
         "https://api.github.com/repos/john-kurkowski/tldextract/releases/generate-notes",
         headers={
@@ -94,24 +104,13 @@ def generate_github_release_notes_body(token: str, version: str) -> str:
             file=sys.stderr,
         )
         return ""
-    return str(response.json()["body"])
+
+    body = str(response.json()["body"])
+    paragraphs = body.split("\n\n")
+    return "\n\n".join(paragraphs[1:])
 
 
-def get_release_notes_url(body: str) -> str:
-    """Parse the release notes content to get the changelog URL."""
-    url_pattern = re.compile(r"\*\*Full Changelog\*\*: (.*)$")
-    match = url_pattern.search(body)
-    if match:
-        return match.group(1)
-    else:
-        print(
-            "WARNING: Failed to parse release notes URL from GitHub response.",
-            file=sys.stderr,
-        )
-        return ""
-
-
-def get_changelog_release_notes(release_notes_url: str, version: str) -> str:
+def get_changelog_release_notes(version: str) -> str:
     """Get the changelog release notes.
 
     Uses a regex starting on a heading beginning with the version number
@@ -125,25 +124,15 @@ def get_changelog_release_notes(release_notes_url: str, version: str) -> str:
     if match:
         return str(match.group(1)).strip()
     else:
-        print(
-            f"WARNING: Failed to parse changelog release notes. Manually copy this version's notes from the CHANGELOG.md file to {release_notes_url}.",
-            file=sys.stderr,
-        )
         return ""
-
-
-def create_release_notes_body(token: str, version: str) -> str:
-    """Compile the release notes."""
-    github_release_body = generate_github_release_notes_body(token, version)
-    release_notes_url = get_release_notes_url(github_release_body)
-    changelog_notes = get_changelog_release_notes(release_notes_url, version)
-    full_release_notes = f"{changelog_notes}\n\n**Full Changelog**: {release_notes_url}"
-    return full_release_notes
 
 
 def create_github_release_draft(token: str, version: str) -> None:
     """Create a release on GitHub."""
-    release_body = create_release_notes_body(token, version)
+    github_release_body = generate_github_release_notes_body(token, version)
+    changelog_notes = get_changelog_release_notes(version)
+    release_body = f"{changelog_notes}\n\n{github_release_body}"
+
     response = requests.post(
         "https://api.github.com/repos/john-kurkowski/tldextract/releases",
         headers={
@@ -168,7 +157,14 @@ def create_github_release_draft(token: str, version: str) -> None:
             file=sys.stderr,
         )
         return
+
     print(f'Release created successfully: {response.json()["html_url"]}')
+
+    if not changelog_notes:
+        print(
+            "WARNING: Failed to parse changelog release notes. Manually copy this version's notes from the CHANGELOG.md file to the above URL.",
+            file=sys.stderr,
+        )
 
 
 def upload_build_to_pypi(is_test: str) -> None:
@@ -227,10 +223,12 @@ def main() -> None:
     is_test = get_is_test_response()
     version_number = input("Enter the version number: ")
 
-    add_git_tag_for_version(version_number)
-    remove_previous_dist()
-    create_build()
-    verify_build(is_test)
+    with add_git_tag_for_version(version_number):
+        remove_previous_dist()
+        create_build()
+        verify_build(is_test)
+        upload_build_to_pypi(is_test)
+    push_git_tags()
     create_github_release_draft(github_token, version_number)
 
 

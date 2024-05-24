@@ -76,7 +76,7 @@ def test_happy_path(
         return mock.Mock(
             json=mock.Mock(
                 return_value={
-                    "body": "Body start **Full Changelog**: fake-body",
+                    "body": "## What's Changed\nGitHub changelog here\n\n## New Contributors\n* @jdoe contributed\n\n**Full Changelog**: fake-body",
                     "html_url": "https://github.com/path/to/release",
                 }
             ),

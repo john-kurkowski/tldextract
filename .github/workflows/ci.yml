@@ -41,7 +41,7 @@ jobs:
           check-latest: true
       - name: Install Python requirements
         run: |
-          pip install --upgrade tox
+          pip install --upgrade tox tox-uv
       - name: Test
         run: tox
         env:

@@ -269,5 +269,5 @@ tox -e py311
 Automatically format all code:
 
 ```zsh
-black .
+ruff format .
 ```

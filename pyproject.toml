@@ -46,7 +46,6 @@ release = [
     "twine",
 ]
 testing = [
-    "black",
     "mypy",
     "pytest",
     "pytest-gitignore",
@@ -105,7 +104,7 @@ select = [
   "W",
 ]
 ignore = [
-  "E501", # line too long; if Black does its job, not worried about the rare long line
+  "E501", # line too long; if formatter does its job, not worried about the rare long line
 ]
 
 [tool.ruff.lint.pydocstyle]

@@ -47,7 +47,9 @@ def find_first_response(
                     session=session, url=url, timeout=cache_fetch_timeout
                 )
             except requests.exceptions.RequestException:
-                LOG.exception("Exception reading Public Suffix List url %s", url)
+                LOG.warning(
+                    "Exception reading Public Suffix List url %s", url, exc_info=True
+                )
     finally:
         # Ensure the session is always closed if it's constructed in the method
         if session_created:

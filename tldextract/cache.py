@@ -113,8 +113,7 @@ class DiskCache:
             with open(cache_filepath) as cache_file:
                 return json.load(cache_file)
         except (OSError, ValueError) as exc:
-            LOG.error("error reading TLD cache file %s: %s", cache_filepath, exc)
-            raise KeyError("namespace: " + namespace + " key: " + repr(key)) from None
+            raise KeyError("namespace: " + namespace + " key: " + repr(key)) from exc
 
     def set(  # noqa: A003
         self, namespace: str, key: str | dict[str, Hashable], value: object

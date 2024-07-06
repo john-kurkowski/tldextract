@@ -36,7 +36,6 @@ To rejoin the original hostname, if it was indeed a valid, registered hostname:
 
 from __future__ import annotations
 
-import logging
 import os
 import urllib.parse
 from collections.abc import Collection, Sequence
@@ -49,9 +48,6 @@ import requests
 from .cache import DiskCache, get_cache_dir
 from .remote import lenient_netloc, looks_like_ip, looks_like_ipv6
 from .suffix_list import get_suffix_lists
-
-LOG = logging.getLogger("tldextract")
-
 
 CACHE_TIMEOUT = os.environ.get("TLDEXTRACT_CACHE_TIMEOUT")
 

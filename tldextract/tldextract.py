@@ -157,13 +157,14 @@ class TLDExtract:
         the `cache_dir` will live in the tldextract directory. You can disable
         the caching functionality of this module by setting `cache_dir` to `None`.
 
-        If the cached version does not exist (such as on the first run), HTTP request the URLs in
-        `suffix_list_urls` in order, until one returns public suffix list data. To disable HTTP
-        requests, set this to an empty sequence.
-
-        The default list of URLs point to the latest version of the Mozilla Public Suffix List and
-        its mirror, but any similar document could be specified. Local files can be specified by
-        using the `file://` protocol. (See `urllib2` documentation.)
+        If the cached version does not exist, such as on the first run, HTTP
+        request the URLs in `suffix_list_urls` in order, and use the first
+        successful response for public suffix definitions. Subsequent, untried
+        URLs are ignored. The default URLs are the latest version of the
+        Mozilla Public Suffix List and its mirror, but any similar document URL
+        could be specified. Local files can be specified by using the `file://`
+        protocol (see `urllib2` documentation). To disable HTTP requests, set
+        this to an empty sequence.
 
         If there is no cached version loaded and no data is found from the `suffix_list_urls`,
         the module will fall back to the included TLD set snapshot. If you do not want
@@ -175,7 +176,9 @@ class TLDExtract:
         suffix, so these domains are excluded by default. If you'd like them
         included instead, set `include_psl_private_domains` to True.
 
-        You can pass additional suffixes in `extra_suffixes` argument without changing list URL
+        You can specify additional suffixes in the `extra_suffixes` argument.
+        These will be merged into whatever public suffix definitions are
+        already in use by `tldextract`, above.
 
         cache_fetch_timeout is passed unmodified to the underlying request object
         per the requests documentation here:

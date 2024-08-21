@@ -46,4 +46,3 @@ jobs:
         run: tox
         env:
           TOXENV: ${{ matrix.language.toxenv }}
-          TOX_OVERRIDE: tox.skip_missing_interpreters=false

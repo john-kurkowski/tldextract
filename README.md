@@ -89,8 +89,8 @@ tldextract http://forums.bbc.co.uk
 
 Beware when first calling `tldextract`, it updates its TLD list with a live HTTP
 request. This updated TLD set is usually cached indefinitely in `$HOME/.cache/python-tldextract`.
-To control the cache's location, set TLDEXTRACT_CACHE environment variable or set the
-cache_dir path in TLDExtract initialization.
+To control the cache's location, set the `TLDEXTRACT_CACHE` environment variable or set the
+`cache_dir` path when constructing a `TLDExtract`.
 
 (Arguably runtime bootstrapping like that shouldn't be the default behavior,
 like for production systems. But I want you to have the latest TLDs, especially
@@ -179,10 +179,12 @@ extract = tldextract.TLDExtract(
     fallback_to_snapshot=False)
 ```
 
-The above snippet will fetch from the URL *you* specified, upon first need to download the
-suffix list (i.e. if the cached version doesn't exist).
+If the cached version of public suffix definitions doesn't exist, such as on
+the first run, the above snippet will request the URLs you specified in order,
+and use the first successful response.
 
-If you want to use input data from your local filesystem, just use the `file://` protocol:
+If you want to use input data from your local filesystem, use the `file://`
+protocol with an absolute path:
 
 ```python
 extract = tldextract.TLDExtract(
@@ -191,17 +193,24 @@ extract = tldextract.TLDExtract(
     fallback_to_snapshot=False)
 ```
 
-Use an absolute path when specifying the `suffix_list_urls` keyword argument.
-`os.path` is your friend.
-
-The command line update command can be used with a URL or local file you specify:
+This also works via command line update:
 
 ```zsh
 tldextract --update --suffix_list_url "http://foo.bar.baz"
 ```
 
-This could be useful in production when you don't want the delay associated with updating the suffix
-list on first use, or if you are behind a complex firewall that prevents a simple update from working.
+Using your own URLs could be useful in production when you don't want the delay
+with updating the suffix list on first use, or if you are behind a complex
+firewall.
+
+You can also specify additional suffixes in the `extra_suffixes` param. These
+will be merged into whatever public suffix definitions are already in use by
+`tldextract`.
+
+```python
+extract = tldextract.TLDExtract(
+    extra_suffixes=["foo", "bar", "baz"])
+```
 
 ## FAQ
 
@@ -210,9 +219,9 @@ list on first use, or if you are behind a complex firewall that prevents a simpl
 This project doesn't contain an actual list of public suffixes. That comes from
 [the Public Suffix List (PSL)](https://publicsuffix.org/). Submit amendments there.
 
-(In the meantime, you can tell tldextract about your exception by either
+In the meantime, you can tell tldextract about your exception by either
 forking the PSL and using your fork in the `suffix_list_urls` param, or adding
-your suffix piecemeal with the `extra_suffixes` param.)
+your suffix piecemeal with the `extra_suffixes` param.
 
 ### I see my suffix in [the Public Suffix List (PSL)](https://publicsuffix.org/), but this library doesn't extract it.
 

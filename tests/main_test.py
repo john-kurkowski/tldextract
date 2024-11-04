@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import os
-import sys
 import tempfile
 from collections.abc import Sequence
 from pathlib import Path
@@ -168,8 +167,7 @@ def test_looks_like_ipv6() -> None:
     assert looks_like_ipv6("aBcD:ef01:2345:6789:aBcD:ef01:aaaa:2288") is True
     assert looks_like_ipv6("aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1") is True
     assert looks_like_ipv6("ZBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1") is False
-    if sys.version_info >= (3, 8, 12):  # noqa: UP036
-        assert looks_like_ipv6("aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.01") is False
+    assert looks_like_ipv6("aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.01") is False
     assert looks_like_ipv6("aBcD:ef01:2345:6789:aBcD:") is False
 
 

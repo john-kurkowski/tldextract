@@ -24,18 +24,6 @@ _DID_LOG_UNABLE_TO_CACHE = False
 
 T = TypeVar("T")
 
-if sys.version_info >= (3, 9):
-
-    def md5(*args: bytes) -> hashlib._Hash:
-        """Use argument only available in newer Python.
-
-        In this file, MD5 is only used for cache location, not security.
-        """
-        return hashlib.md5(*args, usedforsecurity=False)
-
-else:
-    md5 = hashlib.md5
-
 
 def get_pkg_unique_identifier() -> str:
     """Generate an identifier unique to the python version, tldextract version, and python instance.
@@ -51,7 +39,9 @@ def get_pkg_unique_identifier() -> str:
     tldextract_version = "tldextract-" + version
     python_env_name = os.path.basename(sys.prefix)
     # just to handle the edge case of two identically named python environments
-    python_binary_path_short_hash = md5(sys.prefix.encode("utf-8")).hexdigest()[:6]
+    python_binary_path_short_hash = hashlib.md5(
+        sys.prefix.encode("utf-8"), usedforsecurity=False
+    ).hexdigest()[:6]
     python_version = ".".join([str(v) for v in sys.version_info[:-1]])
     identifier_parts = [
         python_version,
@@ -237,7 +227,7 @@ def _fetch_url(session: requests.Session, url: str, timeout: int | None) -> str:
 
 def _make_cache_key(inputs: str | dict[str, Hashable]) -> str:
     key = repr(inputs)
-    return md5(key.encode("utf8")).hexdigest()
+    return hashlib.md5(key.encode("utf8"), usedforsecurity=False).hexdigest()
 
 
 def _make_dir(filename: str) -> None:

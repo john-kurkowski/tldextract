@@ -34,11 +34,12 @@ class Mocks:
 @pytest.fixture
 def mocks() -> Iterator[Mocks]:
     """Stub network and subprocesses."""
-    with mock.patch("builtins.input") as mock_input, mock.patch(
-        "os.listdir"
-    ) as mock_listdir, mock.patch("requests.post") as mock_requests, mock.patch(
-        "subprocess.run"
-    ) as mock_subprocess:
+    with (
+        mock.patch("builtins.input") as mock_input,
+        mock.patch("os.listdir") as mock_listdir,
+        mock.patch("requests.post") as mock_requests,
+        mock.patch("subprocess.run") as mock_subprocess,
+    ):
         yield Mocks(
             input=mock_input,
             listdir=mock_listdir,

@@ -3,6 +3,20 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 5.1.3 (2024-11-04)
+
+* Bugfixes
+  * Reduce logging errors ([`921a825`](https://github.com/john-kurkowski/tldextract/commit/921a82523c0e4403d21d50b2c3410d9af43520ac))
+  * Drop support for EOL Python 3.8 ([#340](https://github.com/john-kurkowski/tldextract/issues/340))
+  * Support Python 3.13 ([#341](https://github.com/john-kurkowski/tldextract/issues/341))
+  * Update bundled snapshot
+* Documentation
+  * Clarify how to use your own definitions
+  * Clarify first-successful definitions vs. merged definitions
+* Misc.
+  * Switch from Black to Ruff ([#333](https://github.com/john-kurkowski/tldextract/issues/333))
+  * Switch from pip to uv, during tox ([#324](https://github.com/john-kurkowski/tldextract/issues/324))
+
 ## 5.1.2 (2024-03-18)
 
 * Bugfixes

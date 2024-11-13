@@ -297,9 +297,9 @@ class TLDExtract:
             len(netloc_with_ascii_dots) >= min_num_ipv6_chars
             and netloc_with_ascii_dots[0] == "["
             and netloc_with_ascii_dots[-1] == "]"
+            and looks_like_ipv6(netloc_with_ascii_dots[1:-1])
         ):
-            if looks_like_ipv6(netloc_with_ascii_dots[1:-1]):
-                return ExtractResult("", netloc_with_ascii_dots, "", is_private=False)
+            return ExtractResult("", netloc_with_ascii_dots, "", is_private=False)
 
         labels = netloc_with_ascii_dots.split(".")
 

@@ -46,7 +46,7 @@ def _schemeless_url(url: str) -> str:
         return url[2:]
     if (
         double_slashes_start < 2
-        or not url[double_slashes_start - 1] == ":"
+        or url[double_slashes_start - 1] != ":"
         or set(url[: double_slashes_start - 1]) - scheme_chars_set
     ):
         return url

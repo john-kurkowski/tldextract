@@ -158,7 +158,7 @@ def create_github_release_draft(token: str, version: str) -> None:
         )
         return
 
-    print(f'Release created successfully: {response.json()["html_url"]}')
+    print(f"Release created successfully: {response.json()['html_url']}")
 
     if not changelog_notes:
         print(

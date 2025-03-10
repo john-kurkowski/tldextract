@@ -55,8 +55,17 @@ To rejoin the original hostname, if it was indeed a valid, registered hostname:
 'forums.bbc.co.uk'
 ```
 
+In addition to the Python interface, there is a command-line interface. Split
+the URL components by space:
+
+```zsh
+$ tldextract 'http://forums.bbc.co.uk'
+forums bbc co.uk
+```
+
 By default, this package supports the public ICANN TLDs and their exceptions.
-You can optionally support the Public Suffix List's private domains as well.
+You can optionally support the Public Suffix List's [private
+domains](#public-vs-private-domains) as well.
 
 This package started by implementing the chosen answer from [this StackOverflow question on
 getting the "domain name" from a URL](http://stackoverflow.com/questions/569137/how-to-get-domain-name-from-url/569219#569219).
@@ -76,13 +85,6 @@ Or the latest dev version:
 
 ```zsh
 pip install -e 'git://github.com/john-kurkowski/tldextract.git#egg=tldextract'
-```
-
-Command-line usage, splits the URL components by space:
-
-```zsh
-tldextract http://forums.bbc.co.uk
-# forums bbc co.uk
 ```
 
 ## Note about caching

@@ -80,17 +80,18 @@ class ExtractResult:
 
         This is roughly the domain the owner paid to register with a registrar
         or, in the case of a private domain, "registered" with the domain
-        owner.
+        owner. If the input was not something one could register, this property
+        returns the empty string.
 
-        To distinguish the latter case of private domains, consider Blogspot,
-        which is in the PSL's private domains. If `TLDExtract`'s
+        To distinguish the case of private domains, consider Blogspot, which is
+        in the PSL's private domains. If `TLDExtract`'s
         `include_psl_private_domains=False`, which is the default, public and
         private domains are not distinguished, the `registered_domain` property
         of a Blogspot URL represents the domain the owner of Blogspot
         registered with a registrar, i.e. `blogspot.com`. If
         `include_psl_private_domains=True`, the `registered_domain` property
-        represents the blogspot.com subdomain the owner of a Blogspot blog
-        registered with Blogspot.
+        represents the blogspot.com _subdomain_ the owner of a blog registered
+        with Blogspot.
 
         >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=False).registered_domain
         'blogspot.com'

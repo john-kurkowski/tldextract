@@ -46,6 +46,8 @@ release = [
     "twine",
 ]
 testing = [
+    "mdformat",
+    "mdformat-ruff",
     "mypy",
     "pytest",
     "pytest-gitignore",

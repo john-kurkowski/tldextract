@@ -67,10 +67,10 @@
           }),
           'json': dict({
             'body': '''
-              * Bugfixes
-                  * Indicate MD5 not used in a security context (FIPS compliance) ([#309](https://github.com/john-kurkowski/tldextract/issues/309))
-              * Misc.
-                  * Increase typecheck aggression
+              - Bugfixes
+                - Indicate MD5 not used in a security context (FIPS compliance) ([#309](https://github.com/john-kurkowski/tldextract/issues/309))
+              - Misc.
+                - Increase typecheck aggression
               
               ## New Contributors
               * @jdoe contributed

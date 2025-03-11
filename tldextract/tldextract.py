@@ -77,6 +77,29 @@ class ExtractResult:
         'bbc.co.uk'
         >>> extract('http://localhost:8080').registered_domain
         ''
+
+        This is roughly the domain the owner paid to register with a registrar
+        or, in the case of a private domain, "registered" with the domain
+        owner.
+
+        To distinguish the latter case of private domains, consider Blogspot,
+        which is in the PSL's private domains. If `TLDExtract`'s
+        `include_psl_private_domains=False`, which is the default, public and
+        private domains are not distinguished, the `registered_domain` property
+        of a Blogspot URL represents the domain the owner of Blogspot
+        registered with a registrar, i.e. `blogspot.com`. If
+        `include_psl_private_domains=True`, the `registered_domain` property
+        represents the blogspot.com subdomain the owner of a Blogspot blog
+        registered with Blogspot.
+
+        >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=False).registered_domain
+        'blogspot.com'
+        >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=True).registered_domain
+        'waiterrant.blogspot.com'
+
+        To always get the same joined string, regardless of the
+        `include_psl_private_domains` setting, consider the TODO and TODO
+        properties.
         """
         if self.suffix and self.domain:
             return f"{self.domain}.{self.suffix}"

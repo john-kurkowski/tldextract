@@ -90,6 +90,9 @@ strict = true
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
 
+[tool.ruff.format]
+docstring-code-format = true
+
 [tool.ruff.lint]
 select = [
   "A",

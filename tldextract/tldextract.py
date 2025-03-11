@@ -71,7 +71,7 @@ class ExtractResult:
 
     @property
     def registered_domain(self) -> str:
-        """Joins the domain and suffix fields with a dot, if they're both set.
+        """Joins the `domain` and `suffix` fields with a dot, if they're both set, or else the empty string.
 
         >>> extract('http://forums.bbc.co.uk').registered_domain
         'bbc.co.uk'
@@ -84,7 +84,7 @@ class ExtractResult:
 
     @property
     def fqdn(self) -> str:
-        """Returns a Fully Qualified Domain Name, if there is a proper domain/suffix.
+        """Returns a Fully Qualified Domain Name (FQDN), if there is a proper `domain` and `suffix`, or else the empty string.
 
         >>> extract('http://forums.bbc.co.uk/path/to/file').fqdn
         'forums.bbc.co.uk'
@@ -97,7 +97,7 @@ class ExtractResult:
 
     @property
     def ipv4(self) -> str:
-        """Returns the ipv4 if that is what the presented domain/url is.
+        """Returns the IPv4, if that is what the input domain/URL was, or else the empty string.
 
         >>> extract('http://127.0.0.1/path/to/file').ipv4
         '127.0.0.1'
@@ -116,7 +116,7 @@ class ExtractResult:
 
     @property
     def ipv6(self) -> str:
-        """Returns the ipv6 if that is what the presented domain/url is.
+        """Returns the IPv6, if that is what the input domain/URL was, or else the empty string.
 
         >>> extract('http://[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1]/path/to/file').ipv6
         'aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1'

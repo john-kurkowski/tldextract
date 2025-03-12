@@ -86,43 +86,6 @@ class ExtractResult:
     """
 
     @property
-    def registered_domain(self) -> str:
-        """Joins the `domain` and `suffix` fields with a dot, if they're both set, or else the empty string.
-
-        >>> extract('http://forums.bbc.co.uk').registered_domain
-        'bbc.co.uk'
-        >>> extract('http://localhost:8080').registered_domain
-        ''
-
-        This is roughly the domain the owner paid to register with a registrar
-        or, in the case of a private domain, "registered" with the domain
-        owner. If the input was not something one could register, this property
-        returns the empty string.
-
-        To distinguish the case of private domains, consider Blogspot, which is
-        in the PSL's private domains. If `TLDExtract`'s
-        `include_psl_private_domains=False`, which is the default, public and
-        private domains are not distinguished, the `registered_domain` property
-        of a Blogspot URL represents the domain the owner of Blogspot
-        registered with a registrar, i.e. `blogspot.com`. If
-        `include_psl_private_domains=True`, the `registered_domain` property
-        represents the blogspot.com _subdomain_ the owner of a blog registered
-        with Blogspot.
-
-        >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=False).registered_domain
-        'blogspot.com'
-        >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=True).registered_domain
-        'waiterrant.blogspot.com'
-
-        To always get the same joined string, regardless of the
-        `include_psl_private_domains` setting, consider the TODO and TODO
-        properties.
-        """
-        if self.suffix and self.domain:
-            return f"{self.domain}.{self.suffix}"
-        return ""
-
-    @property
     def fqdn(self) -> str:
         """Returns a Fully Qualified Domain Name (FQDN), if there is a proper `domain` and `suffix`, or else the empty string.
 
@@ -175,6 +138,74 @@ class ExtractResult:
             debracketed = self.domain[1:-1]
             if looks_like_ipv6(debracketed):
                 return debracketed
+        return ""
+
+    @property
+    def registered_domain(self) -> str:
+        """Joins the `domain` and `suffix` fields with a dot, if they're both set, or else the empty string.
+
+        >>> extract('http://forums.bbc.co.uk').registered_domain
+        'bbc.co.uk'
+        >>> extract('http://localhost:8080').registered_domain
+        ''
+
+        This is an alias for the `top_domain_under_public_suffix` property.
+        `registered_domain` is so called because is roughly the domain the
+        owner paid to register with a registrar or, in the case of a private
+        domain, "registered" with the domain owner. If the input was not
+        something one could register, this property returns the empty string.
+
+        To distinguish the case of private domains, consider Blogspot, which is
+        in the PSL's private domains. If `TLDExtract`'s
+        `include_psl_private_domains=False`, which is the default, public and
+        private domains are not distinguished, the `registered_domain` property
+        of a Blogspot URL represents the domain the owner of Blogspot
+        registered with a registrar, i.e. `blogspot.com`. If
+        `include_psl_private_domains=True`, the `registered_domain` property
+        represents the blogspot.com _subdomain_ the owner of a blog
+        "registered" with Blogspot.
+
+        >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=False).registered_domain
+        'blogspot.com'
+        >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=True).registered_domain
+        'waiterrant.blogspot.com'
+
+        To always get the same joined string, regardless of the
+        `include_psl_private_domains` setting, consider the
+        `top_domain_under_registry_suffix` property.
+        """
+        return self.top_domain_under_public_suffix
+
+    @property
+    def top_domain_under_registry_suffix(self) -> str:
+        """Joins the rightmost domain and `registry_suffix` with a dot, if such a domain is available and `registry_suffix` is set, or else the empty string.
+
+        If the input was not in the Public Suffix List's private domains, this
+        is equivalent to `top_domain_under_public_suffix`.
+
+        >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=False).top_domain_under_registry_suffix
+        'blogspot.com'
+        >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=True).top_domain_under_registry_suffix
+        'blogspot.com'
+        >>> extract('http://localhost:8080').top_domain_under_registry_suffix
+        ''
+        """
+        if not self.is_private:
+            return self.top_domain_under_public_suffix
+
+        raise NotImplementedError
+
+    @property
+    def top_domain_under_public_suffix(self) -> str:
+        """Joins the `domain` and `suffix` fields with a dot, if they're both set, or else the empty string.
+
+        >>> extract('http://forums.bbc.co.uk').top_domain_under_public_suffix
+        'bbc.co.uk'
+        >>> extract('http://localhost:8080').top_domain_under_public_suffix
+        ''
+        """
+        if self.suffix and self.domain:
+            return f"{self.domain}.{self.suffix}"
         return ""
 
 

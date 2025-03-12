@@ -65,9 +65,25 @@ class ExtractResult:
     """
 
     subdomain: str
+    """All subdomains beneath the domain of the input URL, if it contained any such subdomains, or else the empty string."""
+
     domain: str
+    """The topmost domain of the input URL, if it contained a domain name, or else everything hostname-like in the input.
+
+    If the input URL didn't contain a real domain name, this field tends to
+    catch values like an IP address, or private network hostnames like
+    "localhost".
+    """
+
     suffix: str
+    """The public suffix of the input URL, if it contained one, or else the empty string."""
+
     is_private: bool
+    """Whether the input URL belongs in the Public Suffix List's private domains.
+
+    If `include_psl_private_domains` was set to `False`, this is always
+    `False`.
+    """
 
     @property
     def registered_domain(self) -> str:

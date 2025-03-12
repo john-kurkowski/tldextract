@@ -61,13 +61,40 @@ PUBLIC_SUFFIX_LIST_URLS = (
 class ExtractResult:
     """A URL's extracted subdomain, domain, and suffix.
 
-    Also contains metadata, like a flag that indicates if the URL has a private suffix.
+    These first 3 fields are what most users of this library will care about.
+    They are the split, non-overlapping hostname components of the input URL.
+    They can be used to rebuild the original URL's hostname.
+
+    Beyond the first 3 fields, the class contains metadata fields, like a flag
+    that indicates if the input URL's suffix is from a private domain.
     """
 
     subdomain: str
+    """All subdomains beneath the domain of the input URL, if it contained any such subdomains, or else the empty string."""
+
     domain: str
+    """The topmost domain of the input URL, if it contained a domain name, or else everything hostname-like in the input.
+
+    If the input URL didn't contain a real domain name, the `suffix` field will
+    be empty, and this field will catch values like an IP address, or
+    private network hostnames like "localhost".
+    """
+
     suffix: str
+    """The public suffix of the input URL, if it contained one, or else the empty string.
+
+    If `include_psl_private_domains` was set to `False`, this field is the same
+    as `registry_suffix`, i.e. a domain under which people can register
+    subdomains through a registrar. If `include_psl_private_domains` was set to
+    `True`, this field may be a PSL private domain, like "blogspot.com".
+    """
+
     is_private: bool
+    """Whether the input URL belongs in the Public Suffix List's private domains.
+
+    If `include_psl_private_domains` was set to `False`, this field is always
+    `False`.
+    """
 
     @property
     def registered_domain(self) -> str:

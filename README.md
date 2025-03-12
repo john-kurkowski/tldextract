@@ -150,15 +150,17 @@ ExtractResult(subdomain='waiterrant', domain='blogspot', suffix='com', is_privat
 ```
 
 The following overrides this.
+
 ```python
 >>> extract = tldextract.TLDExtract()
 >>> extract('waiterrant.blogspot.com', include_psl_private_domains=True)
 ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com', is_private=True)
 ```
 
-or to change the default for all extract calls,
+To change the default for all extract calls:
+
 ```python
->>> extract = tldextract.TLDExtract( include_psl_private_domains=True)
+>>> extract = tldextract.TLDExtract(include_psl_private_domains=True)
 >>> extract('waiterrant.blogspot.com')
 ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com', is_private=True)
 ```

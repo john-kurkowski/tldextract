@@ -22,13 +22,13 @@ A public suffix is also sometimes called an effective TLD (eTLD).
 >>> import tldextract
 
 >>> tldextract.extract('http://forums.news.cnn.com/')
-ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
+ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False, registry_suffix='com')
 
 >>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
-ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
+ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False, registry_suffix='co.uk')
 
 >>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
-ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg', is_private=False)
+ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg', is_private=False, registry_suffix='org.kg')
 ```
 
 Note subdomain and suffix are _optional_. Not all URL-like inputs have a
@@ -36,13 +36,13 @@ subdomain or a valid suffix.
 
 ```python
 >>> tldextract.extract('google.com')
-ExtractResult(subdomain='', domain='google', suffix='com', is_private=False)
+ExtractResult(subdomain='', domain='google', suffix='com', is_private=False, registry_suffix='com')
 
 >>> tldextract.extract('google.notavalidsuffix')
-ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='', is_private=False)
+ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='', is_private=False, registry_suffix=''))
 
 >>> tldextract.extract('http://127.0.0.1:8080/deployed/')
-ExtractResult(subdomain='', domain='127.0.0.1', suffix='', is_private=False)
+ExtractResult(subdomain='', domain='127.0.0.1', suffix='', is_private=False, registry_suffix='')
 ```
 
 To rejoin the original hostname, if it was indeed a valid, registered hostname:
@@ -146,21 +146,23 @@ By default, `tldextract` treats public and private domains the same.
 ```python
 >>> extract = tldextract.TLDExtract()
 >>> extract('waiterrant.blogspot.com')
-ExtractResult(subdomain='waiterrant', domain='blogspot', suffix='com', is_private=False)
+ExtractResult(subdomain='waiterrant', domain='blogspot', suffix='com', is_private=False, registry_suffix='com')
 ```
 
 The following overrides this.
+
 ```python
 >>> extract = tldextract.TLDExtract()
 >>> extract('waiterrant.blogspot.com', include_psl_private_domains=True)
-ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com', is_private=True)
+ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com', is_private=True, registry_suffix='com')
 ```
 
-or to change the default for all extract calls,
+To change the default for all extract calls:
+
 ```python
->>> extract = tldextract.TLDExtract( include_psl_private_domains=True)
+>>> extract = tldextract.TLDExtract(include_psl_private_domains=True)
 >>> extract('waiterrant.blogspot.com')
-ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com', is_private=True)
+ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com', is_private=True, registry_suffix='com')
 ```
 
 The thinking behind the default is, it's the more common case when people

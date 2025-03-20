@@ -381,7 +381,7 @@ class TLDExtract:
 
         labels = netloc_with_ascii_dots.split(".")
 
-        maybe_indexes = self._get_tld_extractor(session=session).suffix_index(
+        maybe_indexes = self._get_tld_extractor(session).suffix_index(
             labels, include_psl_private_domains=include_psl_private_domains
         )
 
@@ -591,12 +591,12 @@ class _PublicSuffixListTLDExtractor:
         if include_psl_private_domains is None:
             include_psl_private_domains = self.include_psl_private_domains
 
-        node = registry_node = (
+        node = reg_node = (
             self.tlds_incl_private_trie
             if include_psl_private_domains
             else self.tlds_excl_private_trie
         )
-        suffix_idx = label_idx = reg_idx = len(spl)
+        suffix_idx = reg_idx = label_idx = len(spl)
         for label in reversed(spl):
             decoded_label = _decode_punycode(label)
             if decoded_label in node.matches:
@@ -605,7 +605,7 @@ class _PublicSuffixListTLDExtractor:
                 if node.end:
                     suffix_idx = label_idx
                     if not node.is_private:
-                        registry_node = node
+                        reg_node = node
                         reg_idx = label_idx
                 continue
 
@@ -617,7 +617,7 @@ class _PublicSuffixListTLDExtractor:
                     node.matches["*"],
                 ), (
                     reg_idx,
-                    registry_node,
+                    reg_node,
                 )
 
             break
@@ -625,7 +625,7 @@ class _PublicSuffixListTLDExtractor:
         if suffix_idx == len(spl):
             return None
 
-        return ((suffix_idx, node), (reg_idx, registry_node))
+        return ((suffix_idx, node), (reg_idx, reg_node))
 
 
 def _decode_punycode(label: str) -> str:

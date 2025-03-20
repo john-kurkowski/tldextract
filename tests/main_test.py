@@ -374,6 +374,24 @@ def test_dns_root_label() -> None:
     )
 
 
+def test_top_domain_under_public_suffix() -> None:
+    """Test property `top_domain_under_public_suffix`."""
+    assert (
+        tldextract.extract(
+            "http://www.example.auth.us-east-1.amazoncognito.com",
+            include_psl_private_domains=False,
+        ).top_domain_under_public_suffix
+        == "amazoncognito.com"
+    )
+    assert (
+        tldextract.extract(
+            "http://www.example.auth.us-east-1.amazoncognito.com",
+            include_psl_private_domains=True,
+        ).top_domain_under_public_suffix
+        == "example.auth.us-east-1.amazoncognito.com"
+    )
+
+
 def test_top_domain_under_registry_suffix() -> None:
     """Test property `top_domain_under_registry_suffix`."""
     assert (
@@ -388,7 +406,7 @@ def test_top_domain_under_registry_suffix() -> None:
             "http://www.example.auth.us-east-1.amazoncognito.com",
             include_psl_private_domains=True,
         ).top_domain_under_registry_suffix
-        == "example.auth.us-east-1.amazoncognito.com"
+        == "amazoncognito.com"
     )
 
 

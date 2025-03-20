@@ -28,7 +28,7 @@ subdomain or a valid suffix.
 To rejoin the original hostname, if it was indeed a valid, registered hostname:
 
     >>> ext = tldextract.extract('http://forums.bbc.co.uk')
-    >>> ext.registered_domain
+    >>> ext.top_domain_under_public_suffix
     'bbc.co.uk'
     >>> ext.fqdn
     'forums.bbc.co.uk'

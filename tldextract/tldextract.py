@@ -190,10 +190,12 @@ class ExtractResult:
         >>> extract('http://localhost:8080').top_domain_under_registry_suffix
         ''
         """
-        if not self.is_private:
-            return self.top_domain_under_public_suffix
+        top_domain_under_public_suffix = self.top_domain_under_public_suffix
+        if not top_domain_under_public_suffix or not self.is_private:
+            return top_domain_under_public_suffix
 
-        raise NotImplementedError
+        num_labels = self.registry_suffix.count(".") + 1
+        return ".".join(top_domain_under_public_suffix.split(".")[-num_labels:])
 
     @property
     def top_domain_under_public_suffix(self) -> str:

@@ -194,7 +194,7 @@ class ExtractResult:
         if not top_domain_under_public_suffix or not self.is_private:
             return top_domain_under_public_suffix
 
-        num_labels = self.registry_suffix.count(".") + 1
+        num_labels = self.registry_suffix.count(".") + 2
         return ".".join(top_domain_under_public_suffix.split(".")[-num_labels:])
 
     @property

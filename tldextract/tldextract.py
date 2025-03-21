@@ -66,7 +66,7 @@ class ExtractResult:
     They can be used to rebuild the original URL's hostname.
 
     Beyond the first 3 fields, the class contains metadata fields, like a flag
-    that indicates if the URL has a private suffix.
+    that indicates if the input URL's suffix is from a private domain.
     """
 
     subdomain: str
@@ -75,23 +75,37 @@ class ExtractResult:
     domain: str
     """The topmost domain of the input URL, if it contained a domain name, or else everything hostname-like in the input.
 
-    If the input URL didn't contain a real domain name, this field tends to
-    catch values like an IP address, or private network hostnames like
-    "localhost".
+    If the input URL didn't contain a real domain name, the `suffix` field will
+    be empty, and this field will catch values like an IP address, or
+    private network hostnames like "localhost".
     """
 
     suffix: str
-    """The public suffix of the input URL, if it contained one, or else the empty string."""
+    """The public suffix of the input URL, if it contained one, or else the empty string.
+
+    If `include_psl_private_domains` was set to `False`, this field is the same
+    as `registry_suffix`, i.e. a domain under which people can register
+    subdomains through a registrar. If `include_psl_private_domains` was set to
+    `True`, this field may be a PSL private domain, like "blogspot.com".
+    """
 
     is_private: bool
     """Whether the input URL belongs in the Public Suffix List's private domains.
 
-    If `include_psl_private_domains` was set to `False`, this is always
+    If `include_psl_private_domains` was set to `False`, this field is always
     `False`.
     """
 
     registry_suffix: str = field(repr=False)
-    """The registry suffix of the input URL, if it contained one, or else the empty string."""
+    """The registry suffix of the input URL, if it contained one, or else the empty string.
+
+    This field is a domain under which people can register subdomains through a
+    registar.
+
+    This field is unaffected by the `include_psl_private_domains` setting. If
+    `include_psl_private_domains` was set to `False`, this field is always the
+    same as `suffix`.
+    """
 
     @property
     def fqdn(self) -> str:
@@ -164,13 +178,12 @@ class ExtractResult:
         something one could register, this property returns the empty string.
 
         To distinguish the case of private domains, consider Blogspot, which is
-        in the PSL's private domains. If `TLDExtract`'s
-        `include_psl_private_domains=False`, which is the default, public and
-        private domains are not distinguished, the `registered_domain` property
-        of a Blogspot URL represents the domain the owner of Blogspot
-        registered with a registrar, i.e. `blogspot.com`. If
+        in the PSL's private domains. If `include_psl_private_domains` was set
+        to `False`, the `registered_domain` property of a Blogspot URL
+        represents the domain the owner of Blogspot registered with a
+        registrar, i.e. Google registered "blogspot.com". If
         `include_psl_private_domains=True`, the `registered_domain` property
-        represents the blogspot.com _subdomain_ the owner of a blog
+        represents the "blogspot.com" _subdomain_ the owner of a blog
         "registered" with Blogspot.
 
         >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=False).registered_domain

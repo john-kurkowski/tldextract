@@ -5,25 +5,25 @@ It does this via the Public Suffix List (PSL).
     >>> import tldextract
 
     >>> tldextract.extract('http://forums.news.cnn.com/')
-    ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False, registry_suffix='com')
+    ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
 
     >>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
-    ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False, registry_suffix='co.uk')
+    ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
 
     >>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
-    ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg', is_private=False, registry_suffix='org.kg')
+    ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg', is_private=False)
 
 Note subdomain and suffix are _optional_. Not all URL-like inputs have a
 subdomain or a valid suffix.
 
     >>> tldextract.extract('google.com')
-    ExtractResult(subdomain='', domain='google', suffix='com', is_private=False, registry_suffix='com')
+    ExtractResult(subdomain='', domain='google', suffix='com', is_private=False)
 
     >>> tldextract.extract('google.notavalidsuffix')
-    ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='', is_private=False, registry_suffix='')
+    ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='', is_private=False)
 
     >>> tldextract.extract('http://127.0.0.1:8080/deployed/')
-    ExtractResult(subdomain='', domain='127.0.0.1', suffix='', is_private=False, registry_suffix='')
+    ExtractResult(subdomain='', domain='127.0.0.1', suffix='', is_private=False)
 
 To rejoin the original hostname, if it was indeed a valid, registered hostname:
 
@@ -39,7 +39,7 @@ from __future__ import annotations
 import os
 import urllib.parse
 from collections.abc import Collection, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import wraps
 
 import idna
@@ -61,7 +61,12 @@ PUBLIC_SUFFIX_LIST_URLS = (
 class ExtractResult:
     """A URL's extracted subdomain, domain, and suffix.
 
-    Also contains metadata, like a flag that indicates if the URL has a private suffix.
+    These first 3 fields are what most users of this library will care about.
+    They are the split, non-overlapping hostname components of the input URL.
+    They can be used to rebuild the original URL's hostname.
+
+    Beyond the first 3 fields, the class contains metadata fields, like a flag
+    that indicates if the URL has a private suffix.
     """
 
     subdomain: str
@@ -85,7 +90,7 @@ class ExtractResult:
     `False`.
     """
 
-    registry_suffix: str
+    registry_suffix: str = field(repr=False)
     """The registry suffix of the input URL, if it contained one, or else the empty string."""
 
     @property
@@ -313,9 +318,9 @@ class TLDExtract:
 
         >>> extractor = TLDExtract()
         >>> extractor.extract_str('http://forums.news.cnn.com/')
-        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False, registry_suffix='com')
+        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
         >>> extractor.extract_str('http://forums.bbc.co.uk/')
-        ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False, registry_suffix='co.uk')
+        ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
 
         Allows configuring the HTTP request via the optional `session`
         parameter. For example, if you need to use a HTTP proxy. See also
@@ -326,7 +331,7 @@ class TLDExtract:
         >>> # customize your session here
         >>> with session:
         ...     extractor.extract_str("http://forums.news.cnn.com/", session=session)
-        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False, registry_suffix='com')
+        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
         """
         return self._extract_netloc(
             lenient_netloc(url), include_psl_private_domains, session=session
@@ -348,9 +353,9 @@ class TLDExtract:
 
         >>> extractor = TLDExtract()
         >>> extractor.extract_urllib(urllib.parse.urlsplit('http://forums.news.cnn.com/'))
-        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False, registry_suffix='com')
+        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
         >>> extractor.extract_urllib(urllib.parse.urlsplit('http://forums.bbc.co.uk/'))
-        ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False, registry_suffix='co.uk')
+        ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
         """
         return self._extract_netloc(
             url.netloc, include_psl_private_domains, session=session

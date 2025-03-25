@@ -533,10 +533,10 @@ def reverse_domain_name(
     packages and plugins.
 
     >>> reverse_domain_name("login.example.com")
-    com.example.login
+    'com.example.login'
 
     >>> reverse_domain_name("login.example.co.uk")
-    co.uk.example.login
+    'co.uk.example.login'
     """
     if tldextractor:
         result = tldextractor(domain)

@@ -415,6 +415,38 @@ def test_ipv4_lookalike() -> None:
     )
 
 
+def test_reverse_domain_name_notation() -> None:
+    """Test property `reverse_domain_name`."""
+    assert (
+        tldextract.extract("www.example.com").reverse_domain_name == "com.example.www"
+    )
+    assert (
+        tldextract.extract("www.theregister.co.uk").reverse_domain_name
+        == "co.uk.theregister.www"
+    )
+    assert tldextract.extract("example.com").reverse_domain_name == "com.example"
+    assert (
+        tldextract.extract("theregister.co.uk").reverse_domain_name
+        == "co.uk.theregister"
+    )
+    assert (
+        tldextract.extract("media.forums.theregister.co.uk").reverse_domain_name
+        == "co.uk.theregister.forums.media"
+    )
+    assert (
+        tldextract.extract(
+            "foo.uk.com", include_psl_private_domains=False
+        ).reverse_domain_name
+        == "com.uk.foo"
+    )
+    assert (
+        tldextract.extract(
+            "foo.uk.com", include_psl_private_domains=True
+        ).reverse_domain_name
+        == "uk.com.foo"
+    )
+
+
 def test_bad_kwargs_no_way_to_fetch() -> None:
     """Test an impossible combination of kwargs that disable all ways to fetch data."""
     with pytest.raises(ValueError, match="disable all ways"):
@@ -615,38 +647,4 @@ def test_private_domains_depth() -> None:
         domain="",
         suffix="s3.dualstack.us-east-1.amazonaws.com",
         is_private=True,
-    )
-
-
-def test_reverse_domain_name_notation() -> None:
-    """Test the `tldextract.reverse_domain_name` function against adaptations of several test scenarios above."""
-    # test_american
-    assert tldextract.reverse_domain_name("www.example.com") == "com.example.www"
-
-    # test_british
-    assert (
-        tldextract.reverse_domain_name("www.theregister.co.uk")
-        == "co.uk.theregister.www"
-    )
-
-    # test_no_subdomain
-    assert tldextract.reverse_domain_name("example.com") == "com.example"
-    assert tldextract.reverse_domain_name("theregister.co.uk") == "co.uk.theregister"
-
-    # test_nested_subdomain
-    assert (
-        tldextract.reverse_domain_name("media.forums.theregister.co.uk")
-        == "co.uk.theregister.forums.media"
-    )
-
-    # test_include_psl_private_domain_attr
-    extract_private = tldextract.TLDExtract(include_psl_private_domains=True)
-    assert tldextract.reverse_domain_name("foo.uk.com", extract_private) == "uk.com.foo"
-
-    extract_public1 = tldextract.TLDExtract()
-    extract_public2 = tldextract.TLDExtract(include_psl_private_domains=False)
-    assert (
-        tldextract.reverse_domain_name("foo.uk.com", extract_public1)
-        == tldextract.reverse_domain_name("foo.uk.com", extract_public2)
-        == "com.uk.foo"
     )

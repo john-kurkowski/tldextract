@@ -619,6 +619,8 @@ def test_private_domains_depth() -> None:
 
 
 def test_reverse_domain_name_notation() -> None:
+    """Test the `tldextract.reverse_domain_name` function against adaptations
+    of several test scenarios above"""
 
     # test_american
     assert (
@@ -638,13 +640,13 @@ def test_reverse_domain_name_notation() -> None:
         tldextract.reverse_domain_name("theregister.co.uk") ==
         'co.uk.theregister'
     )
-    
+
     # test_nested_subdomain
     assert (
         tldextract.reverse_domain_name("media.forums.theregister.co.uk") ==
         "co.uk.theregister.forums.media"
     )
-    
+
     # test_include_psl_private_domain_attr
     extract_private = tldextract.TLDExtract(include_psl_private_domains=True)
     assert (

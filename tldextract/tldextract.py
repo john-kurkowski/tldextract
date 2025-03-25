@@ -41,7 +41,6 @@ import urllib.parse
 from collections.abc import Collection, Sequence
 from dataclasses import dataclass
 from functools import wraps
-from typing import Optional
 
 import idna
 import requests
@@ -523,11 +522,11 @@ def _decode_punycode(label: str) -> str:
 
 def reverse_domain_name(
     domain: str,
-    tldextractor: Optional[TLDExtract] = None,
+    tldextractor: TLDExtract | None = None,
 ) -> str:
     """
-    An implementation of `Reverse Domain Name Notation`, in which the
-    registered domain is used as the leftmost component.
+    Applies an implementation of `Reverse Domain Name Notation` to the submitted
+    domain, in which the registered domain is used as the leftmost component.
 
     Reverse Domain Name Notation is typically used to organize namespaces for
     packages and plugins.
@@ -538,6 +537,7 @@ def reverse_domain_name(
     >>> reverse_domain_name("login.example.co.uk")
     'co.uk.example.login'
     """
+
     if tldextractor:
         result = tldextractor(domain)
     else:

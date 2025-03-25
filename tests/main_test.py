@@ -616,3 +616,46 @@ def test_private_domains_depth() -> None:
         suffix="s3.dualstack.us-east-1.amazonaws.com",
         is_private=True,
     )
+
+
+def test_reverse_domain_name_notation() -> None:
+
+    # test_american
+    assert (
+        tldextract.reverse_domain_name("www.example.com") ==
+        'com.example.www'
+    )
+
+    # test_british
+    assert (
+        tldextract.reverse_domain_name("www.theregister.co.uk") ==
+        'co.uk.theregister.www'
+    )
+
+    # test_no_subdomain
+    assert tldextract.reverse_domain_name("example.com") == 'com.example'
+    assert (
+        tldextract.reverse_domain_name("theregister.co.uk") ==
+        'co.uk.theregister'
+    )
+    
+    # test_nested_subdomain
+    assert (
+        tldextract.reverse_domain_name("media.forums.theregister.co.uk") ==
+        "co.uk.theregister.forums.media"
+    )
+    
+    # test_include_psl_private_domain_attr
+    extract_private = tldextract.TLDExtract(include_psl_private_domains=True)
+    assert (
+        tldextract.reverse_domain_name("foo.uk.com", extract_private) ==
+        "uk.com.foo"
+    )
+
+    extract_public1 = tldextract.TLDExtract()
+    extract_public2 = tldextract.TLDExtract(include_psl_private_domains=False)
+    assert (
+        tldextract.reverse_domain_name("foo.uk.com", extract_public1) ==
+        tldextract.reverse_domain_name("foo.uk.com", extract_public2) ==
+        "com.uk.foo"
+    )

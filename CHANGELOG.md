@@ -3,6 +3,14 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## unreleased
+
+* Misc.
+  * Added function `reverse_domain_name` to implement Reverse Domain Name Notation.
+    See:
+    * https://en.wikipedia.org/wiki/Reverse_domain_name_notation
+    * https://github.com/john-kurkowski/tldextract/issues/342
+
 ## 5.1.3 (2024-11-04)
 
 * Bugfixes

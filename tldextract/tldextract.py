@@ -524,12 +524,11 @@ def reverse_domain_name(
     domain: str,
     tldextractor: TLDExtract | None = None,
 ) -> str:
-    """
-    Applies an implementation of `Reverse Domain Name Notation` to the submitted
-    domain, in which the registered domain is used as the leftmost component.
+    """Apply an implementation of `Reverse Domain Name Notation`.
 
-    Reverse Domain Name Notation is typically used to organize namespaces for
-    packages and plugins.
+    Applies a reverse domain name notation to the submitted domain, in which the
+    registered domain is used as the leftmost component. Reverse Domain Name
+    Notation is typically used to organize namespaces for packages and plugins.
 
     >>> reverse_domain_name("login.example.com")
     'com.example.login'
@@ -537,7 +536,6 @@ def reverse_domain_name(
     >>> reverse_domain_name("login.example.co.uk")
     'co.uk.example.login'
     """
-
     if tldextractor:
         result = tldextractor(domain)
     else:

@@ -77,12 +77,15 @@ def test_cli_json_output(
     stdout, stderr = capsys.readouterr()
     assert not stderr
     assert json.loads(stdout) == {
-        "subdomain": "www",
         "domain": "bbc",
-        "suffix": "co.uk",
         "fqdn": "www.bbc.co.uk",
         "ipv4": "",
         "ipv6": "",
         "is_private": False,
         "registered_domain": "bbc.co.uk",
+        "registry_suffix": "co.uk",
+        "subdomain": "www",
+        "suffix": "co.uk",
+        "top_domain_under_public_suffix": "bbc.co.uk",
+        "top_domain_under_registry_suffix": "bbc.co.uk",
     }

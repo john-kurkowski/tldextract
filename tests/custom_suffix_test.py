@@ -32,12 +32,19 @@ def test_private_extraction() -> None:
     """Test this library's uncached, offline, private domain extraction."""
     tld = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp(), suffix_list_urls=[])
 
-    assert tld("foo.blogspot.com") == ExtractResult("foo", "blogspot", "com", False)
+    assert tld("foo.blogspot.com") == ExtractResult(
+        subdomain="foo",
+        domain="blogspot",
+        suffix="com",
+        is_private=False,
+        registry_suffix="com",
+    )
     assert tld("foo.blogspot.com", include_psl_private_domains=True) == ExtractResult(
-        "",
-        "foo",
-        "blogspot.com",
-        True,
+        subdomain="",
+        domain="foo",
+        suffix="blogspot.com",
+        is_private=True,
+        registry_suffix="com",
     )
 
 

@@ -71,7 +71,7 @@ class ExtractResult:
 
     @property
     def registered_domain(self) -> str:
-        """Joins the `domain` and `suffix` fields with a dot, if they're both set, or else the empty string.
+        """The `domain` and `suffix` fields joined with a dot, if they're both set, or else the empty string.
 
         >>> extract("http://forums.bbc.co.uk").registered_domain
         'bbc.co.uk'
@@ -84,7 +84,7 @@ class ExtractResult:
 
     @property
     def fqdn(self) -> str:
-        """Returns a Fully Qualified Domain Name (FQDN), if there is a proper `domain` and `suffix`, or else the empty string.
+        """The Fully Qualified Domain Name (FQDN), if there is a proper `domain` and `suffix`, or else the empty string.
 
         >>> extract("http://forums.bbc.co.uk/path/to/file").fqdn
         'forums.bbc.co.uk'
@@ -97,7 +97,7 @@ class ExtractResult:
 
     @property
     def ipv4(self) -> str:
-        """Returns the IPv4, if that is what the input domain/URL was, or else the empty string.
+        """The IPv4 address, if that is what the input domain/URL was, or else the empty string.
 
         >>> extract("http://127.0.0.1/path/to/file").ipv4
         '127.0.0.1'
@@ -116,7 +116,7 @@ class ExtractResult:
 
     @property
     def ipv6(self) -> str:
-        """Returns the IPv6, if that is what the input domain/URL was, or else the empty string.
+        """The IPv6 address, if that is what the input domain/URL was, or else the empty string.
 
         >>> extract(
         ...     "http://[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1]/path/to/file"
@@ -143,7 +143,7 @@ class ExtractResult:
 
     @property
     def reverse_domain_name(self) -> str:
-        """Return the Reverse Domain Name Notation.
+        """The domain name in Reverse Domain Name Notation.
 
         Applies a reverse domain name notation to the submitted domain, in which the
         registered domain is used as the leftmost component. Reverse Domain Name
@@ -354,9 +354,9 @@ class TLDExtract:
 
     @property
     def tlds(self, session: requests.Session | None = None) -> list[str]:
-        """Returns the list of tld's used by default.
+        """The list of TLDs used by default.
 
-        This will vary based on `include_psl_private_domains` and `extra_suffixes`
+        This will vary based on `include_psl_private_domains` and `extra_suffixes`.
         """
         return list(self._get_tld_extractor(session=session).tlds())
 

@@ -141,6 +141,25 @@ class ExtractResult:
                 return debracketed
         return ""
 
+    @property
+    def reverse_domain_name(self) -> str:
+        """Return the Reverse Domain Name Notation.
+
+        Applies a reverse domain name notation to the submitted domain, in which the
+        registered domain is used as the leftmost component. Reverse Domain Name
+        Notation is typically used to organize namespaces for packages and plugins.
+
+        >>> extract("login.example.com").reverse_domain_name
+        'com.example.login'
+
+        >>> extract("login.example.co.uk").reverse_domain_name
+        'co.uk.example.login'
+        """
+        stack = [self.suffix, self.domain]
+        if self.subdomain:
+            stack.extend(reversed(self.subdomain.split(".")))
+        return ".".join(stack)
+
 
 class TLDExtract:
     """A callable for extracting, subdomain, domain, and suffix components from a URL."""

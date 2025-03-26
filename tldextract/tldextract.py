@@ -4,30 +4,30 @@ It does this via the Public Suffix List (PSL).
 
     >>> import tldextract
 
-    >>> tldextract.extract('http://forums.news.cnn.com/')
+    >>> tldextract.extract("http://forums.news.cnn.com/")
     ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
 
-    >>> tldextract.extract('http://forums.bbc.co.uk/') # United Kingdom
+    >>> tldextract.extract("http://forums.bbc.co.uk/")  # United Kingdom
     ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
 
-    >>> tldextract.extract('http://www.worldbank.org.kg/') # Kyrgyzstan
+    >>> tldextract.extract("http://www.worldbank.org.kg/")  # Kyrgyzstan
     ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg', is_private=False)
 
 Note subdomain and suffix are _optional_. Not all URL-like inputs have a
 subdomain or a valid suffix.
 
-    >>> tldextract.extract('google.com')
+    >>> tldextract.extract("google.com")
     ExtractResult(subdomain='', domain='google', suffix='com', is_private=False)
 
-    >>> tldextract.extract('google.notavalidsuffix')
+    >>> tldextract.extract("google.notavalidsuffix")
     ExtractResult(subdomain='google', domain='notavalidsuffix', suffix='', is_private=False)
 
-    >>> tldextract.extract('http://127.0.0.1:8080/deployed/')
+    >>> tldextract.extract("http://127.0.0.1:8080/deployed/")
     ExtractResult(subdomain='', domain='127.0.0.1', suffix='', is_private=False)
 
 To rejoin the original hostname, if it was indeed a valid, registered hostname:
 
-    >>> ext = tldextract.extract('http://forums.bbc.co.uk')
+    >>> ext = tldextract.extract("http://forums.bbc.co.uk")
     >>> ext.top_domain_under_public_suffix
     'bbc.co.uk'
     >>> ext.fqdn
@@ -111,9 +111,9 @@ class ExtractResult:
     def fqdn(self) -> str:
         """Returns a Fully Qualified Domain Name (FQDN), if there is a proper `domain` and `suffix`, or else the empty string.
 
-        >>> extract('http://forums.bbc.co.uk/path/to/file').fqdn
+        >>> extract("http://forums.bbc.co.uk/path/to/file").fqdn
         'forums.bbc.co.uk'
-        >>> extract('http://localhost:8080').fqdn
+        >>> extract("http://localhost:8080").fqdn
         ''
         """
         if self.suffix and (self.domain or self.is_private):
@@ -124,11 +124,11 @@ class ExtractResult:
     def ipv4(self) -> str:
         """Returns the IPv4, if that is what the input domain/URL was, or else the empty string.
 
-        >>> extract('http://127.0.0.1/path/to/file').ipv4
+        >>> extract("http://127.0.0.1/path/to/file").ipv4
         '127.0.0.1'
-        >>> extract('http://127.0.0.1.1/path/to/file').ipv4
+        >>> extract("http://127.0.0.1.1/path/to/file").ipv4
         ''
-        >>> extract('http://256.1.1.1').ipv4
+        >>> extract("http://256.1.1.1").ipv4
         ''
         """
         if (
@@ -143,11 +143,15 @@ class ExtractResult:
     def ipv6(self) -> str:
         """Returns the IPv6, if that is what the input domain/URL was, or else the empty string.
 
-        >>> extract('http://[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1]/path/to/file').ipv6
+        >>> extract(
+        ...     "http://[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1]/path/to/file"
+        ... ).ipv6
         'aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1'
-        >>> extract('http://[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1.1]/path/to/file').ipv6
+        >>> extract(
+        ...     "http://[aBcD:ef01:2345:6789:aBcD:ef01:127.0.0.1.1]/path/to/file"
+        ... ).ipv6
         ''
-        >>> extract('http://[aBcD:ef01:2345:6789:aBcD:ef01:256.0.0.1]').ipv6
+        >>> extract("http://[aBcD:ef01:2345:6789:aBcD:ef01:256.0.0.1]").ipv6
         ''
         """
         min_num_ipv6_chars = 4
@@ -166,9 +170,9 @@ class ExtractResult:
     def registered_domain(self) -> str:
         """Joins the `domain` and `suffix` fields with a dot, if they're both set, or else the empty string.
 
-        >>> extract('http://forums.bbc.co.uk').registered_domain
+        >>> extract("http://forums.bbc.co.uk").registered_domain
         'bbc.co.uk'
-        >>> extract('http://localhost:8080').registered_domain
+        >>> extract("http://localhost:8080").registered_domain
         ''
 
         This is an alias for the `top_domain_under_public_suffix` property.
@@ -186,9 +190,13 @@ class ExtractResult:
         represents the "blogspot.com" _subdomain_ the owner of a blog
         "registered" with Blogspot.
 
-        >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=False).registered_domain
+        >>> extract(
+        ...     "http://waiterrant.blogspot.com", include_psl_private_domains=False
+        ... ).registered_domain
         'blogspot.com'
-        >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=True).registered_domain
+        >>> extract(
+        ...     "http://waiterrant.blogspot.com", include_psl_private_domains=True
+        ... ).registered_domain
         'waiterrant.blogspot.com'
 
         To always get the same joined string, regardless of the
@@ -198,17 +206,40 @@ class ExtractResult:
         return self.top_domain_under_public_suffix
 
     @property
+    def reverse_domain_name(self) -> str:
+        """Return the Reverse Domain Name Notation.
+
+        Applies a reverse domain name notation to the submitted domain, in which the
+        registered domain is used as the leftmost component. Reverse Domain Name
+        Notation is typically used to organize namespaces for packages and plugins.
+
+        >>> extract("login.example.com").reverse_domain_name
+        'com.example.login'
+
+        >>> extract("login.example.co.uk").reverse_domain_name
+        'co.uk.example.login'
+        """
+        stack = [self.suffix, self.domain]
+        if self.subdomain:
+            stack.extend(reversed(self.subdomain.split(".")))
+        return ".".join(stack)
+
+    @property
     def top_domain_under_registry_suffix(self) -> str:
         """Joins the rightmost domain and `registry_suffix` with a dot, if such a domain is available and `registry_suffix` is set, or else the empty string.
 
         If the input was not in the Public Suffix List's private domains, this
         is equivalent to `top_domain_under_public_suffix`.
 
-        >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=False).top_domain_under_registry_suffix
+        >>> extract(
+        ...     "http://waiterrant.blogspot.com", include_psl_private_domains=False
+        ... ).top_domain_under_registry_suffix
         'blogspot.com'
-        >>> extract('http://waiterrant.blogspot.com', include_psl_private_domains=True).top_domain_under_registry_suffix
+        >>> extract(
+        ...     "http://waiterrant.blogspot.com", include_psl_private_domains=True
+        ... ).top_domain_under_registry_suffix
         'blogspot.com'
-        >>> extract('http://localhost:8080').top_domain_under_registry_suffix
+        >>> extract("http://localhost:8080").top_domain_under_registry_suffix
         ''
         """
         top_domain_under_public_suffix = self.top_domain_under_public_suffix
@@ -222,9 +253,9 @@ class ExtractResult:
     def top_domain_under_public_suffix(self) -> str:
         """Joins the `domain` and `suffix` fields with a dot, if they're both set, or else the empty string.
 
-        >>> extract('http://forums.bbc.co.uk').top_domain_under_public_suffix
+        >>> extract("http://forums.bbc.co.uk").top_domain_under_public_suffix
         'bbc.co.uk'
-        >>> extract('http://localhost:8080').top_domain_under_public_suffix
+        >>> extract("http://localhost:8080").top_domain_under_public_suffix
         ''
         """
         if self.suffix and self.domain:
@@ -330,9 +361,9 @@ class TLDExtract:
         I.e. its effective TLD, gTLD, ccTLD, etc. components.
 
         >>> extractor = TLDExtract()
-        >>> extractor.extract_str('http://forums.news.cnn.com/')
+        >>> extractor.extract_str("http://forums.news.cnn.com/")
         ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
-        >>> extractor.extract_str('http://forums.bbc.co.uk/')
+        >>> extractor.extract_str("http://forums.bbc.co.uk/")
         ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
 
         Allows configuring the HTTP request via the optional `session`
@@ -365,9 +396,11 @@ class TLDExtract:
         name has already been parsed.
 
         >>> extractor = TLDExtract()
-        >>> extractor.extract_urllib(urllib.parse.urlsplit('http://forums.news.cnn.com/'))
+        >>> extractor.extract_urllib(
+        ...     urllib.parse.urlsplit("http://forums.news.cnn.com/")
+        ... )
         ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
-        >>> extractor.extract_urllib(urllib.parse.urlsplit('http://forums.bbc.co.uk/'))
+        >>> extractor.extract_urllib(urllib.parse.urlsplit("http://forums.bbc.co.uk/"))
         ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
         """
         return self._extract_netloc(

@@ -451,6 +451,38 @@ def test_ipv4_lookalike() -> None:
     )
 
 
+def test_reverse_domain_name_notation() -> None:
+    """Test property `reverse_domain_name`."""
+    assert (
+        tldextract.extract("www.example.com").reverse_domain_name == "com.example.www"
+    )
+    assert (
+        tldextract.extract("www.theregister.co.uk").reverse_domain_name
+        == "co.uk.theregister.www"
+    )
+    assert tldextract.extract("example.com").reverse_domain_name == "com.example"
+    assert (
+        tldextract.extract("theregister.co.uk").reverse_domain_name
+        == "co.uk.theregister"
+    )
+    assert (
+        tldextract.extract("media.forums.theregister.co.uk").reverse_domain_name
+        == "co.uk.theregister.forums.media"
+    )
+    assert (
+        tldextract.extract(
+            "foo.uk.com", include_psl_private_domains=False
+        ).reverse_domain_name
+        == "com.uk.foo"
+    )
+    assert (
+        tldextract.extract(
+            "foo.uk.com", include_psl_private_domains=True
+        ).reverse_domain_name
+        == "uk.com.foo"
+    )
+
+
 def test_bad_kwargs_no_way_to_fetch() -> None:
     """Test an impossible combination of kwargs that disable all ways to fetch data."""
     with pytest.raises(ValueError, match="disable all ways"):

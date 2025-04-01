@@ -232,10 +232,14 @@ class ExtractResult:
 
     @property
     def top_domain_under_registry_suffix(self) -> str:
-        """The rightmost domain and `registry_suffix` joined with a dot, if such a domain is available and `registry_suffix` is set, or else the empty string.
+        """The rightmost domain label and `registry_suffix` joined with a dot, if such a domain is available and `registry_suffix` is set, or else the empty string.
 
-        If the input was not in the Public Suffix List's private domains, this
-        is equivalent to `top_domain_under_public_suffix`.
+        The rightmost domain label might be in the `domain` field, or, if the
+        input URL's suffix is a PSL private domain, in the public suffix
+        `suffix` field.
+
+        If the input was not in the PSL's private domains, this property is
+        equivalent to `top_domain_under_public_suffix`.
 
         >>> extract(
         ...     "http://waiterrant.blogspot.com", include_psl_private_domains=False

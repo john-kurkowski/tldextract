@@ -3,13 +3,20 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
-## unreleased
+## 5.2.0 (2025-04-07)
 
+* Features
+  * Add `reverse_domain_name` result property ([#342](https://github.com/john-kurkowski/tldextract/issues/342))
+* Bugfixes
+  * Extend exported public interface with `ExtractResult` and `update` ([`36ff658`](https://github.com/john-kurkowski/tldextract/commit/36ff658c53b510c5d56f8af235c8b08ce3c512f5))
+    * These were always meant to be public. Eases user import.
+* Docs
+  * Document result fields
+  * Note all return values
+  * Colocate usage in the usage section
+  * Link to private domain docs
 * Misc.
-  * Add `reverse_domain_name` property, for Reverse Domain Name Notation.
-    See:
-    * https://en.wikipedia.org/wiki/Reverse_domain_name_notation
-    * https://github.com/john-kurkowski/tldextract/issues/342
+  * Update bundled snapshot
 
 ## 5.1.3 (2024-11-04)
 
@@ -18,7 +25,7 @@ After upgrading, update your cache file by deleting it or via `tldextract
   * Drop support for EOL Python 3.8 ([#340](https://github.com/john-kurkowski/tldextract/issues/340))
   * Support Python 3.13 ([#341](https://github.com/john-kurkowski/tldextract/issues/341))
   * Update bundled snapshot
-* Documentation
+* Docs
   * Clarify how to use your own definitions
   * Clarify first-successful definitions vs. merged definitions
 * Misc.

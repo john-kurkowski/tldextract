@@ -13,10 +13,18 @@ It will:
 Prerequisites:
     - This must be run from the root of the repository.
     - The repo must have a clean git working tree.
-    - The user must have the GITHUB_TOKEN environment variable set to a GitHub personal access token with repository "Contents" read and write permission.
-    - The user will need credentials for the PyPI repository, which the user will be prompted for during the upload step. The user will need to paste the token manually from a password manager or similar.
-    - The CHANGELOG.md file must already contain an entry for the version being released.
-    - Install requirements with: pip install --upgrade --editable '.[release]'
+    - The user must have the `GITHUB_TOKEN` environment variable set to a
+      GitHub personal access token with repository "Contents" read and write
+      permission. To generate, see
+      https://github.com/settings/personal-access-tokens
+    - The user will need an API token for the PyPI repository, which the user
+      will be prompted for during the upload step. The user will need to paste
+      the token manually from a password manager or similar. To generate, see
+      https://pypi.org/manage/account/
+    - The CHANGELOG.md file must already contain an entry for the version being
+      released.
+    - Install requirements with: `pip install --upgrade --editable
+      '.[release]'`
 
 """
 

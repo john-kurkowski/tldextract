@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import os
 import urllib.parse
+import warnings
 from collections.abc import Collection, Sequence
 from dataclasses import dataclass, field
 from functools import wraps
@@ -175,6 +176,11 @@ class ExtractResult:
         >>> extract("http://localhost:8080").registered_domain
         ''
 
+        .. deprecated:: 6.0.0
+           This property is deprecated and will be removed in the next major
+           version. Use `top_domain_under_public_suffix` instead, which has the
+           same behavior but a more accurate name.
+
         This is an alias for the `top_domain_under_public_suffix` property.
         `registered_domain` is so called because is roughly the domain the
         owner paid to register with a registrar or, in the case of a private
@@ -203,6 +209,12 @@ class ExtractResult:
         `include_psl_private_domains` setting, consider the
         `top_domain_under_registry_suffix` property.
         """
+        warnings.warn(
+            "The 'registered_domain' property is deprecated and will be removed in the next major version. "
+            "Use 'top_domain_under_public_suffix' instead, which has the same behavior but a more accurate name.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.top_domain_under_public_suffix
 
     @property

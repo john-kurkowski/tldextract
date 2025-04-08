@@ -103,6 +103,7 @@ def main() -> None:
                 "ipv4",
                 "ipv6",
                 "registered_domain",
+                "reverse_domain_name",
                 "top_domain_under_public_suffix",
                 "top_domain_under_registry_suffix",
             )

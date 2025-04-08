@@ -84,6 +84,7 @@ def test_cli_json_output(
         "is_private": False,
         "registered_domain": "bbc.co.uk",
         "registry_suffix": "co.uk",
+        "reverse_domain_name": "co.uk.bbc.www",
         "subdomain": "www",
         "suffix": "co.uk",
         "top_domain_under_public_suffix": "bbc.co.uk",

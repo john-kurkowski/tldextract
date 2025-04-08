@@ -28,7 +28,7 @@ subdomain or a valid suffix.
 To rejoin the original hostname, if it was indeed a valid, registered hostname:
 
     >>> ext = tldextract.extract("http://forums.bbc.co.uk")
-    >>> ext.registered_domain
+    >>> ext.top_domain_under_public_suffix
     'bbc.co.uk'
     >>> ext.fqdn
     'forums.bbc.co.uk'
@@ -39,7 +39,7 @@ from __future__ import annotations
 import os
 import urllib.parse
 from collections.abc import Collection, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import wraps
 
 import idna
@@ -96,18 +96,16 @@ class ExtractResult:
     `False`.
     """
 
-    @property
-    def registered_domain(self) -> str:
-        """The `domain` and `suffix` fields joined with a dot, if they're both set, or else the empty string.
+    registry_suffix: str = field(repr=False)
+    """The registry suffix of the input URL, if it contained one, or else the empty string.
 
-        >>> extract("http://forums.bbc.co.uk").registered_domain
-        'bbc.co.uk'
-        >>> extract("http://localhost:8080").registered_domain
-        ''
-        """
-        if self.suffix and self.domain:
-            return f"{self.domain}.{self.suffix}"
-        return ""
+    This field is a domain under which people can register subdomains through a
+    registar.
+
+    This field is unaffected by the `include_psl_private_domains` setting. If
+    `include_psl_private_domains` was set to `False`, this field is always the
+    same as `suffix`.
+    """
 
     @property
     def fqdn(self) -> str:
@@ -169,6 +167,45 @@ class ExtractResult:
         return ""
 
     @property
+    def registered_domain(self) -> str:
+        """The `domain` and `suffix` fields joined with a dot, if they're both set, or else the empty string.
+
+        >>> extract("http://forums.bbc.co.uk").registered_domain
+        'bbc.co.uk'
+        >>> extract("http://localhost:8080").registered_domain
+        ''
+
+        This is an alias for the `top_domain_under_public_suffix` property.
+        `registered_domain` is so called because is roughly the domain the
+        owner paid to register with a registrar or, in the case of a private
+        domain, "registered" with the domain owner. If the input was not
+        something one could register, this property returns the empty string.
+
+        To distinguish the case of private domains, consider Blogspot, which is
+        in the PSL's private domains. If `include_psl_private_domains` was set
+        to `False`, the `registered_domain` property of a Blogspot URL
+        represents the domain the owner of Blogspot registered with a
+        registrar, i.e. Google registered "blogspot.com". If
+        `include_psl_private_domains=True`, the `registered_domain` property
+        represents the "blogspot.com" _subdomain_ the owner of a blog
+        "registered" with Blogspot.
+
+        >>> extract(
+        ...     "http://waiterrant.blogspot.com", include_psl_private_domains=False
+        ... ).registered_domain
+        'blogspot.com'
+        >>> extract(
+        ...     "http://waiterrant.blogspot.com", include_psl_private_domains=True
+        ... ).registered_domain
+        'waiterrant.blogspot.com'
+
+        To always get the same joined string, regardless of the
+        `include_psl_private_domains` setting, consider the
+        `top_domain_under_registry_suffix` property.
+        """
+        return self.top_domain_under_public_suffix
+
+    @property
     def reverse_domain_name(self) -> str:
         """The domain name in Reverse Domain Name Notation.
 
@@ -192,6 +229,48 @@ class ExtractResult:
         if self.subdomain:
             stack.extend(reversed(self.subdomain.split(".")))
         return ".".join(stack)
+
+    @property
+    def top_domain_under_registry_suffix(self) -> str:
+        """The rightmost domain label and `registry_suffix` joined with a dot, if such a domain is available and `registry_suffix` is set, or else the empty string.
+
+        The rightmost domain label might be in the `domain` field, or, if the
+        input URL's suffix is a PSL private domain, in the public suffix
+        `suffix` field.
+
+        If the input was not in the PSL's private domains, this property is
+        equivalent to `top_domain_under_public_suffix`.
+
+        >>> extract(
+        ...     "http://waiterrant.blogspot.com", include_psl_private_domains=False
+        ... ).top_domain_under_registry_suffix
+        'blogspot.com'
+        >>> extract(
+        ...     "http://waiterrant.blogspot.com", include_psl_private_domains=True
+        ... ).top_domain_under_registry_suffix
+        'blogspot.com'
+        >>> extract("http://localhost:8080").top_domain_under_registry_suffix
+        ''
+        """
+        top_domain_under_public_suffix = self.top_domain_under_public_suffix
+        if not top_domain_under_public_suffix or not self.is_private:
+            return top_domain_under_public_suffix
+
+        num_labels = self.registry_suffix.count(".") + 2
+        return ".".join(top_domain_under_public_suffix.split(".")[-num_labels:])
+
+    @property
+    def top_domain_under_public_suffix(self) -> str:
+        """The `domain` and `suffix` fields joined with a dot, if they're both set, or else the empty string.
+
+        >>> extract("http://forums.bbc.co.uk").top_domain_under_public_suffix
+        'bbc.co.uk'
+        >>> extract("http://localhost:8080").top_domain_under_public_suffix
+        ''
+        """
+        if self.suffix and self.domain:
+            return f"{self.domain}.{self.suffix}"
+        return ""
 
 
 class TLDExtract:
@@ -357,24 +436,58 @@ class TLDExtract:
             and netloc_with_ascii_dots[-1] == "]"
             and looks_like_ipv6(netloc_with_ascii_dots[1:-1])
         ):
-            return ExtractResult("", netloc_with_ascii_dots, "", is_private=False)
+            return ExtractResult(
+                "", netloc_with_ascii_dots, "", is_private=False, registry_suffix=""
+            )
 
         labels = netloc_with_ascii_dots.split(".")
 
-        suffix_index, is_private = self._get_tld_extractor(
-            session=session
-        ).suffix_index(labels, include_psl_private_domains=include_psl_private_domains)
+        maybe_indexes = self._get_tld_extractor(session).suffix_index(
+            labels, include_psl_private_domains=include_psl_private_domains
+        )
 
         num_ipv4_labels = 4
-        if suffix_index == len(labels) == num_ipv4_labels and looks_like_ip(
-            netloc_with_ascii_dots
+        if (
+            not maybe_indexes
+            and len(labels) == num_ipv4_labels
+            and looks_like_ip(netloc_with_ascii_dots)
         ):
-            return ExtractResult("", netloc_with_ascii_dots, "", is_private)
+            return ExtractResult(
+                "", netloc_with_ascii_dots, "", is_private=False, registry_suffix=""
+            )
+        elif not maybe_indexes:
+            return ExtractResult(
+                subdomain=".".join(labels[:-1]),
+                domain=labels[-1],
+                suffix="",
+                is_private=False,
+                registry_suffix="",
+            )
 
-        suffix = ".".join(labels[suffix_index:]) if suffix_index != len(labels) else ""
-        subdomain = ".".join(labels[: suffix_index - 1]) if suffix_index >= 2 else ""
-        domain = labels[suffix_index - 1] if suffix_index else ""
-        return ExtractResult(subdomain, domain, suffix, is_private)
+        (
+            (public_suffix_index, public_suffix_node),
+            (registry_suffix_index, registry_suffix_node),
+        ) = maybe_indexes
+
+        subdomain = (
+            ".".join(labels[: public_suffix_index - 1])
+            if public_suffix_index >= 2
+            else ""
+        )
+        domain = labels[public_suffix_index - 1] if public_suffix_index > 0 else ""
+        public_suffix = ".".join(labels[public_suffix_index:])
+        registry_suffix = (
+            ".".join(labels[registry_suffix_index:])
+            if public_suffix_node.is_private
+            else public_suffix
+        )
+        return ExtractResult(
+            subdomain=subdomain,
+            domain=domain,
+            suffix=public_suffix,
+            is_private=public_suffix_node.is_private,
+            registry_suffix=registry_suffix,
+        )
 
     def update(
         self, fetch_now: bool = False, session: requests.Session | None = None
@@ -531,40 +644,49 @@ class _PublicSuffixListTLDExtractor:
 
     def suffix_index(
         self, spl: list[str], include_psl_private_domains: bool | None = None
-    ) -> tuple[int, bool]:
-        """Return the index of the first suffix label, and whether it is private.
+    ) -> tuple[tuple[int, Trie], tuple[int, Trie]] | None:
+        """Return the index of the first public suffix label, the index of the first registry suffix label, and their corresponding trie nodes.
 
-        Returns len(spl) if no suffix is found.
+        Returns `None` if no suffix is found.
         """
         if include_psl_private_domains is None:
             include_psl_private_domains = self.include_psl_private_domains
 
-        node = (
+        node = reg_node = (
             self.tlds_incl_private_trie
             if include_psl_private_domains
             else self.tlds_excl_private_trie
         )
-        i = len(spl)
-        j = i
+        suffix_idx = reg_idx = label_idx = len(spl)
         for label in reversed(spl):
             decoded_label = _decode_punycode(label)
             if decoded_label in node.matches:
-                j -= 1
+                label_idx -= 1
                 node = node.matches[decoded_label]
                 if node.end:
-                    i = j
+                    suffix_idx = label_idx
+                    if not node.is_private:
+                        reg_node = node
+                        reg_idx = label_idx
                 continue
 
             is_wildcard = "*" in node.matches
             if is_wildcard:
                 is_wildcard_exception = "!" + decoded_label in node.matches
-                if is_wildcard_exception:
-                    return j, node.matches["*"].is_private
-                return j - 1, node.matches["*"].is_private
+                return (
+                    label_idx if is_wildcard_exception else label_idx - 1,
+                    node.matches["*"],
+                ), (
+                    reg_idx,
+                    reg_node,
+                )
 
             break
 
-        return i, node.is_private
+        if suffix_idx == len(spl):
+            return None
+
+        return ((suffix_idx, node), (reg_idx, reg_node))
 
 
 def _decode_punycode(label: str) -> str:

@@ -49,7 +49,7 @@ To rejoin the original hostname, if it was indeed a valid, registered hostname:
 
 ```python
 >>> ext = tldextract.extract('http://forums.bbc.co.uk')
->>> ext.registered_domain
+>>> ext.top_domain_under_public_suffix
 'bbc.co.uk'
 >>> ext.fqdn
 'forums.bbc.co.uk'
@@ -246,7 +246,7 @@ For example:
 extractor = TLDExtract()
 split_url = urllib.parse.urlsplit("https://foo.bar.com:8080")
 split_suffix = extractor.extract_urllib(split_url)
-url_to_crawl = f"{split_url.scheme}://{split_suffix.registered_domain}:{split_url.port}"
+url_to_crawl = f"{split_url.scheme}://{split_suffix.top_domain_under_public_suffix}:{split_url.port}"
 ```
 
 `tldextract`'s lenient string parsing stance lowers the learning curve of using

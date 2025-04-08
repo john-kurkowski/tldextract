@@ -98,7 +98,14 @@ def main() -> None:
     for i in args.input:
         ext = tld_extract(i)
         if args.json:
-            properties = ("fqdn", "ipv4", "ipv6", "registered_domain")
+            properties = (
+                "fqdn",
+                "ipv4",
+                "ipv6",
+                "registered_domain",
+                "top_domain_under_public_suffix",
+                "top_domain_under_registry_suffix",
+            )
             print(
                 json.dumps(
                     {

@@ -89,6 +89,9 @@ strict = true
 
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
+filterwarnings = [
+    "ignore:The 'registered_domain' property is deprecated:DeprecationWarning:tldextract.*:"
+]
 
 [tool.ruff.format]
 docstring-code-format = true

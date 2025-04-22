@@ -3,6 +3,23 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 5.3.0 (2025-04-21)
+
+* Features
+  * Add result field `registry_suffix` ([#344](https://github.com/john-kurkowski/tldextract/issues/344))
+    * To complement the existing public suffix field `suffix`
+  * Add result property `top_domain_under_public_suffix` ([#344](https://github.com/john-kurkowski/tldextract/issues/344))
+  * Add result property `top_domain_under_registry_suffix` ([#344](https://github.com/john-kurkowski/tldextract/issues/344))
+  * Deprecate `registered_domain` property
+    * Use `top_domain_under_public_suffix` instead, which has the same behavior
+      but a more accurate name
+* Bugfixes
+  * Fix missing `reverse_domain_name` property in CLI `--json` output ([`a545c67`](https://github.com/john-kurkowski/tldextract/commit/a545c67d87223616fc13e90692886b3ca9af18bb))
+* Misc.
+    * Expand internal `suffix_index` return type to be richer than bools, and
+      include the registry suffix during trie traversal
+      ([#344](https://github.com/john-kurkowski/tldextract/issues/344))
+
 ## 5.2.0 (2025-04-07)
 
 * Features

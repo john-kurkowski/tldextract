@@ -7,9 +7,13 @@ Say you want just the "google" part of https://www.google.com. *Everybody gets
 this wrong.* Splitting on the "." and taking the 2nd-to-last element only works
 for simple domains, e.g. .com. Consider
 [http://forums.bbc.co.uk](http://forums.bbc.co.uk): the naive splitting method
-will give you "co" as the domain, instead of "bbc". Rather than juggle TLDs,
-gTLDs, or ccTLDs  yourself, `tldextract` extracts the currently living public
+will give you "co" as the domain, instead of "bbc".
+
+Rather than juggle TLDs,
+gTLDs, ccTLDs, and their exceptions yourself, `tldextract` extracts the currently living public
 suffixes according to [the Public Suffix List](https://publicsuffix.org).
+You can optionally support the Public Suffix List's [private
+domains](#public-vs-private-domains) as well.
 
 > A "public suffix" is one under which Internet users can directly register
 > names.
@@ -62,16 +66,6 @@ the URL components by space:
 $ tldextract 'http://forums.bbc.co.uk'
 forums bbc co.uk
 ```
-
-By default, this package supports the public ICANN TLDs and their exceptions.
-You can optionally support the Public Suffix List's [private
-domains](#public-vs-private-domains) as well.
-
-This package started by implementing the chosen answer from [this StackOverflow question on
-getting the "domain name" from a URL](http://stackoverflow.com/questions/569137/how-to-get-domain-name-from-url/569219#569219).
-However, the proposed regex solution doesn't address many country codes like
-com.au, or the exceptions to country codes like the registered domain
-parliament.uk. The Public Suffix List does, and so does this package.
 
 ## Install
 
@@ -284,3 +278,11 @@ Automatically format all code:
 ```zsh
 ruff format .
 ```
+
+## History
+
+This package started by implementing the chosen answer from [this StackOverflow question on
+getting the "domain name" from a URL](http://stackoverflow.com/questions/569137/how-to-get-domain-name-from-url/569219#569219).
+However, the proposed regex solution doesn't address many country codes like
+com.au, or the exceptions to country codes like the registered domain
+parliament.uk. The Public Suffix List does, and so does this package.

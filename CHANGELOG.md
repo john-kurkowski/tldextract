@@ -479,5 +479,60 @@ Fix publishing mistake with 1.7.0.
 ## 1.1 (2012-03-22)
 
 * Bugfixes
-    * Reliable logger name
-    * Forgotten `import sys`
+    * Reliable logger name ([#10](https://github.com/john-kurkowski/tldextract/pull/10))
+    * Forgotten `import sys` ([#8](https://github.com/john-kurkowski/tldextract/pull/8))
+
+## 1.0 (2012-02-12)
+
+* Docs
+    * Summarize advanced usage
+* Removals
+    * Remove deprecated global
+
+## 0.4 (2012-01-19)
+
+* Features
+  * Add global functions `extract` and `urlsplit` that use a singleton TLDExtract class instance
+    * The global functions now take only the `url` param; instantiate your own TLDExtract to set the other 2 params
+    * Deprecate `tldextract.urlsplit`. Client can call `urlparse.urlsplit` before calling tldextract and achieve the same functionality.
+* Bugfixes
+  * Capture more errors around unpickling
+
+## 0.3.2 (2012-01-07)
+
+* Bugfixes
+  * Fallback if pkg_resources isn't available, like on GAE ([#4](https://github.com/john-kurkowski/tldextract/pull/4))
+  * Update TLD snapshot from new PSL location
+
+## 0.3.1 (2011-07-07)
+
+* Bugfixes
+  * Fix missing resource `.tld_set_snapshot`
+
+## 0.3 (2011-06-18)
+
+* Features
+  * Replace regex with Public Suffix List, set-based TLD lookup
+  * Add optional `fetch` param
+  * Debug log the diff of `.tld_regex_snapshot`
+* Bugfixes
+  * Fix viewing live TLD definitions on GAE
+
+## 0.2 (2011-03-02)
+
+* Features
+  * Add 'stricter' version of extract that calls `urlparse.urlsplit` on the input URL
+* Bugfixes
+  * Regress to parsing IPs by regex if `socket` is unavailable
+  * Return a `namedtuple` instead of a `dict`, mirroring the `urlparse` lib's return types
+
+## 0.1.1 (2011-03-01)
+
+* Bugfixes
+  * Support URLs with usernames, passwords, and ports
+  * Support more schemes
+    * Don't assume `http://` URLs: strip off any URL prefix resembling a scheme
+
+## 0.1 (2011-02-27)
+
+* Initial release

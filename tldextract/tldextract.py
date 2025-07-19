@@ -176,10 +176,12 @@ class ExtractResult:
         >>> extract("http://localhost:8080").registered_domain
         ''
 
-        .. deprecated:: 6.0.0
-           This property is deprecated and will be removed in the next major
-           version. Use `top_domain_under_public_suffix` instead, which has the
-           same behavior but a more accurate name.
+        .. deprecated:: 5.3.1
+           Use `top_domain_under_public_suffix` instead, which has the same
+           behavior but a more accurate name.
+
+        .. versionremoved:: 6.0.0
+           This property will be removed in the next major version.
 
         This is an alias for the `top_domain_under_public_suffix` property.
         `registered_domain` is so called because is roughly the domain the

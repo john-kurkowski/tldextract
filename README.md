@@ -22,6 +22,8 @@ ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False
 >>> ext = tldextract.extract('http://forums.bbc.co.uk')
 >>> ext.domain
 'bbc'
+>>> ext.top_domain_under_public_suffix
+'bbc.co.uk'
 >>> ext.fqdn
 'forums.bbc.co.uk'
 ```

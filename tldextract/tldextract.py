@@ -404,7 +404,9 @@ class TLDExtract:
             >>> session = requests.Session()
             >>> # customize your session here
             >>> with session:
-            ...     extractor.extract_str("http://forums.news.cnn.com/", session=session)
+            ...     extractor.extract_str(
+            ...         "http://forums.news.cnn.com/", session=session
+            ...     )
             ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
         """
         return self._extract_netloc(
@@ -437,7 +439,9 @@ class TLDExtract:
             ...     urllib.parse.urlsplit("http://forums.news.cnn.com/")
             ... )
             ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
-            >>> extractor.extract_urllib(urllib.parse.urlsplit("http://forums.bbc.co.uk/"))
+            >>> extractor.extract_urllib(
+            ...     urllib.parse.urlsplit("http://forums.bbc.co.uk/")
+            ... )
             ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
         """
         return self._extract_netloc(

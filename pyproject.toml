@@ -1,0 +1,121 @@
+[project]
+name = "tldextract"
+authors = [{name = "John Kurkowski", email = "john.kurkowski@gmail.com"}]
+license = {text = "BSD-3-Clause"}
+description = "Accurately separates a URL's subdomain, domain, and public suffix, using the Public Suffix List (PSL). By default, this includes the public ICANN TLDs and their exceptions. You can optionally support the Public Suffix List's private domains as well."
+keywords = [
+    "tld",
+    "domain",
+    "subdomain",
+    "url",
+    "parse",
+    "extract",
+    "urlparse",
+    "urlsplit",
+    "public",
+    "suffix",
+    "list",
+    "publicsuffix",
+    "publicsuffixlist",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+requires-python = ">=3.9"
+dynamic = ["version"]
+readme = "README.md"
+
+dependencies = [
+    "idna",
+    "requests>=2.1.0",
+    "requests-file>=1.4",
+    "filelock>=3.0.8",
+]
+
+[project.optional-dependencies]
+release = [
+    "build",
+    "twine",
+]
+testing = [
+    "mypy",
+    "pytest",
+    "pytest-gitignore",
+    "pytest-mock",
+    "pytest-socket",
+    "responses",
+    "ruff",
+    "syrupy",
+    "tox",
+    "tox-uv",
+    "types-filelock",
+    "types-requests",
+]
+
+[project.urls]
+Homepage = "https://github.com/john-kurkowski/tldextract"
+
+[project.scripts]
+tldextract = "tldextract.cli:main"
+
+[build-system]
+requires = [
+    "setuptools>=61.2",
+    "setuptools_scm[toml]>=6.2",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["tldextract"]
+include-package-data = true
+license-files = ["LICENSE"]
+
+[tool.setuptools_scm]
+write_to = "tldextract/_version.py"
+
+[tool.setuptools.dynamic]
+version = {attr = "setuptools_scm.get_version"}
+
+[tool.mypy]
+explicit_package_bases = true
+strict = true
+
+[tool.pytest.ini_options]
+addopts = [
+  "--disable-socket",
+  "--doctest-modules",
+]
+filterwarnings = [
+    "ignore:The 'registered_domain' property is deprecated:DeprecationWarning:tldextract.*:"
+]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "I",
+  "N",
+  "UP",
+  "W",
+]
+ignore = [
+  "E501", # line too long; if formatter does its job, not worried about the rare long line
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"

@@ -3,6 +3,217 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 5.3.0 (2025-04-21)
+
+* Features
+  * Add result field `registry_suffix` ([#344](https://github.com/john-kurkowski/tldextract/issues/344))
+    * To complement the existing public suffix field `suffix`
+  * Add result property `top_domain_under_public_suffix` ([#344](https://github.com/john-kurkowski/tldextract/issues/344))
+  * Add result property `top_domain_under_registry_suffix` ([#344](https://github.com/john-kurkowski/tldextract/issues/344))
+  * Deprecate `registered_domain` property
+    * Use `top_domain_under_public_suffix` instead, which has the same behavior
+      but a more accurate name
+* Bugfixes
+  * Fix missing `reverse_domain_name` property in CLI `--json` output ([`a545c67`](https://github.com/john-kurkowski/tldextract/commit/a545c67d87223616fc13e90692886b3ca9af18bb))
+* Misc.
+    * Expand internal `suffix_index` return type to be richer than bools, and
+      include the registry suffix during trie traversal
+      ([#344](https://github.com/john-kurkowski/tldextract/issues/344))
+
+## 5.2.0 (2025-04-07)
+
+* Features
+  * Add `reverse_domain_name` result property ([#342](https://github.com/john-kurkowski/tldextract/issues/342))
+* Bugfixes
+  * Extend exported public interface with `ExtractResult` and `update` ([`36ff658`](https://github.com/john-kurkowski/tldextract/commit/36ff658c53b510c5d56f8af235c8b08ce3c512f5))
+    * These were always meant to be public. Eases user import.
+* Docs
+  * Document result fields
+  * Note all return values
+  * Colocate usage in the usage section
+  * Link to private domain docs
+* Misc.
+  * Update bundled snapshot
+
+## 5.1.3 (2024-11-04)
+
+* Bugfixes
+  * Reduce logging errors ([`921a825`](https://github.com/john-kurkowski/tldextract/commit/921a82523c0e4403d21d50b2c3410d9af43520ac))
+  * Drop support for EOL Python 3.8 ([#340](https://github.com/john-kurkowski/tldextract/issues/340))
+  * Support Python 3.13 ([#341](https://github.com/john-kurkowski/tldextract/issues/341))
+  * Update bundled snapshot
+* Docs
+  * Clarify how to use your own definitions
+  * Clarify first-successful definitions vs. merged definitions
+* Misc.
+  * Switch from Black to Ruff ([#333](https://github.com/john-kurkowski/tldextract/issues/333))
+  * Switch from pip to uv, during tox ([#324](https://github.com/john-kurkowski/tldextract/issues/324))
+
+## 5.1.2 (2024-03-18)
+
+* Bugfixes
+  * Remove `socket.inet_pton`, to fix platform-dependent IP parsing ([#318](https://github.com/john-kurkowski/tldextract/issues/318))
+  * Use non-capturing groups for IPv4 address detection, for a slight speed boost ([#323](https://github.com/john-kurkowski/tldextract/issues/323))
+* Misc.
+  * Add CI for PyPy3.9 and PyPy3.10 ([#316](https://github.com/john-kurkowski/tldextract/issues/316))
+  * Add script to automate package release process ([#325](https://github.com/john-kurkowski/tldextract/issues/325))
+  * Update LICENSE copyright years
+
+## 5.1.1 (2023-11-16)
+
+* Bugfixes
+  * Fix path join on Windows ([#314](https://github.com/john-kurkowski/tldextract/issues/314))
+  * Support Python 3.12
+
+## 5.1.0 (2023-11-05)
+
+* Features
+    * Allow passing in `requests.Session` ([#311](https://github.com/john-kurkowski/tldextract/issues/311))
+    * Add "-j, --json" option to support output in json format ([#313](https://github.com/john-kurkowski/tldextract/issues/313))
+* Docs
+    * Improve clarity of absolute path ([#312](https://github.com/john-kurkowski/tldextract/issues/312))
+* Misc.
+    * Extract all testing deps from tox.ini to pyproject.toml extras ([#310](https://github.com/john-kurkowski/tldextract/issues/310))
+    * Work around responses type union error, in tests
+
+## 5.0.1 (2023-10-17)
+
+* Bugfixes
+    * Indicate MD5 not used in a security context (FIPS compliance) ([#309](https://github.com/john-kurkowski/tldextract/issues/309))
+* Misc.
+    * Increase typecheck aggression
+
+## 5.0.0 (2023-10-11)
+
+* Breaking Changes
+    * Migrate `ExtractResult` from `namedtuple` to `dataclass` ([#306](https://github.com/john-kurkowski/tldextract/issues/306))
+        * This means no more iterating/indexing/slicing/unpacking the result
+          object returned by this library. It is no longer a tuple. You must
+          directly reference the fields you're interested in.
+
+          For example, the
+          following will no longer work.
+          ```python
+          tldextract.extract("example.com")[1:3]
+          # TypeError: 'ExtractResult' object is not subscriptable
+          ```
+          Instead, use the following.
+          ```python
+          ext = tldextract.extract("example.com")
+          (ext.domain, ext.suffix)
+          ```
+* Bugfixes
+    * Drop support for EOL Python 3.7
+* Misc.
+    * Switch from pycodestyle and Pylint to Ruff ([#304](https://github.com/john-kurkowski/tldextract/issues/304))
+    * Consolidate config files
+    * Type tests
+    * Require docstrings in tests
+    * Remove obsolete tests
+
+## 4.0.0 (2023-10-11)
+
+* **Breaking** bugfixes
+    * Always include suffix if private suffix enabled and private suffix exists ([#300](https://github.com/john-kurkowski/tldextract/issues/300))
+        * Add a 4th field `is_private: bool`, to the `ExtractResult`
+          `namedtuple`, indicating whether the extraction came from the PSL's
+          private domains or not.
+        * **This could cause issues when iterating over the tuple and assuming
+          only 3 fields.**
+        * Previously, the docs promoted iteration to rejoin parts of the tuple.
+          This is better achieved by individual access of fields of interest
+          (e.g. `ExtractResult.subdomain`) or convenience properties (e.g.
+          `ExtractResult.{fqdn,registered_domain}`).
+
+This is the same content as version 3.6.0, originally released 2023-09-19,
+which was yanked.
+
+## 3.5.0 (2023-09-06)
+
+* Features
+    * Support IPv6 addresses ([#298](https://github.com/john-kurkowski/tldextract/issues/298))
+* Bugfixes
+    * Accept only 4 decimal octet IPv4 addresses ([#292](https://github.com/john-kurkowski/tldextract/issues/292))
+    * Support IPv4 addresses with unicode dots ([#292](https://github.com/john-kurkowski/tldextract/issues/292))
+    * Reject IPv4 addresses with trailing whitespaces + non-whitespaces ([#293](https://github.com/john-kurkowski/tldextract/issues/293))
+* Misc.
+    * Migrate setup.py to pyproject.toml ([#299](https://github.com/john-kurkowski/tldextract/issues/299))
+
+## 3.4.4 (2023-05-19)
+
+* Bugfixes
+  * Honor private domains flag on `self`, not only when passed to `__call__` ([#289](https://github.com/john-kurkowski/tldextract/issues/289))
+
+## 3.4.3 (2023-05-18)
+
+* Bugfixes
+  * Speed up 10-15% over all inputs
+    * Refactor `suffix_index()` to use a trie ([#285](https://github.com/john-kurkowski/tldextract/issues/285))
+* Docs
+  * Adopt PEP257 doc style
+
+## 3.4.2 (2023-05-16)
+
+* Bugfixes
+  * Speed up 10-40% on "average" inputs, and even more on pathological inputs, like long subdomains
+    * Optimize `suffix_index()`: search from right to left ([#283](https://github.com/john-kurkowski/tldextract/issues/283))
+    * Optimize netloc extraction: switch from regex to if/else ([#284](https://github.com/john-kurkowski/tldextract/issues/284))
+
+## 3.4.1 (2023-04-26)
+
+* Bugfixes
+  * Fix Pyright not finding tldextract public interface ([#279](https://github.com/john-kurkowski/tldextract/issues/279))
+  * Fix various Pyright checks
+  * Use SPDX license identifier ([#280](https://github.com/john-kurkowski/tldextract/issues/280))
+  * Support Python 3.11
+* Docs
+  * Add FAQ about private domains
+* Misc.
+  * Update bundled snapshot
+  * Fix lint in newer pylint
+
+## 3.4.0 (2022-10-04)
+
+* Features
+  * Add method `extract_urllib` to extract from a `urllib.parse.{ParseResult,SplitResult}` ([#274](https://github.com/john-kurkowski/tldextract/issues/274))
+* Bugfixes
+  * Fix internal type-var error, in newer versions of mypy ([#275](https://github.com/john-kurkowski/tldextract/issues/275))
+
+## 3.3.1 (2022-07-08)
+
+* Bugfixes
+  * Fix documented types, in README and in exception message ([#265](https://github.com/john-kurkowski/tldextract/issues/265))
+* Misc.
+  * Format source code
+
+## 3.3.0 (2022-05-04)
+
+* Features
+  * Add CLI flag `--suffix_list_url` to set the suffix list URL(s) or source file(s) ([#197](https://github.com/john-kurkowski/tldextract/issues/197))
+  * Add CLI flag `--no_fallback_to_snapshot` to not fall back to the snapshot ([#260](https://github.com/john-kurkowski/tldextract/issues/260))
+  * Add alias `--include_psl_private_domains` for CLI flag `--private_domains`
+* Bugfixes
+  * Handle more internationalized domain name dots ([#253](https://github.com/john-kurkowski/tldextract/issues/253))
+* Misc.
+  * Update bundled snapshot
+  * Add basic CLI test coverage
+
+## 3.2.1 (2022-04-11)
+
+* Bugfixes
+  * Fix incorrect namespace used for caching function returns ([#258](https://github.com/john-kurkowski/tldextract/issues/258))
+  * Remove redundant encode ([`6e2c0e0`](https://github.com/john-kurkowski/tldextract/commit/6e2c0e0))
+  * Remove redundant lowercase ([`226bfc2`](https://github.com/john-kurkowski/tldextract/commit/226bfc2))
+  * Remove unused `try`/`except` path ([#255](https://github.com/john-kurkowski/tldextract/issues/255))
+  * Add types to the private API (disallow untyped calls and defs) ([#256](https://github.com/john-kurkowski/tldextract/issues/256))
+  * Rely on `python_requires` instead of runtime check ([#247](https://github.com/john-kurkowski/tldextract/issues/247))
+* Docs
+  * Fix docs with updated types
+  * Fix link in Travis CI badge ([#248](https://github.com/john-kurkowski/tldextract/issues/248))
+  * Rewrite documentation intro
+  * Remove unnecessary subheading
+  * Unify case
+
 ## 3.2.0 (2022-02-20)
 
 * Features
@@ -268,5 +479,60 @@ Fix publishing mistake with 1.7.0.
 ## 1.1 (2012-03-22)
 
 * Bugfixes
-    * Reliable logger name
-    * Forgotten `import sys`
+    * Reliable logger name ([#10](https://github.com/john-kurkowski/tldextract/pull/10))
+    * Forgotten `import sys` ([#8](https://github.com/john-kurkowski/tldextract/pull/8))
+
+## 1.0 (2012-02-12)
+
+* Docs
+    * Summarize advanced usage
+* Removals
+    * Remove deprecated global
+
+## 0.4 (2012-01-19)
+
+* Features
+  * Add global functions `extract` and `urlsplit` that use a singleton TLDExtract class instance
+    * The global functions now take only the `url` param; instantiate your own TLDExtract to set the other 2 params
+    * Deprecate `tldextract.urlsplit`. Client can call `urlparse.urlsplit` before calling tldextract and achieve the same functionality.
+* Bugfixes
+  * Capture more errors around unpickling
+
+## 0.3.2 (2012-01-07)
+
+* Bugfixes
+  * Fallback if pkg_resources isn't available, like on GAE ([#4](https://github.com/john-kurkowski/tldextract/pull/4))
+  * Update TLD snapshot from new PSL location
+
+## 0.3.1 (2011-07-07)
+
+* Bugfixes
+  * Fix missing resource `.tld_set_snapshot`
+
+## 0.3 (2011-06-18)
+
+* Features
+  * Replace regex with Public Suffix List, set-based TLD lookup
+  * Add optional `fetch` param
+  * Debug log the diff of `.tld_regex_snapshot`
+* Bugfixes
+  * Fix viewing live TLD definitions on GAE
+
+## 0.2 (2011-03-02)
+
+* Features
+  * Add 'stricter' version of extract that calls `urlparse.urlsplit` on the input URL
+* Bugfixes
+  * Regress to parsing IPs by regex if `socket` is unavailable
+  * Return a `namedtuple` instead of a `dict`, mirroring the `urlparse` lib's return types
+
+## 0.1.1 (2011-03-01)
+
+* Bugfixes
+  * Support URLs with usernames, passwords, and ports
+  * Support more schemes
+    * Don't assume `http://` URLs: strip off any URL prefix resembling a scheme
+
+## 0.1 (2011-02-27)
+
+* Initial release

@@ -4,8 +4,8 @@
 using [the Public Suffix List (PSL)](https://publicsuffix.org).
 
 **Why?** Naive URL parsing like splitting on dots fails for domains like
-`forums.bbc.co.uk` (gives "co" instead of "bbc"). `tldextract` handles all the
-edge cases, so you don't have to.
+`forums.bbc.co.uk` (gives "co" instead of "bbc"). `tldextract` handles the edge
+cases, so you don't have to.
 
 ## Quick Start
 

@@ -382,24 +382,32 @@ class TLDExtract:
     ) -> ExtractResult:
         """Take a string URL and splits it into its subdomain, domain, and suffix components.
 
-        I.e. its effective TLD, gTLD, ccTLD, etc. components.
+        Args:
+            url: The URL string to extract components from
+            include_psl_private_domains: Whether to treat PSL private domains as suffixes.
+                If None, uses the instance default.
+            session: Optional requests.Session for HTTP configuration (e.g., proxies)
 
-        >>> extractor = TLDExtract()
-        >>> extractor.extract_str("http://forums.news.cnn.com/")
-        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
-        >>> extractor.extract_str("http://forums.bbc.co.uk/")
-        ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
+        Returns:
+            ExtractResult: Named tuple containing subdomain, domain, suffix, and metadata
 
-        Allows configuring the HTTP request via the optional `session`
-        parameter. For example, if you need to use a HTTP proxy. See also
-        `requests.Session`.
+        Examples:
+            Basic extraction:
+            >>> extractor = TLDExtract()
+            >>> extractor.extract_str("http://forums.news.cnn.com/")
+            ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
+            >>> extractor.extract_str("http://forums.bbc.co.uk/")
+            ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
 
-        >>> import requests
-        >>> session = requests.Session()
-        >>> # customize your session here
-        >>> with session:
-        ...     extractor.extract_str("http://forums.news.cnn.com/", session=session)
-        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
+            Using a custom session:
+            >>> import requests
+            >>> session = requests.Session()
+            >>> # customize your session here
+            >>> with session:
+            ...     extractor.extract_str(
+            ...         "http://forums.news.cnn.com/", session=session
+            ...     )
+            ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
         """
         return self._extract_netloc(
             lenient_netloc(url), include_psl_private_domains, session=session
@@ -411,21 +419,30 @@ class TLDExtract:
         include_psl_private_domains: bool | None = None,
         session: requests.Session | None = None,
     ) -> ExtractResult:
-        """Take the output of urllib.parse URL parsing methods and further splits the parsed URL.
+        """Extract components from a pre-parsed URL object.
 
-        Splits the parsed URL into its subdomain, domain, and suffix
-        components, i.e. its effective TLD, gTLD, ccTLD, etc. components.
+        Args:
+            url: ParseResult or SplitResult from urllib.parse methods
+            include_psl_private_domains: Whether to treat PSL private domains as suffixes.
+                If None, uses the instance default.
+            session: Optional requests.Session for HTTP configuration
 
-        This method is like `extract_str` but faster, as the string's domain
-        name has already been parsed.
+        Returns:
+            ExtractResult: Named tuple containing subdomain, domain, suffix, and metadata
 
-        >>> extractor = TLDExtract()
-        >>> extractor.extract_urllib(
-        ...     urllib.parse.urlsplit("http://forums.news.cnn.com/")
-        ... )
-        ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
-        >>> extractor.extract_urllib(urllib.parse.urlsplit("http://forums.bbc.co.uk/"))
-        ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
+        Note:
+            This method is faster than `extract_str` since the URL is already parsed.
+
+        Examples:
+            >>> extractor = TLDExtract()
+            >>> extractor.extract_urllib(
+            ...     urllib.parse.urlsplit("http://forums.news.cnn.com/")
+            ... )
+            ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
+            >>> extractor.extract_urllib(
+            ...     urllib.parse.urlsplit("http://forums.bbc.co.uk/")
+            ... )
+            ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
         """
         return self._extract_netloc(
             url.netloc, include_psl_private_domains, session=session
@@ -506,7 +523,12 @@ class TLDExtract:
     def update(
         self, fetch_now: bool = False, session: requests.Session | None = None
     ) -> None:
-        """Force fetch the latest suffix list definitions."""
+        """Clear cache and force fresh suffix list fetch on next extraction.
+
+        Args:
+            fetch_now: If True, immediately fetch updated suffix lists
+            session: Optional requests.Session for HTTP configuration
+        """
         self._extractor = None
         self._cache.clear()
         if fetch_now:

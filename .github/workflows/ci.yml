@@ -25,9 +25,6 @@ jobs:
             {python-version: "pypy3.9", toxenv: "pypy39"},
             {python-version: "pypy3.10", toxenv: "pypy310"},
             {python-version: "pypy3.11", toxenv: "pypy311"},
-            {python-version: "pypy3.12", toxenv: "pypy312"},
-            {python-version: "pypy3.13", toxenv: "pypy313"},
-            {python-version: "pypy3.14", toxenv: "pypy314"},
           ]
         include:
           - os: ubuntu-latest

@@ -32,7 +32,7 @@ def test_disk_cache(tmp_path: Path) -> None:
 
 def test_get_pkg_unique_identifier(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test generating a unique identifier for the version of this package."""
-    monkeypatch.setattr(sys, "version_info", (3, 9, 1, "final", 0))
+    monkeypatch.setattr(sys, "version_info", (3, 10, 1, "final", 0))
     monkeypatch.setattr(sys, "prefix", "/home/john/.pyenv/versions/myvirtualenv")
 
     mock_version_module = types.ModuleType("tldextract._version", "mocked module")
@@ -41,13 +41,13 @@ def test_get_pkg_unique_identifier(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert (
         get_pkg_unique_identifier()
-        == "3.9.1.final__myvirtualenv__f01a7b__tldextract-1.2.3"
+        == "3.10.1.final__myvirtualenv__f01a7b__tldextract-1.2.3"
     )
 
 
 def test_get_cache_dir(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test finding the cache directory."""
-    pkg_identifier = "3.9.1.final__myvirtualenv__f01a7b__tldextract-1.2.3"
+    pkg_identifier = "3.10.1.final__myvirtualenv__f01a7b__tldextract-1.2.3"
     monkeypatch.setattr(
         tldextract.cache, "get_pkg_unique_identifier", lambda: pkg_identifier
     )

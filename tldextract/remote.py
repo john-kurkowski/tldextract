@@ -1,7 +1,5 @@
 """tldextract helpers for testing and fetching remote resources."""
 
-from __future__ import annotations
-
 import re
 from ipaddress import AddressValueError, IPv6Address
 from urllib.parse import scheme_chars

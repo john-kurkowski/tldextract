@@ -1,7 +1,5 @@
 """Helpers."""
 
-from __future__ import annotations
-
 import errno
 import hashlib
 import json

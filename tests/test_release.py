@@ -1,7 +1,5 @@
 """Test the library maintainer release script."""
 
-from __future__ import annotations
-
 import dataclasses
 import sys
 from collections.abc import Iterator

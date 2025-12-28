@@ -1,7 +1,5 @@
 """Test ability to run in parallel with shared cache."""
 
-from __future__ import annotations
-
 import os
 from multiprocessing import Pool
 from pathlib import Path

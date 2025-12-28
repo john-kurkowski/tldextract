@@ -1,7 +1,5 @@
 """tldextract helpers for testing and fetching remote resources."""
 
-from __future__ import annotations
-
 import logging
 import pkgutil
 import re

@@ -28,8 +28,6 @@ Prerequisites:
 
 """
 
-from __future__ import annotations
-
 import contextlib
 import os
 import re

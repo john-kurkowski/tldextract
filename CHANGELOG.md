@@ -3,6 +3,15 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 5.3.1 (2025-12-28)
+
+* Bugfixes
+  * Drop support for EOL Python 3.9 ([#359](https://github.com/john-kurkowski/tldextract/issues/359))
+  * Support Python 3.14 + PyPy 3.11 ([#358](https://github.com/john-kurkowski/tldextract/issues/358))
+  * Speed up IP address search space with `isdecimal()` instead of `isdigit()` ([#352](https://github.com/john-kurkowski/tldextract/issues/352))
+* Docs
+  * Reorganize, dedupe, and shorten README ([#349](https://github.com/john-kurkowski/tldextract/issues/349))
+
 ## 5.3.0 (2025-04-21)
 
 * Features

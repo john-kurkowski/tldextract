@@ -67,8 +67,8 @@ tldextract = "tldextract.cli:main"
 
 [build-system]
 requires = [
-    "setuptools>=77.0.3",
-    "setuptools_scm[toml]>=6.2",
+    "setuptools>=80",
+    "setuptools-scm>=8",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -78,9 +78,6 @@ include-package-data = true
 
 [tool.setuptools_scm]
 write_to = "tldextract/_version.py"
-
-[tool.setuptools.dynamic]
-version = {attr = "setuptools_scm.get_version"}
 
 [tool.mypy]
 explicit_package_bases = true

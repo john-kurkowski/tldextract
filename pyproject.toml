@@ -1,7 +1,8 @@
 [project]
 name = "tldextract"
 authors = [{name = "John Kurkowski", email = "john.kurkowski@gmail.com"}]
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 description = "Accurately separates a URL's subdomain, domain, and public suffix, using the Public Suffix List (PSL). By default, this includes the public ICANN TLDs and their exceptions. You can optionally support the Public Suffix List's private domains as well."
 keywords = [
     "tld",
@@ -21,7 +22,6 @@ keywords = [
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Topic :: Utilities",
-    "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -67,7 +67,7 @@ tldextract = "tldextract.cli:main"
 
 [build-system]
 requires = [
-    "setuptools>=61.2",
+    "setuptools>=77.0.3",
     "setuptools_scm[toml]>=6.2",
 ]
 build-backend = "setuptools.build_meta"
@@ -75,7 +75,6 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 packages = ["tldextract"]
 include-package-data = true
-license-files = ["LICENSE"]
 
 [tool.setuptools_scm]
 write_to = "tldextract/_version.py"

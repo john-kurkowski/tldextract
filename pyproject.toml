@@ -50,6 +50,7 @@ testing = [
     "pytest",
     "pytest-gitignore",
     "pytest-mock",
+    "pytest-socket",
     "responses",
     "ruff",
     "syrupy",
@@ -84,7 +85,10 @@ explicit_package_bases = true
 strict = true
 
 [tool.pytest.ini_options]
-addopts = "--doctest-modules"
+addopts = [
+  "--disable-socket",
+  "--doctest-modules",
+]
 filterwarnings = [
     "ignore:The 'registered_domain' property is deprecated:DeprecationWarning:tldextract.*:"
 ]

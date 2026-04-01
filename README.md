@@ -108,7 +108,7 @@ extract = tldextract.TLDExtract(
 from urllib.parse import urlsplit
 
 split_url = urlsplit("https://example.com:8080/path")
-result = tldextract.extract_urllib(split_url)
+result = tldextract.extract.extract_urllib(split_url)
 ```
 
 ## Command Line

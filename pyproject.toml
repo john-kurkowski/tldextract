@@ -52,6 +52,7 @@ testing = [
     "pytest-mock",
     "responses",
     "ruff",
+    "sybil[pytest]",
     "syrupy",
     "tox",
     "tox-uv",

@@ -47,7 +47,7 @@ no_fetch_extract('http://www.google.com')
 
 Via environment variable:
 
-```python
+```zsh
 export TLDEXTRACT_CACHE="/path/to/cache"
 ```
 

@@ -105,7 +105,6 @@ extract = tldextract.TLDExtract(
 ### How to validate URLs before extraction
 
 ```python
-import tldextract
 from urllib.parse import urlsplit
 
 extract = tldextract.TLDExtract()

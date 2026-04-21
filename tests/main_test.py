@@ -16,7 +16,12 @@ import tldextract
 import tldextract.suffix_list
 from tldextract.cache import DiskCache
 from tldextract.remote import lenient_netloc, looks_like_ip, looks_like_ipv6
-from tldextract.suffix_list import SuffixListNotFound
+from tldextract.suffix_list import (
+    PUBLIC_SUFFIX_SNAPSHOT_PATH,
+    PslMetadata,
+    SuffixListInfo,
+    SuffixListNotFound,
+)
 from tldextract.tldextract import ExtractResult
 
 extract = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp())
@@ -535,7 +540,8 @@ def test_find_first_response_without_session(tmp_path: Path) -> None:
     cache = DiskCache(str(tmp_path))
 
     result = tldextract.suffix_list.find_first_response(cache, [server], 5)
-    assert result == response_text
+    assert result.url == server
+    assert result.text == response_text
 
 
 def test_find_first_response_with_session(tmp_path: Path) -> None:
@@ -549,9 +555,80 @@ def test_find_first_response_with_session(tmp_path: Path) -> None:
     result = tldextract.suffix_list.find_first_response(
         cache, [server], 5, mock_session
     )
-    assert result == response_text
+    assert result.url == server
+    assert result.text == response_text
     mock_session.get.assert_called_once_with(server, timeout=5)
     mock_session.close.assert_not_called()
+
+
+def test_suffix_list_info_snapshot_only_before_extraction() -> None:
+    """Load suffix list metadata lazily from the packaged snapshot."""
+    extract = tldextract.TLDExtract(cache_dir=None, suffix_list_urls=())
+
+    result = extract.suffix_list_info
+
+    assert result == SuffixListInfo(
+        loaded_from=PUBLIC_SUFFIX_SNAPSHOT_PATH,
+        psl_metadata=PslMetadata(
+            version="2025-04-07_15-51-09_UTC",
+            commit="5fc8d12c1624ddbc56a80e944aca151a8ee466a1",
+        ),
+    )
+
+
+@responses.activate
+def test_suffix_list_info_remote_source() -> None:
+    """Expose the URL and official metadata from a fetched suffix list."""
+    server = "http://some-server.com"
+    responses.add(
+        responses.GET,
+        server,
+        status=200,
+        body="// VERSION: 2025-01-01_00-00-00_UTC\n// COMMIT: abc123\ncom\n",
+    )
+    extract = tldextract.TLDExtract(cache_dir=None, suffix_list_urls=[server])
+
+    result = extract.suffix_list_info
+
+    assert result == SuffixListInfo(
+        loaded_from=server,
+        psl_metadata=PslMetadata(version="2025-01-01_00-00-00_UTC", commit="abc123"),
+    )
+
+
+@responses.activate
+def test_suffix_list_info_is_cached_until_update() -> None:
+    """Keep metadata stable in memory until the extractor is updated."""
+    server = "http://some-server.com"
+    responses.add(
+        responses.GET,
+        server,
+        status=200,
+        body="// VERSION: 2025-01-01_00-00-00_UTC\n// COMMIT: abc123\ncom\n",
+    )
+    extract = tldextract.TLDExtract(cache_dir=None, suffix_list_urls=[server])
+
+    first = extract.suffix_list_info
+    second = extract.suffix_list_info
+
+    assert first is second
+    assert len(responses.calls) == 1
+
+    extract.update()
+
+    responses.replace(
+        responses.GET,
+        server,
+        status=200,
+        body="// VERSION: 2025-01-02_00-00-00_UTC\n// COMMIT: def456\norg\n",
+    )
+    refreshed = extract.suffix_list_info
+
+    assert refreshed == SuffixListInfo(
+        loaded_from=server,
+        psl_metadata=PslMetadata(version="2025-01-02_00-00-00_UTC", commit="def456"),
+    )
+    assert len(responses.calls) == 2
 
 
 def test_include_psl_private_domain_attr() -> None:

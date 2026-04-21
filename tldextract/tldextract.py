@@ -48,7 +48,7 @@ import requests
 
 from .cache import DiskCache, get_cache_dir
 from .remote import lenient_netloc, looks_like_ip, looks_like_ipv6
-from .suffix_list import get_suffix_lists
+from .suffix_list import SuffixListInfo, _LoadedSuffixList, get_suffix_lists
 
 CACHE_TIMEOUT = os.environ.get("TLDEXTRACT_CACHE_TIMEOUT")
 
@@ -357,6 +357,7 @@ class TLDExtract:
         self.include_psl_private_domains = include_psl_private_domains
         self.extra_suffixes = extra_suffixes
         self._extractor: _PublicSuffixListTLDExtractor | None = None
+        self._suffix_list_info: SuffixListInfo | None = None
 
         self.cache_fetch_timeout = (
             float(cache_fetch_timeout)
@@ -530,6 +531,7 @@ class TLDExtract:
             session: Optional requests.Session for HTTP configuration
         """
         self._extractor = None
+        self._suffix_list_info = None
         self._cache.clear()
         if fetch_now:
             self._get_tld_extractor(session=session)
@@ -541,6 +543,28 @@ class TLDExtract:
         This will vary based on `include_psl_private_domains` and `extra_suffixes`.
         """
         return list(self._get_tld_extractor(session=session).tlds())
+
+    @property
+    def suffix_list_info(self) -> SuffixListInfo:
+        """Metadata about the active suffix list used by this extractor.
+
+        Accessing this property lazily loads suffix list data if necessary.
+        """
+        self._get_tld_extractor()
+        suffix_list_info = self._suffix_list_info
+        assert suffix_list_info is not None
+        return suffix_list_info
+
+    def _get_suffix_list_data(
+        self, session: requests.Session | None = None
+    ) -> _LoadedSuffixList:
+        return get_suffix_lists(
+            cache=self._cache,
+            urls=self.suffix_list_urls,
+            cache_fetch_timeout=self.cache_fetch_timeout,
+            fallback_to_snapshot=self.fallback_to_snapshot,
+            session=session,
+        )
 
     def _get_tld_extractor(
         self, session: requests.Session | None = None
@@ -558,14 +582,10 @@ class TLDExtract:
         if self._extractor:
             return self._extractor
 
-        public_tlds, private_tlds = get_suffix_lists(
-            cache=self._cache,
-            urls=self.suffix_list_urls,
-            cache_fetch_timeout=self.cache_fetch_timeout,
-            fallback_to_snapshot=self.fallback_to_snapshot,
-            session=session,
-        )
-
+        loaded_suffix_list = self._get_suffix_list_data(session=session)
+        public_tlds = loaded_suffix_list.public_suffixes
+        private_tlds = loaded_suffix_list.private_suffixes
+        self._suffix_list_info = loaded_suffix_list.suffix_list_info
         if not any([public_tlds, private_tlds, self.extra_suffixes]):
             raise ValueError("No tlds set. Cannot proceed without tlds.")
 

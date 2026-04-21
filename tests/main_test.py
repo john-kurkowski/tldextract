@@ -5,7 +5,7 @@ import os
 import tempfile
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from unittest.mock import Mock
 
 import pytest
@@ -559,6 +559,52 @@ def test_find_first_response_with_session(tmp_path: Path) -> None:
     assert result.text == response_text
     mock_session.get.assert_called_once_with(server, timeout=5)
     mock_session.close.assert_not_called()
+
+
+def test_get_suffix_lists_upgrades_legacy_cache(tmp_path: Path) -> None:
+    """Rewrite legacy cached suffix data into the metadata-aware cache shape."""
+    cache = DiskCache(str(tmp_path))
+    urls = ()
+    cache_key = {"urls": urls, "fallback_to_snapshot": True}
+    cache.set("publicsuffix.org-tlds", cache_key, [["com"], ["blogspot.com"]])
+
+    result = tldextract.suffix_list.get_suffix_lists(
+        cache=cache,
+        urls=urls,
+        cache_fetch_timeout=None,
+        fallback_to_snapshot=True,
+    )
+
+    assert result.suffix_list_info == SuffixListInfo(
+        loaded_from=PUBLIC_SUFFIX_SNAPSHOT_PATH,
+        psl_metadata=PslMetadata(
+            version="2025-04-07_15-51-09_UTC",
+            commit="5fc8d12c1624ddbc56a80e944aca151a8ee466a1",
+        ),
+    )
+    cached_value = cast(
+        dict[str, object], cache.get("publicsuffix.org-tlds", cache_key)
+    )
+    assert cached_value["loaded_from"] == PUBLIC_SUFFIX_SNAPSHOT_PATH
+    assert cast(dict[str, object], cached_value["psl_metadata"]) == {
+        "version": "2025-04-07_15-51-09_UTC",
+        "commit": "5fc8d12c1624ddbc56a80e944aca151a8ee466a1",
+    }
+    assert "com" in cast(list[str], cached_value["public_suffixes"])
+    assert "blogspot.com" in cast(list[str], cached_value["private_suffixes"])
+
+
+def test_get_suffix_lists_without_fallback_raises(tmp_path: Path) -> None:
+    """Propagate lookup failure when snapshot fallback is disabled."""
+    cache = DiskCache(str(tmp_path))
+
+    with pytest.raises(SuffixListNotFound):
+        tldextract.suffix_list.get_suffix_lists(
+            cache=cache,
+            urls=(),
+            cache_fetch_timeout=None,
+            fallback_to_snapshot=False,
+        )
 
 
 def test_suffix_list_info_snapshot_only_before_extraction() -> None:

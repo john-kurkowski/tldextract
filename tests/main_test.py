@@ -5,7 +5,7 @@ import os
 import tempfile
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from unittest.mock import Mock
 
 import pytest
@@ -16,7 +16,12 @@ import tldextract
 import tldextract.suffix_list
 from tldextract.cache import DiskCache
 from tldextract.remote import lenient_netloc, looks_like_ip, looks_like_ipv6
-from tldextract.suffix_list import SuffixListNotFound
+from tldextract.suffix_list import (
+    PUBLIC_SUFFIX_SNAPSHOT_PATH,
+    PslMetadata,
+    SuffixListInfo,
+    SuffixListNotFound,
+)
 from tldextract.tldextract import ExtractResult
 
 extract = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp())
@@ -535,7 +540,8 @@ def test_find_first_response_without_session(tmp_path: Path) -> None:
     cache = DiskCache(str(tmp_path))
 
     result = tldextract.suffix_list.find_first_response(cache, [server], 5)
-    assert result == response_text
+    assert result.url == server
+    assert result.text == response_text
 
 
 def test_find_first_response_with_session(tmp_path: Path) -> None:
@@ -549,9 +555,126 @@ def test_find_first_response_with_session(tmp_path: Path) -> None:
     result = tldextract.suffix_list.find_first_response(
         cache, [server], 5, mock_session
     )
-    assert result == response_text
+    assert result.url == server
+    assert result.text == response_text
     mock_session.get.assert_called_once_with(server, timeout=5)
     mock_session.close.assert_not_called()
+
+
+def test_get_suffix_lists_upgrades_legacy_cache(tmp_path: Path) -> None:
+    """Rewrite legacy cached suffix data into the metadata-aware cache shape."""
+    cache = DiskCache(str(tmp_path))
+    urls = ()
+    cache_key = {"urls": urls, "fallback_to_snapshot": True}
+    cache.set("publicsuffix.org-tlds", cache_key, [["com"], ["blogspot.com"]])
+
+    result = tldextract.suffix_list.get_suffix_lists(
+        cache=cache,
+        urls=urls,
+        cache_fetch_timeout=None,
+        fallback_to_snapshot=True,
+    )
+
+    assert result.suffix_list_info == SuffixListInfo(
+        loaded_from=PUBLIC_SUFFIX_SNAPSHOT_PATH,
+        psl_metadata=PslMetadata(
+            version="2025-04-07_15-51-09_UTC",
+            commit="5fc8d12c1624ddbc56a80e944aca151a8ee466a1",
+        ),
+    )
+    cached_value = cast(
+        dict[str, object], cache.get("publicsuffix.org-tlds", cache_key)
+    )
+    assert cached_value["loaded_from"] == PUBLIC_SUFFIX_SNAPSHOT_PATH
+    assert cast(dict[str, object], cached_value["psl_metadata"]) == {
+        "version": "2025-04-07_15-51-09_UTC",
+        "commit": "5fc8d12c1624ddbc56a80e944aca151a8ee466a1",
+    }
+    assert "com" in cast(list[str], cached_value["public_suffixes"])
+    assert "blogspot.com" in cast(list[str], cached_value["private_suffixes"])
+
+
+def test_get_suffix_lists_without_fallback_raises(tmp_path: Path) -> None:
+    """Propagate lookup failure when snapshot fallback is disabled."""
+    cache = DiskCache(str(tmp_path))
+
+    with pytest.raises(SuffixListNotFound):
+        tldextract.suffix_list.get_suffix_lists(
+            cache=cache,
+            urls=(),
+            cache_fetch_timeout=None,
+            fallback_to_snapshot=False,
+        )
+
+
+def test_suffix_list_info_snapshot_only_before_extraction() -> None:
+    """Load suffix list metadata lazily from the packaged snapshot."""
+    extract = tldextract.TLDExtract(cache_dir=None, suffix_list_urls=())
+
+    result = extract.suffix_list_info
+
+    assert result == SuffixListInfo(
+        loaded_from=PUBLIC_SUFFIX_SNAPSHOT_PATH,
+        psl_metadata=PslMetadata(
+            version="2025-04-07_15-51-09_UTC",
+            commit="5fc8d12c1624ddbc56a80e944aca151a8ee466a1",
+        ),
+    )
+
+
+@responses.activate
+def test_suffix_list_info_remote_source() -> None:
+    """Expose the URL and official metadata from a fetched suffix list."""
+    server = "http://some-server.com"
+    responses.add(
+        responses.GET,
+        server,
+        status=200,
+        body="// VERSION: 2025-01-01_00-00-00_UTC\n// COMMIT: abc123\ncom\n",
+    )
+    extract = tldextract.TLDExtract(cache_dir=None, suffix_list_urls=[server])
+
+    result = extract.suffix_list_info
+
+    assert result == SuffixListInfo(
+        loaded_from=server,
+        psl_metadata=PslMetadata(version="2025-01-01_00-00-00_UTC", commit="abc123"),
+    )
+
+
+@responses.activate
+def test_suffix_list_info_is_cached_until_update() -> None:
+    """Keep metadata stable in memory until the extractor is updated."""
+    server = "http://some-server.com"
+    responses.add(
+        responses.GET,
+        server,
+        status=200,
+        body="// VERSION: 2025-01-01_00-00-00_UTC\n// COMMIT: abc123\ncom\n",
+    )
+    extract = tldextract.TLDExtract(cache_dir=None, suffix_list_urls=[server])
+
+    first = extract.suffix_list_info
+    second = extract.suffix_list_info
+
+    assert first is second
+    assert len(responses.calls) == 1
+
+    extract.update()
+
+    responses.replace(
+        responses.GET,
+        server,
+        status=200,
+        body="// VERSION: 2025-01-02_00-00-00_UTC\n// COMMIT: def456\norg\n",
+    )
+    refreshed = extract.suffix_list_info
+
+    assert refreshed == SuffixListInfo(
+        loaded_from=server,
+        psl_metadata=PslMetadata(version="2025-01-02_00-00-00_UTC", commit="def456"),
+    )
+    assert len(responses.calls) == 2
 
 
 def test_include_psl_private_domain_attr() -> None:

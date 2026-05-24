@@ -303,8 +303,11 @@ class TLDExtract:
         """Construct a callable for extracting subdomain, domain, and suffix components from a URL.
 
         Upon calling it, it first checks for a JSON in `cache_dir`. By default,
-        the `cache_dir` will live in the tldextract directory. You can disable
-        the caching functionality of this module by setting `cache_dir` to `None`.
+        the `cache_dir` follows the XDG Base Directory standard, e.g.
+        `$HOME/.cache/python-tldextract`, falling back to the tldextract package
+        directory only when no suitable user cache location can be determined.
+        You can disable the caching functionality of this module by setting
+        `cache_dir` to `None`.
 
         If the cached version does not exist, such as on the first run, HTTP
         request the URLs in `suffix_list_urls` in order, and use the first

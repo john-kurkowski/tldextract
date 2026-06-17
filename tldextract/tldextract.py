@@ -238,8 +238,11 @@ class ExtractResult:
 
         >>> extract("login.example.co.uk").reverse_domain_name
         'co.uk.example.login'
+
+        >>> extract("localhost").reverse_domain_name
+        'localhost'
         """
-        stack = [self.suffix, self.domain]
+        stack = [i for i in (self.suffix, self.domain) if i]
         if self.subdomain:
             stack.extend(reversed(self.subdomain.split(".")))
         return ".".join(stack)

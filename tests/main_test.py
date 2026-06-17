@@ -481,6 +481,15 @@ def test_reverse_domain_name_notation() -> None:
     )
 
 
+def test_reverse_domain_name_notation_no_suffix() -> None:
+    """Test `reverse_domain_name` omits empty components instead of emitting stray dots."""
+    assert tldextract.extract("localhost").reverse_domain_name == "localhost"
+    assert tldextract.extract("127.0.0.1").reverse_domain_name == "127.0.0.1"
+    assert tldextract.extract("sub.localhost").reverse_domain_name == "localhost.sub"
+    assert tldextract.extract("com").reverse_domain_name == "com"
+    assert tldextract.extract("").reverse_domain_name == ""
+
+
 def test_bad_kwargs_no_way_to_fetch() -> None:
     """Test an impossible combination of kwargs that disable all ways to fetch data."""
     with pytest.raises(ValueError, match="disable all ways"):

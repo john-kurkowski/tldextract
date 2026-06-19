@@ -180,15 +180,15 @@ def test_punycode() -> None:
     """Test URLs with Punycode."""
     assert_extract(
         "http://xn--h1alffa9f.xn--p1ai",
-        ("xn--h1alffa9f.xn--p1ai", "", "xn--h1alffa9f", "xn--p1ai"),
+        ("россия.рф", "", "россия", "рф"),
     )
     assert_extract(
         "http://xN--h1alffa9f.xn--p1ai",
-        ("xN--h1alffa9f.xn--p1ai", "", "xN--h1alffa9f", "xn--p1ai"),
+        ("россия.рф", "", "россия", "рф"),
     )
     assert_extract(
         "http://XN--h1alffa9f.xn--p1ai",
-        ("XN--h1alffa9f.xn--p1ai", "", "XN--h1alffa9f", "xn--p1ai"),
+        ("россия.рф", "", "россия", "рф"),
     )
     # Entries that might generate UnicodeError exception
     # This subdomain generates UnicodeError 'IDNA does not round-trip'
@@ -213,15 +213,29 @@ def test_punycode() -> None:
     )
 
 
+def test_punycode_and_unicode_suffixes_return_same_result() -> None:
+    """Test equivalent Unicode and Punycode suffix forms."""
+    extractor = tldextract.TLDExtract(
+        cache_dir=None, suffix_list_urls=(), fallback_to_snapshot=True
+    )
+
+    unicode_result = extractor("test.公司.cn")
+    punycode_result = extractor("test.xn--55qx5d.cn")
+
+    assert punycode_result == unicode_result
+    assert punycode_result.suffix == "公司.cn"
+    assert punycode_result.fqdn == "test.公司.cn"
+
+
 def test_invalid_puny_with_puny() -> None:
     """Test URLs with a mix of in/valid Punycode."""
     assert_extract(
         "http://xn--zckzap6140b352by.blog.so-net.xn--wcvs22d.hk",
         (
-            "xn--zckzap6140b352by.blog.so-net.xn--wcvs22d.hk",
+            "xn--zckzap6140b352by.blog.so-net.教育.hk",
             "xn--zckzap6140b352by.blog",
             "so-net",
-            "xn--wcvs22d.hk",
+            "教育.hk",
         ),
     )
     assert_extract(
@@ -255,7 +269,7 @@ def test_idna_2008() -> None:
     """
     assert_extract(
         "xn--gieen46ers-73a.de",
-        ("xn--gieen46ers-73a.de", "", "xn--gieen46ers-73a", "de"),
+        ("gießen46ers.de", "", "gießen46ers", "de"),
     )
     assert_extract(
         "angelinablog。com.de",

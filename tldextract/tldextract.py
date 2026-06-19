@@ -471,7 +471,10 @@ class TLDExtract:
                 "", netloc_with_ascii_dots, "", is_private=False, registry_suffix=""
             )
 
-        labels = netloc_with_ascii_dots.split(".")
+        labels = [
+            _decode_punycode_for_result(label)
+            for label in netloc_with_ascii_dots.split(".")
+        ]
 
         maybe_indexes = self._get_tld_extractor(session).suffix_index(
             labels, include_psl_private_domains=include_psl_private_domains
@@ -726,11 +729,15 @@ class _PublicSuffixListTLDExtractor:
 
 
 def _decode_punycode(label: str) -> str:
+    decoded_label = _decode_punycode_for_result(label)
+    return decoded_label if decoded_label != label else label.lower()
+
+
+def _decode_punycode_for_result(label: str) -> str:
     lowered = label.lower()
-    looks_like_puny = lowered.startswith("xn--")
-    if looks_like_puny:
+    if lowered.startswith("xn--"):
         try:
             return idna.decode(lowered)
         except (UnicodeError, IndexError):
             pass
-    return lowered
+    return label

@@ -59,6 +59,12 @@ def main() -> None:
         help="Include private domains",
     )
     parser.add_argument(
+        "--include_psl_default_rule",
+        default=False,
+        action="store_true",
+        help="Apply the PSL default wildcard rule to unlisted TLDs",
+    )
+    parser.add_argument(
         "--no_fallback_to_snapshot",
         default=True,
         action="store_false",
@@ -70,6 +76,7 @@ def main() -> None:
 
     obj_kwargs = {
         "include_psl_private_domains": args.include_psl_private_domains,
+        "include_psl_default_rule": args.include_psl_default_rule,
         "fallback_to_snapshot": args.fallback_to_snapshot,
     }
 

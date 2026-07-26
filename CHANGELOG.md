@@ -3,6 +3,12 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## Unreleased
+
+* Features
+  * Add an opt-in flag for applying the PSL default wildcard rule to unlisted
+    TLDs ([#338](https://github.com/john-kurkowski/tldextract/issues/338))
+
 ## 5.3.1 (2025-12-28)
 
 * Bugfixes

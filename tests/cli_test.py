@@ -66,6 +66,23 @@ def test_cli_namedargs(
     assert stdout == " example com\n bbc co.uk\nforums bbc co.uk\n"
 
 
+def test_cli_psl_default_rule(
+    capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Test opting into the PSL default wildcard rule."""
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["tldextract", "--include_psl_default_rule", "example.example"],
+    )
+
+    main()
+
+    stdout, stderr = capsys.readouterr()
+    assert not stderr
+    assert stdout == " example example\n"
+
+
 def test_cli_json_output(
     capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:

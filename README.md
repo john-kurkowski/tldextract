@@ -79,6 +79,18 @@ extract('waiterrant.blogspot.com')
 # ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com', is_private=True)
 ```
 
+### How to apply the PSL default wildcard rule
+
+The PSL algorithm treats the final label as a suffix when no explicit rule
+matches. This is opt-in so existing users can continue distinguishing
+recognized suffixes from internal or invalid hostnames.
+
+```python
+extract = tldextract.TLDExtract(include_psl_default_rule=True)
+extract("example.example")
+# ExtractResult(subdomain='', domain='example', suffix='example', is_private=False)
+```
+
 ### How to use a local suffix list
 
 ```python

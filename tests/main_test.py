@@ -3,6 +3,7 @@
 import logging
 import os
 import tempfile
+import urllib.parse
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -127,6 +128,54 @@ def test_local_host() -> None:
         "http://internalunlikelyhostname.information/",
         ("", "internalunlikelyhostname", "information", ""),
     )
+
+
+@pytest.mark.parametrize(
+    ("url", "expected"),
+    [
+        ("example", ExtractResult("", "", "example", False, "example")),
+        (
+            "example.example",
+            ExtractResult("", "example", "example", False, "example"),
+        ),
+        (
+            "b.example.example",
+            ExtractResult("b", "example", "example", False, "example"),
+        ),
+        (
+            "a.b.example.example",
+            ExtractResult("a.b", "example", "example", False, "example"),
+        ),
+    ],
+)
+def test_psl_default_rule(url: str, expected: ExtractResult) -> None:
+    """Test the opt-in PSL wildcard rule for unlisted TLDs."""
+    default_rule_extract = tldextract.TLDExtract(
+        cache_dir=None, suffix_list_urls=(), include_psl_default_rule=True
+    )
+    assert default_rule_extract(url) == expected
+    assert (
+        extract_using_fallback_to_snapshot_no_cache(url, include_psl_default_rule=True)
+        == expected
+    )
+
+
+def test_psl_default_rule_can_be_disabled_per_call() -> None:
+    """Test overriding the instance default for an individual extraction."""
+    default_rule_extract = tldextract.TLDExtract(
+        cache_dir=None, suffix_list_urls=(), include_psl_default_rule=True
+    )
+    assert default_rule_extract(
+        "example.example", include_psl_default_rule=False
+    ) == ExtractResult("example", "example", "", False, "")
+
+
+def test_psl_default_rule_with_parsed_url() -> None:
+    """Test the PSL default wildcard rule with a pre-parsed URL."""
+    assert extract_using_fallback_to_snapshot_no_cache.extract_urllib(
+        urllib.parse.urlsplit("https://example.example/path"),
+        include_psl_default_rule=True,
+    ) == ExtractResult("", "example", "example", False, "example")
 
 
 def test_lenient_netloc() -> None:
@@ -613,6 +662,15 @@ def test_global_extract() -> None:
         suffix="blogspot.com",
         is_private=True,
         registry_suffix="com",
+    )
+    assert tldextract.extract(
+        "example.example", include_psl_default_rule=True
+    ) == ExtractResult(
+        subdomain="",
+        domain="example",
+        suffix="example",
+        is_private=False,
+        registry_suffix="example",
     )
 
 

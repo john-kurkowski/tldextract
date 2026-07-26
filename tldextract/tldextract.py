@@ -299,6 +299,7 @@ class TLDExtract:
         include_psl_private_domains: bool = False,
         extra_suffixes: Sequence[str] = (),
         cache_fetch_timeout: str | float | None = CACHE_TIMEOUT,
+        include_psl_default_rule: bool = False,
     ) -> None:
         """Construct a callable for extracting subdomain, domain, and suffix components from a URL.
 
@@ -329,6 +330,12 @@ class TLDExtract:
         These will be merged into whatever public suffix definitions are
         already in use by `tldextract`, above.
 
+        The PSL algorithm uses a default wildcard rule when no explicit rule
+        matches. To apply that rule to unlisted TLDs, set
+        `include_psl_default_rule` to True. It is disabled by default to
+        preserve the distinction between recognized suffixes and internal or
+        invalid hostnames.
+
         cache_fetch_timeout is passed unmodified to the underlying request object
         per the requests documentation here:
         http://docs.python-requests.org/en/master/user/advanced/#timeouts
@@ -355,6 +362,7 @@ class TLDExtract:
             )
 
         self.include_psl_private_domains = include_psl_private_domains
+        self.include_psl_default_rule = include_psl_default_rule
         self.extra_suffixes = extra_suffixes
         self._extractor: _PublicSuffixListTLDExtractor | None = None
 
@@ -370,15 +378,22 @@ class TLDExtract:
         url: str,
         include_psl_private_domains: bool | None = None,
         session: requests.Session | None = None,
+        include_psl_default_rule: bool | None = None,
     ) -> ExtractResult:
         """Alias for `extract_str`."""
-        return self.extract_str(url, include_psl_private_domains, session=session)
+        return self.extract_str(
+            url,
+            include_psl_private_domains,
+            session=session,
+            include_psl_default_rule=include_psl_default_rule,
+        )
 
     def extract_str(
         self,
         url: str,
         include_psl_private_domains: bool | None = None,
         session: requests.Session | None = None,
+        include_psl_default_rule: bool | None = None,
     ) -> ExtractResult:
         """Take a string URL and splits it into its subdomain, domain, and suffix components.
 
@@ -387,6 +402,8 @@ class TLDExtract:
             include_psl_private_domains: Whether to treat PSL private domains as suffixes.
                 If None, uses the instance default.
             session: Optional requests.Session for HTTP configuration (e.g., proxies)
+            include_psl_default_rule: Whether to apply the PSL default wildcard rule
+                to unlisted TLDs. If None, uses the instance default.
 
         Returns:
             ExtractResult: Named tuple containing subdomain, domain, suffix, and metadata
@@ -410,7 +427,10 @@ class TLDExtract:
             ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
         """
         return self._extract_netloc(
-            lenient_netloc(url), include_psl_private_domains, session=session
+            lenient_netloc(url),
+            include_psl_private_domains,
+            session=session,
+            include_psl_default_rule=include_psl_default_rule,
         )
 
     def extract_urllib(
@@ -418,6 +438,7 @@ class TLDExtract:
         url: urllib.parse.ParseResult | urllib.parse.SplitResult,
         include_psl_private_domains: bool | None = None,
         session: requests.Session | None = None,
+        include_psl_default_rule: bool | None = None,
     ) -> ExtractResult:
         """Extract components from a pre-parsed URL object.
 
@@ -426,6 +447,8 @@ class TLDExtract:
             include_psl_private_domains: Whether to treat PSL private domains as suffixes.
                 If None, uses the instance default.
             session: Optional requests.Session for HTTP configuration
+            include_psl_default_rule: Whether to apply the PSL default wildcard rule
+                to unlisted TLDs. If None, uses the instance default.
 
         Returns:
             ExtractResult: Named tuple containing subdomain, domain, suffix, and metadata
@@ -445,7 +468,10 @@ class TLDExtract:
             ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
         """
         return self._extract_netloc(
-            url.netloc, include_psl_private_domains, session=session
+            url.netloc,
+            include_psl_private_domains,
+            session=session,
+            include_psl_default_rule=include_psl_default_rule,
         )
 
     def _extract_netloc(
@@ -453,6 +479,7 @@ class TLDExtract:
         netloc: str,
         include_psl_private_domains: bool | None,
         session: requests.Session | None = None,
+        include_psl_default_rule: bool | None = None,
     ) -> ExtractResult:
         netloc_with_ascii_dots = (
             netloc.replace("\u3002", "\u002e")
@@ -472,6 +499,8 @@ class TLDExtract:
             )
 
         labels = netloc_with_ascii_dots.split(".")
+        if include_psl_default_rule is None:
+            include_psl_default_rule = self.include_psl_default_rule
 
         maybe_indexes = self._get_tld_extractor(session).suffix_index(
             labels, include_psl_private_domains=include_psl_private_domains
@@ -487,6 +516,14 @@ class TLDExtract:
                 "", netloc_with_ascii_dots, "", is_private=False, registry_suffix=""
             )
         elif not maybe_indexes:
+            if include_psl_default_rule:
+                return ExtractResult(
+                    subdomain=".".join(labels[:-2]),
+                    domain=labels[-2] if len(labels) > 1 else "",
+                    suffix=labels[-1],
+                    is_private=False,
+                    registry_suffix=labels[-1],
+                )
             return ExtractResult(
                 subdomain=".".join(labels[:-1]),
                 domain=labels[-1],
@@ -635,9 +672,13 @@ def extract(  # noqa: D103
     url: str,
     include_psl_private_domains: bool | None = False,
     session: requests.Session | None = None,
+    include_psl_default_rule: bool | None = False,
 ) -> ExtractResult:
     return TLD_EXTRACTOR(
-        url, include_psl_private_domains=include_psl_private_domains, session=session
+        url,
+        include_psl_private_domains=include_psl_private_domains,
+        session=session,
+        include_psl_default_rule=include_psl_default_rule,
     )
 
 

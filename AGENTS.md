@@ -9,23 +9,23 @@ the behavior you are working on, such as a specific test file or pytest `-k`
 selector:
 
 ```zsh
-tox -e py310 -- tests/cli_test.py
-tox -e py310 -- -k private
+uv run tox -e py310 -- tests/cli_test.py
+uv run tox -e py310 -- -k private
 ```
 
 Before wrapping up any code change, always run the required validation baseline:
 
 ```zsh
-tox -e py310         # Fastest full pytest run while iterating
-tox -e lint          # Lint (ruff check)
-tox -e typecheck     # Type-check (mypy)
-ruff format .        # Auto-format code
+uv run tox -e py310         # Fastest full pytest run while iterating
+uv run tox -e lint          # Lint (ruff check)
+uv run tox -e typecheck     # Type-check (mypy)
+uv run ruff format .        # Auto-format code
 ```
 
 Run broader validation when the scope warrants it:
 
 ```zsh
-tox --parallel       # Run everything: pytest on all Pythons + codestyle + lint + typecheck
+uv run tox --parallel  # Run everything: pytest on all Pythons + codestyle + lint + typecheck
 ```
 
 The `py*` and `pypy*` environments forward to `pytest`; `codestyle`, `lint`, and

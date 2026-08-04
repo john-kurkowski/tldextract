@@ -3,6 +3,11 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## Unreleased
+
+* Bugfixes
+  * Fix `reverse_domain_name` emitting stray dots when the suffix or domain is empty ([#368](https://github.com/john-kurkowski/tldextract/pull/368))
+
 ## 5.3.1 (2025-12-28)
 
 * Bugfixes

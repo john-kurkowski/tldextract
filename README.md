@@ -97,6 +97,28 @@ extract = tldextract.TLDExtract(
 )
 ```
 
+### How to set the suffix list URLs via environment variable
+
+The default `suffix_list_urls` can be set without touching code, which is handy
+in containers or managed environments. The value is a newline-delimited list of
+URLs:
+
+```zsh
+export TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS="https://myserver.com/suffix-list.dat"
+```
+
+Set it to the empty string to disable HTTP fetching entirely, relying on the
+cache or the bundled snapshot:
+
+```zsh
+export TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS=""
+```
+
+Entries that name an existing local file are converted to `file://` URLs, for
+parity with the `--suffix_list_url` command line option. An explicit
+`suffix_list_urls` argument passed to `TLDExtract` takes precedence over the
+environment variable.
+
 ### How to add extra suffixes
 
 ```python

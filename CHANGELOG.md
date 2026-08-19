@@ -3,6 +3,11 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## Unreleased
+
+* Features
+  * Add `TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS` environment variable to set the default suffix list URLs ([#233](https://github.com/john-kurkowski/tldextract/issues/233))
+
 ## 5.3.2 (2026-08-08)
 
 * Bugfixes

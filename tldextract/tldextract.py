@@ -37,6 +37,7 @@ To rejoin the original hostname, if it was indeed a valid, registered hostname:
 from __future__ import annotations
 
 import os
+import pathlib
 import urllib.parse
 import warnings
 from collections.abc import Collection, Sequence
@@ -56,6 +57,33 @@ PUBLIC_SUFFIX_LIST_URLS = (
     "https://publicsuffix.org/list/public_suffix_list.dat",
     "https://raw.githubusercontent.com/publicsuffix/list/master/public_suffix_list.dat",
 )
+
+
+def _suffix_list_urls_from_env(
+    default: Sequence[str] = PUBLIC_SUFFIX_LIST_URLS,
+) -> Sequence[str]:
+    """Read the default suffix list URLs from the environment.
+
+    The `TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS` environment variable, if set,
+    overrides `default`. Its value is a newline-delimited list of URLs, and
+    blank lines are ignored. Setting it to the empty string yields an empty
+    sequence, which disables HTTP requests for the suffix list. For parity with
+    the `--suffix_list_url` CLI option, entries that name an existing local file
+    are converted to `file://` URLs.
+    """
+    raw = os.environ.get("TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS")
+    if raw is None:
+        return default
+
+    urls = []
+    for line in raw.splitlines():
+        source = line.strip()
+        if not source:
+            continue
+        if os.path.isfile(source):
+            source = pathlib.Path(os.path.abspath(source)).as_uri()
+        urls.append(source)
+    return urls
 
 
 @dataclass(order=True)
@@ -301,7 +329,7 @@ class TLDExtract:
     def __init__(
         self,
         cache_dir: str | None = get_cache_dir(),
-        suffix_list_urls: Sequence[str] = PUBLIC_SUFFIX_LIST_URLS,
+        suffix_list_urls: Sequence[str] = _suffix_list_urls_from_env(),
         fallback_to_snapshot: bool = True,
         include_psl_private_domains: bool = False,
         extra_suffixes: Sequence[str] = (),
@@ -324,6 +352,18 @@ class TLDExtract:
         could be specified. Local files can be specified by using the `file://`
         protocol (see `urllib2` documentation). To disable HTTP requests, set
         this to an empty sequence.
+
+        The default `suffix_list_urls` can also be set with the environment
+        variable TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS, whose value is a
+        newline-delimited list of URLs, like so:
+
+        TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS="https://example.com/list.dat"
+
+        Setting it to the empty string disables HTTP requests, the same as
+        passing an empty sequence. Entries that name an existing local file are
+        converted to `file://` URLs, for parity with the `--suffix_list_url`
+        CLI option. An explicit `suffix_list_urls` argument takes precedence
+        over the environment variable.
 
         If there is no cached version loaded and no data is found from the `suffix_list_urls`,
         the module will fall back to the included TLD set snapshot. If you do not want

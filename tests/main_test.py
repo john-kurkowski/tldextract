@@ -17,7 +17,7 @@ import tldextract.suffix_list
 from tldextract.cache import DiskCache
 from tldextract.remote import lenient_netloc, looks_like_ip, looks_like_ipv6
 from tldextract.suffix_list import SuffixListNotFound
-from tldextract.tldextract import ExtractResult
+from tldextract.tldextract import ExtractResult, _get_default_cache_fetch_timeout
 
 extract = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp())
 extract_no_cache = tldextract.TLDExtract(cache_dir=None)
@@ -533,6 +533,21 @@ def test_cache_timeouts(tmp_path: Path) -> None:
 
     with pytest.raises(SuffixListNotFound):
         tldextract.suffix_list.find_first_response(cache, [server], 5)
+
+
+def test_default_fetch_timeout_environment_variable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Prefer the explicit fetch timeout name while supporting the legacy name."""
+    monkeypatch.delenv("TLDEXTRACT_DEFAULT_FETCH_TIMEOUT", raising=False)
+    monkeypatch.delenv("TLDEXTRACT_CACHE_TIMEOUT", raising=False)
+    assert _get_default_cache_fetch_timeout() is None
+
+    monkeypatch.setenv("TLDEXTRACT_CACHE_TIMEOUT", "2.4")
+    assert _get_default_cache_fetch_timeout() == "2.4"
+
+    monkeypatch.setenv("TLDEXTRACT_DEFAULT_FETCH_TIMEOUT", "1.2")
+    assert _get_default_cache_fetch_timeout() == "1.2"
 
 
 @responses.activate

@@ -97,6 +97,23 @@ extract = tldextract.TLDExtract(
 )
 ```
 
+### How to set the suffix list fetch timeout
+
+Set a default timeout in seconds before starting Python:
+
+```zsh
+export TLDEXTRACT_DEFAULT_FETCH_TIMEOUT="1.2"
+```
+
+Or set it for one extractor in code:
+
+```python
+extract = tldextract.TLDExtract(cache_fetch_timeout=1.2)
+```
+
+A single value applies separately to the connection and response-read phases of
+each remote Public Suffix List request.
+
 ### How to add extra suffixes
 
 ```python

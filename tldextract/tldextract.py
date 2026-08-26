@@ -50,7 +50,16 @@ from .cache import DiskCache, get_cache_dir
 from .remote import lenient_netloc, looks_like_ip, looks_like_ipv6
 from .suffix_list import get_suffix_lists
 
-CACHE_TIMEOUT = os.environ.get("TLDEXTRACT_CACHE_TIMEOUT")
+
+def _get_default_cache_fetch_timeout() -> str | None:
+    """Read the default PSL fetch timeout from the environment."""
+    return os.environ.get(
+        "TLDEXTRACT_DEFAULT_FETCH_TIMEOUT",
+        os.environ.get("TLDEXTRACT_CACHE_TIMEOUT"),
+    )
+
+
+CACHE_TIMEOUT = _get_default_cache_fetch_timeout()
 
 PUBLIC_SUFFIX_LIST_URLS = (
     "https://publicsuffix.org/list/public_suffix_list.dat",
@@ -344,9 +353,9 @@ class TLDExtract:
         http://docs.python-requests.org/en/master/user/advanced/#timeouts
 
         cache_fetch_timeout can also be set to a single value with the
-        environment variable TLDEXTRACT_CACHE_TIMEOUT, like so:
+        environment variable TLDEXTRACT_DEFAULT_FETCH_TIMEOUT, like so:
 
-        TLDEXTRACT_CACHE_TIMEOUT="1.2"
+        TLDEXTRACT_DEFAULT_FETCH_TIMEOUT="1.2"
 
         When set this way, the same timeout value will be used for both connect
         and read timeouts

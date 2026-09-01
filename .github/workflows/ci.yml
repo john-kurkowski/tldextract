@@ -41,7 +41,7 @@ jobs:
           python-version: ${{ matrix.language.python-version }}
           check-latest: true
       - name: Setup uv
-        uses: astral-sh/setup-uv@v9.0.0
+        uses: astral-sh/setup-uv@v10.0.1
         with:
           enable-cache: true
       - name: Test

@@ -461,7 +461,7 @@ class TLDExtract:
             ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
         """
         return self._extract_netloc(
-            url.netloc, include_psl_private_domains, session=session
+            lenient_netloc(url.netloc), include_psl_private_domains, session=session
         )
 
     def _extract_netloc(

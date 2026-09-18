@@ -110,6 +110,8 @@ class ExtractResult:
     This field is unaffected by the `include_psl_private_domains` setting. If
     `include_psl_private_domains` was set to `False`, this field is always the
     same as `suffix`.
+    
+    .. versionadded:: 5.3.0
     """
 
     @property
@@ -180,7 +182,7 @@ class ExtractResult:
         >>> extract("http://localhost:8080").registered_domain
         ''
 
-        .. deprecated:: 5.3.1
+        .. deprecated:: 5.3.0
            Use `top_domain_under_public_suffix` instead, which has the same
            behavior but a more accurate name.
 
@@ -272,6 +274,8 @@ class ExtractResult:
         'blogspot.com'
         >>> extract("http://localhost:8080").top_domain_under_registry_suffix
         ''
+
+        .. versionadded:: 5.3.0
         """
         top_domain_under_public_suffix = self.top_domain_under_public_suffix
         if not top_domain_under_public_suffix or not self.is_private:
@@ -288,6 +292,8 @@ class ExtractResult:
         'bbc.co.uk'
         >>> extract("http://localhost:8080").top_domain_under_public_suffix
         ''
+
+        .. versionadded:: 5.3.0
         """
         if self.suffix and self.domain:
             return f"{self.domain}.{self.suffix}"

@@ -110,7 +110,7 @@ class ExtractResult:
     This field is unaffected by the `include_psl_private_domains` setting. If
     `include_psl_private_domains` was set to `False`, this field is always the
     same as `suffix`.
-    
+
     .. versionadded:: 5.3.0
     """
 

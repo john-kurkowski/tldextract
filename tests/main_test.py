@@ -3,7 +3,8 @@
 import logging
 import os
 import tempfile
-from collections.abc import Sequence
+import urllib.parse
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 from unittest.mock import Mock
@@ -62,6 +63,29 @@ def assert_extract(
         assert expected_tld == ext.suffix
         assert expected_ip_data == ext.ipv4
         assert expected_ipv6_data == ext.ipv6
+
+
+@pytest.mark.parametrize("parse_url", [urllib.parse.urlparse, urllib.parse.urlsplit])
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://www.example.com:8443/path",
+        "https://user:pass@www.example.com/path",
+        "https://user:pass@WWW.Example.COM:8443/path",
+        "https://WWW.Example.COM./path",
+        "http://127.0.0.1:8080/path",
+        "http://[::1]:8080/path",
+        "http://user:pass@[2001:db8::1]:8080/path",
+        "https://www.食狮.公司.cn:8443/path",
+    ],
+)
+def test_extract_urllib_hostname(
+    parse_url: Callable[[str], urllib.parse.ParseResult | urllib.parse.SplitResult],
+    url: str,
+) -> None:
+    """Parsed URLs retain the same hostname components as their string form."""
+    extractor = extract_using_fallback_to_snapshot_no_cache
+    assert extractor.extract_urllib(parse_url(url)) == extractor(url)
 
 
 def test_american() -> None:

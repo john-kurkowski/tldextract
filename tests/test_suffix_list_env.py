@@ -95,13 +95,13 @@ def test_explicit_urls_take_precedence(
     assert extract("example.explicit").suffix == "explicit"
 
 
-@pytest.mark.parametrize("suffix_list_urls", [None, (), []])
-def test_explicit_falsy_urls_disable_http(
+@pytest.mark.parametrize("suffix_list_urls", [(), []])
+def test_explicit_empty_urls_disable_http(
     monkeypatch: pytest.MonkeyPatch,
     mocker: pytest_mock.MockerFixture,
-    suffix_list_urls: Sequence[str] | None,
+    suffix_list_urls: Sequence[str],
 ) -> None:
-    """Explicit falsy values keep the preexisting no-fetch behavior."""
+    """Explicit empty sequences override the environment default."""
     monkeypatch.setenv(ENV_VAR, "https://example.com/from-env.dat")
     http_get = mocker.patch("requests.Session.get")
 

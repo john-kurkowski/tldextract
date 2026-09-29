@@ -302,7 +302,7 @@ class ExtractResult:
 
 
 class _UseEnvironmentUrls:
-    """Distinguish omitted URLs from an explicit falsy argument."""
+    """Mark omitted URLs so the constructor can read the environment."""
 
 
 _USE_ENVIRONMENT_URLS = _UseEnvironmentUrls()
@@ -315,9 +315,7 @@ class TLDExtract:
     def __init__(
         self,
         cache_dir: str | None = get_cache_dir(),
-        suffix_list_urls: Sequence[str] | None | _UseEnvironmentUrls = (
-            _USE_ENVIRONMENT_URLS
-        ),
+        suffix_list_urls: Sequence[str] | _UseEnvironmentUrls = _USE_ENVIRONMENT_URLS,
         fallback_to_snapshot: bool = True,
         include_psl_private_domains: bool = False,
         extra_suffixes: Sequence[str] = (),

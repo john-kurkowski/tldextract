@@ -2,6 +2,8 @@
 
 import logging
 import os
+import subprocess
+import sys
 import tempfile
 from collections.abc import Sequence
 from pathlib import Path
@@ -533,6 +535,55 @@ def test_cache_timeouts(tmp_path: Path) -> None:
 
     with pytest.raises(SuffixListNotFound):
         tldextract.suffix_list.find_first_response(cache, [server], 5)
+
+
+@pytest.mark.parametrize(
+    ("new_timeout", "legacy_timeout", "expected_timeout"),
+    [
+        (None, None, "None"),
+        (None, "2.4", "2.4"),
+        ("1.2", "2.4", "1.2"),
+    ],
+)
+def test_default_fetch_timeout_environment_variable_reaches_request(
+    monkeypatch: pytest.MonkeyPatch,
+    new_timeout: str | None,
+    legacy_timeout: str | None,
+    expected_timeout: str,
+) -> None:
+    """Apply the startup environment default to a public extractor's PSL request."""
+    for name, value in (
+        ("TLDEXTRACT_DEFAULT_FETCH_TIMEOUT", new_timeout),
+        ("TLDEXTRACT_CACHE_TIMEOUT", legacy_timeout),
+    ):
+        if value is None:
+            monkeypatch.delenv(name, raising=False)
+        else:
+            monkeypatch.setenv(name, value)
+
+    script = """
+from unittest.mock import Mock
+
+import tldextract
+
+session = Mock()
+session.get.return_value.text = "com\\n"
+extract = tldextract.TLDExtract(
+    cache_dir=None,
+    suffix_list_urls=("https://psl.example/list",),
+    fallback_to_snapshot=False,
+)
+extract("example.com", session=session)
+print(session.get.call_args.kwargs["timeout"])
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        capture_output=True,
+        check=True,
+        env=os.environ.copy(),
+        text=True,
+    )
+    assert result.stdout.strip() == expected_timeout
 
 
 @responses.activate

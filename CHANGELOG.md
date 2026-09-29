@@ -3,6 +3,11 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## Unreleased
+
+* Features
+  * Add the clearer `TLDEXTRACT_DEFAULT_FETCH_TIMEOUT` environment variable while retaining support for `TLDEXTRACT_CACHE_TIMEOUT` ([#159](https://github.com/john-kurkowski/tldextract/issues/159))
+
 ## 5.3.2 (2026-08-08)
 
 * Bugfixes

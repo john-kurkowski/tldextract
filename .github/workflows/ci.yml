@@ -48,3 +48,16 @@ jobs:
         run: uv tool run --with tox-uv tox
         env:
           TOXENV: ${{ matrix.language.toxenv }}
+  # Keep this name stable: it is the one status check required by the ruleset.
+  ci:
+    name: CI
+    needs: test
+    # Run after a failed matrix job so the required check reports failure, not skip.
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify test matrix
+        env:
+          TEST_RESULT: ${{ needs.test.result }}
+        run: test "$TEST_RESULT" = success

@@ -112,6 +112,23 @@ def test_explicit_empty_urls_disable_http(
     http_get.assert_not_called()
 
 
+def test_explicit_none_keeps_runtime_no_fetch(
+    monkeypatch: pytest.MonkeyPatch, mocker: pytest_mock.MockerFixture
+) -> None:
+    """Explicit None still disables fetching, though it is outside the typed API."""
+    monkeypatch.setenv(ENV_VAR, "https://example.com/from-env.dat")
+    http_get = mocker.patch("requests.Session.get")
+
+    extract = tldextract.TLDExtract(
+        cache_dir=None,
+        suffix_list_urls=None,  # type: ignore[arg-type]
+    )
+
+    assert extract.suffix_list_urls == ()
+    assert extract("example.com").suffix == "com"
+    http_get.assert_not_called()
+
+
 def test_public_extract_reads_env_before_import(tmp_path: Path) -> None:
     """The module-level extractor uses the environment present at import."""
     local_file = tmp_path / "list.dat"

@@ -66,6 +66,10 @@ class ExtractResult:
     They are the split, non-overlapping hostname components of the input URL.
     They can be used to rebuild the original URL's hostname.
 
+    The extracted strings generally preserve the input's casing and Unicode or
+    ASCII-compatible encoding (ACE, commonly called Punycode). They are not
+    normalized for comparison or validated as real hostnames.
+
     Beyond the first 3 fields, the class contains metadata fields, like a flag
     that indicates if the input URL's suffix is from a private domain.
     """
@@ -106,6 +110,8 @@ class ExtractResult:
     This field is unaffected by the `include_psl_private_domains` setting. If
     `include_psl_private_domains` was set to `False`, this field is always the
     same as `suffix`.
+
+    .. versionadded:: 5.3.0
     """
 
     @property
@@ -176,7 +182,7 @@ class ExtractResult:
         >>> extract("http://localhost:8080").registered_domain
         ''
 
-        .. deprecated:: 5.3.1
+        .. deprecated:: 5.3.0
            Use `top_domain_under_public_suffix` instead, which has the same
            behavior but a more accurate name.
 
@@ -238,8 +244,11 @@ class ExtractResult:
 
         >>> extract("login.example.co.uk").reverse_domain_name
         'co.uk.example.login'
+
+        >>> extract("localhost").reverse_domain_name
+        'localhost'
         """
-        stack = [self.suffix, self.domain]
+        stack = [i for i in (self.suffix, self.domain) if i]
         if self.subdomain:
             stack.extend(reversed(self.subdomain.split(".")))
         return ".".join(stack)
@@ -265,6 +274,8 @@ class ExtractResult:
         'blogspot.com'
         >>> extract("http://localhost:8080").top_domain_under_registry_suffix
         ''
+
+        .. versionadded:: 5.3.0
         """
         top_domain_under_public_suffix = self.top_domain_under_public_suffix
         if not top_domain_under_public_suffix or not self.is_private:
@@ -281,6 +292,8 @@ class ExtractResult:
         'bbc.co.uk'
         >>> extract("http://localhost:8080").top_domain_under_public_suffix
         ''
+
+        .. versionadded:: 5.3.0
         """
         if self.suffix and self.domain:
             return f"{self.domain}.{self.suffix}"
@@ -303,8 +316,11 @@ class TLDExtract:
         """Construct a callable for extracting subdomain, domain, and suffix components from a URL.
 
         Upon calling it, it first checks for a JSON in `cache_dir`. By default,
-        the `cache_dir` will live in the tldextract directory. You can disable
-        the caching functionality of this module by setting `cache_dir` to `None`.
+        the `cache_dir` follows the XDG Base Directory standard, e.g.
+        `$HOME/.cache/python-tldextract`, falling back to the tldextract package
+        directory only when no suitable user cache location can be determined.
+        You can disable the caching functionality of this module by setting
+        `cache_dir` to `None`.
 
         If the cached version does not exist, such as on the first run, HTTP
         request the URLs in `suffix_list_urls` in order, and use the first

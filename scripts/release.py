@@ -23,8 +23,8 @@ Prerequisites:
       https://pypi.org/manage/account/
     - The CHANGELOG.md file must already contain an entry for the version being
       released.
-    - Install requirements with: `pip install --upgrade --editable
-      '.[release]'`
+    - Run the release script with: `uv run --no-default-groups --group release
+      scripts/release.py`
 
 """
 

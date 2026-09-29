@@ -3,6 +3,21 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## 5.3.2 (2026-08-08)
+
+* Bugfixes
+  * Fix `reverse_domain_name` stray dots when suffix or domain empty ([#368](https://github.com/john-kurkowski/tldextract/pull/368))
+* Docs
+  * Fix README: `extract_urllib` is on the instance, not the module ([#362](https://github.com/john-kurkowski/tldextract/pull/362))
+  * Fix docstring: default `cache_dir` description ([#367](https://github.com/john-kurkowski/tldextract/pull/367))
+  * Document hostname representation limits
+  * Document implicit PSL wildcard behavior
+* Misc
+  * Add Markdown doctest coverage ([#363](https://github.com/john-kurkowski/tldextract/pull/363))
+  * Remove obsolete pytest-gitignore
+  * Adopt uv dependency groups for contributors
+  * Install only test dependencies in test environments
+
 ## 5.3.1 (2025-12-28)
 
 * Bugfixes

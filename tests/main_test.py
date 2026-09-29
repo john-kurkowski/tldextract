@@ -2,6 +2,8 @@
 
 import logging
 import os
+import subprocess
+import sys
 import tempfile
 from collections.abc import Sequence
 from pathlib import Path
@@ -17,7 +19,7 @@ import tldextract.suffix_list
 from tldextract.cache import DiskCache
 from tldextract.remote import lenient_netloc, looks_like_ip, looks_like_ipv6
 from tldextract.suffix_list import SuffixListNotFound
-from tldextract.tldextract import ExtractResult, _get_default_cache_fetch_timeout
+from tldextract.tldextract import ExtractResult
 
 extract = tldextract.TLDExtract(cache_dir=tempfile.mkdtemp())
 extract_no_cache = tldextract.TLDExtract(cache_dir=None)
@@ -535,19 +537,53 @@ def test_cache_timeouts(tmp_path: Path) -> None:
         tldextract.suffix_list.find_first_response(cache, [server], 5)
 
 
-def test_default_fetch_timeout_environment_variable(
+@pytest.mark.parametrize(
+    ("new_timeout", "legacy_timeout", "expected_timeout"),
+    [
+        (None, None, "None"),
+        (None, "2.4", "2.4"),
+        ("1.2", "2.4", "1.2"),
+    ],
+)
+def test_default_fetch_timeout_environment_variable_reaches_request(
     monkeypatch: pytest.MonkeyPatch,
+    new_timeout: str | None,
+    legacy_timeout: str | None,
+    expected_timeout: str,
 ) -> None:
-    """Prefer the explicit fetch timeout name while supporting the legacy name."""
-    monkeypatch.delenv("TLDEXTRACT_DEFAULT_FETCH_TIMEOUT", raising=False)
-    monkeypatch.delenv("TLDEXTRACT_CACHE_TIMEOUT", raising=False)
-    assert _get_default_cache_fetch_timeout() is None
+    """Apply the startup environment default to a public extractor's PSL request."""
+    for name, value in (
+        ("TLDEXTRACT_DEFAULT_FETCH_TIMEOUT", new_timeout),
+        ("TLDEXTRACT_CACHE_TIMEOUT", legacy_timeout),
+    ):
+        if value is None:
+            monkeypatch.delenv(name, raising=False)
+        else:
+            monkeypatch.setenv(name, value)
 
-    monkeypatch.setenv("TLDEXTRACT_CACHE_TIMEOUT", "2.4")
-    assert _get_default_cache_fetch_timeout() == "2.4"
+    script = """
+from unittest.mock import Mock
 
-    monkeypatch.setenv("TLDEXTRACT_DEFAULT_FETCH_TIMEOUT", "1.2")
-    assert _get_default_cache_fetch_timeout() == "1.2"
+import tldextract
+
+session = Mock()
+session.get.return_value.text = "com\\n"
+extract = tldextract.TLDExtract(
+    cache_dir=None,
+    suffix_list_urls=("https://psl.example/list",),
+    fallback_to_snapshot=False,
+)
+extract("example.com", session=session)
+print(session.get.call_args.kwargs["timeout"])
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        capture_output=True,
+        check=True,
+        env=os.environ.copy(),
+        text=True,
+    )
+    assert result.stdout.strip() == expected_timeout
 
 
 @responses.activate

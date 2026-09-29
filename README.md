@@ -43,6 +43,17 @@ no_fetch_extract = tldextract.TLDExtract(suffix_list_urls=())
 no_fetch_extract("http://www.google.com")
 ```
 
+Or set the default for new extractors with an empty environment variable. Set
+it before importing `tldextract` to affect the module-level `extract` function:
+
+```zsh
+export TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS=""
+```
+
+The cache key includes the configured URLs. An empty value does not reuse a
+cache entry fetched with the standard URLs; if no entry exists for the empty
+URL list, `tldextract` uses its bundled snapshot.
+
 ### How to set a custom cache location
 
 Via environment variable:
@@ -89,6 +100,9 @@ extract = tldextract.TLDExtract(
 )
 ```
 
+An existing local path in `TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS` is converted to
+a `file://` URL, like the `--suffix_list_url` command line option.
+
 ### How to use a remote suffix list
 
 ```python
@@ -97,27 +111,14 @@ extract = tldextract.TLDExtract(
 )
 ```
 
-### How to set the suffix list URLs via environment variable
-
-The default `suffix_list_urls` can be set without touching code, which is handy
-in containers or managed environments. The value is a newline-delimited list of
-URLs:
+The default can also be set through a newline-delimited environment variable:
 
 ```zsh
 export TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS="https://myserver.com/suffix-list.dat"
 ```
 
-Set it to the empty string to disable HTTP fetching entirely, relying on the
-cache or the bundled snapshot:
-
-```zsh
-export TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS=""
-```
-
-Entries that name an existing local file are converted to `file://` URLs, for
-parity with the `--suffix_list_url` command line option. An explicit
-`suffix_list_urls` argument passed to `TLDExtract` takes precedence over the
-environment variable.
+New `TLDExtract()` instances read this value when constructed. An explicit
+`suffix_list_urls` argument takes precedence.
 
 ### How to add extra suffixes
 

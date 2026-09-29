@@ -47,7 +47,12 @@ import idna
 import requests
 
 from .cache import DiskCache, get_cache_dir
-from .remote import lenient_netloc, looks_like_ip, looks_like_ipv6
+from .remote import (
+    _hostname_from_authority,
+    lenient_netloc,
+    looks_like_ip,
+    looks_like_ipv6,
+)
 from .suffix_list import get_suffix_lists
 
 CACHE_TIMEOUT = os.environ.get("TLDEXTRACT_CACHE_TIMEOUT")
@@ -461,7 +466,9 @@ class TLDExtract:
             ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
         """
         return self._extract_netloc(
-            lenient_netloc(url.netloc), include_psl_private_domains, session=session
+            _hostname_from_authority(url.netloc),
+            include_psl_private_domains,
+            session=session,
         )
 
     def _extract_netloc(

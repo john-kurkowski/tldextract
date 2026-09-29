@@ -7,6 +7,7 @@ After upgrading, update your cache file by deleting it or via `tldextract
 
 * Features
   * Add the clearer `TLDEXTRACT_DEFAULT_FETCH_TIMEOUT` environment variable while retaining support for `TLDEXTRACT_CACHE_TIMEOUT` ([#159](https://github.com/john-kurkowski/tldextract/issues/159))
+  * Add `TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS` environment variable to set the default suffix list URLs ([#233](https://github.com/john-kurkowski/tldextract/issues/233))
 
 ## 5.3.2 (2026-08-08)
 

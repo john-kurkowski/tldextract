@@ -37,6 +37,7 @@ To rejoin the original hostname, if it was indeed a valid, registered hostname:
 from __future__ import annotations
 
 import os
+import pathlib
 import urllib.parse
 import warnings
 from collections.abc import Collection, Sequence
@@ -314,6 +315,13 @@ class ExtractResult:
         return ""
 
 
+class _UseEnvironmentUrls:
+    """Mark omitted URLs so the constructor can read the environment."""
+
+
+_USE_ENVIRONMENT_URLS = _UseEnvironmentUrls()
+
+
 class TLDExtract:
     """A callable for extracting, subdomain, domain, and suffix components from a URL."""
 
@@ -321,7 +329,7 @@ class TLDExtract:
     def __init__(
         self,
         cache_dir: str | None = get_cache_dir(),
-        suffix_list_urls: Sequence[str] = PUBLIC_SUFFIX_LIST_URLS,
+        suffix_list_urls: Sequence[str] | _UseEnvironmentUrls = _USE_ENVIRONMENT_URLS,
         fallback_to_snapshot: bool = True,
         include_psl_private_domains: bool = False,
         extra_suffixes: Sequence[str] = (),
@@ -343,34 +351,41 @@ class TLDExtract:
         Mozilla Public Suffix List and its mirror, but any similar document URL
         could be specified. Local files can be specified by using the `file://`
         protocol (see `urllib2` documentation). To disable HTTP requests, set
-        this to an empty sequence.
+        this to an empty sequence. The default can also be set with the
+        newline-delimited environment variable `TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS`.
+        An empty value disables HTTP requests. Entries naming existing local
+        files are converted to `file://` URLs, as with the `--suffix_list_url`
+        CLI option. New instances read the environment when constructed; an
+        explicit `suffix_list_urls` argument takes precedence.
 
         If there is no cached version loaded and no data is found from the `suffix_list_urls`,
         the module will fall back to the included TLD set snapshot. If you do not want
-        this behavior, you may set `fallback_to_snapshot` to False, and an exception will be
+        this behavior, you may set `fallback_to_snapshot` to `False`, and an exception will be
         raised instead.
 
         The Public Suffix List includes a list of "private domains" as TLDs,
         such as blogspot.com. These do not fit `tldextract`'s definition of a
         suffix, so these domains are excluded by default. If you'd like them
-        included instead, set `include_psl_private_domains` to True.
+        included instead, set `include_psl_private_domains` to `True`.
 
         You can specify additional suffixes in the `extra_suffixes` argument.
         These will be merged into whatever public suffix definitions are
         already in use by `tldextract`, above.
 
-        cache_fetch_timeout is passed unmodified to the underlying request object
+        `cache_fetch_timeout` is passed unmodified to the underlying request object
         per the requests documentation here:
         http://docs.python-requests.org/en/master/user/advanced/#timeouts
 
-        cache_fetch_timeout can also be set to a single value with the
-        environment variable TLDEXTRACT_DEFAULT_FETCH_TIMEOUT, like so:
+        `cache_fetch_timeout` can also be set to a single value with the
+        environment variable `TLDEXTRACT_DEFAULT_FETCH_TIMEOUT`, like so:
 
         TLDEXTRACT_DEFAULT_FETCH_TIMEOUT="1.2"
 
         When set this way, the same timeout value will be used for both connect
-        and read timeouts
+        and read timeouts. The older `TLDEXTRACT_CACHE_TIMEOUT` is also supported.
         """
+        if isinstance(suffix_list_urls, _UseEnvironmentUrls):
+            suffix_list_urls = _suffix_list_urls_from_env()
         suffix_list_urls = suffix_list_urls or ()
         self.suffix_list_urls = tuple(
             url.strip() for url in suffix_list_urls if url.strip()
@@ -608,6 +623,23 @@ class TLDExtract:
             include_psl_private_domains=self.include_psl_private_domains,
         )
         return self._extractor
+
+
+def _suffix_list_urls_from_env() -> Sequence[str]:
+    """Resolve the default suffix list URLs from the environment."""
+    raw = os.environ.get("TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS")
+    if raw is None:
+        return PUBLIC_SUFFIX_LIST_URLS
+
+    urls = []
+    for line in raw.splitlines():
+        source = line.strip()
+        if not source:
+            continue
+        if os.path.isfile(source):
+            source = pathlib.Path(os.path.abspath(source)).as_uri()
+        urls.append(source)
+    return urls
 
 
 TLD_EXTRACTOR = TLDExtract()

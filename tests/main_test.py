@@ -5,7 +5,8 @@ import os
 import subprocess
 import sys
 import tempfile
-from collections.abc import Sequence
+import urllib.parse
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 from unittest.mock import Mock
@@ -64,6 +65,53 @@ def assert_extract(
         assert expected_tld == ext.suffix
         assert expected_ip_data == ext.ipv4
         assert expected_ipv6_data == ext.ipv6
+
+
+@pytest.mark.parametrize("parse_url", [urllib.parse.urlparse, urllib.parse.urlsplit])
+@pytest.mark.parametrize(
+    ("url", "expected_components", "expected_ips"),
+    [
+        ("https://www.example.com:8443/path", ("www", "example", "com"), ("", "")),
+        (
+            "https://user:pass@www.example.com/path",
+            ("www", "example", "com"),
+            ("", ""),
+        ),
+        (
+            "https://user:pass@WWW.Example.COM:8443/path",
+            ("WWW", "Example", "COM"),
+            ("", ""),
+        ),
+        ("https://WWW.Example.COM./path", ("WWW", "Example", "COM"), ("", "")),
+        (
+            "http://127.0.0.1:8080/path",
+            ("", "127.0.0.1", ""),
+            ("127.0.0.1", ""),
+        ),
+        ("http://[::1]:8080/path", ("", "[::1]", ""), ("", "::1")),
+        (
+            "http://user:pass@[2001:db8::1]:8080/path",
+            ("", "[2001:db8::1]", ""),
+            ("", "2001:db8::1"),
+        ),
+        (
+            "https://www.食狮.公司.cn:8443/path",
+            ("www", "食狮", "公司.cn"),
+            ("", ""),
+        ),
+    ],
+)
+def test_extract_urllib_hostname(
+    parse_url: Callable[[str], urllib.parse.ParseResult | urllib.parse.SplitResult],
+    url: str,
+    expected_components: tuple[str, str, str],
+    expected_ips: tuple[str, str],
+) -> None:
+    """Parsed URLs extract hostname components without authority decorations."""
+    extractor = extract_using_fallback_to_snapshot_no_cache
+    result = extractor.extract_urllib(parse_url(url))
+    assert (result.subdomain, result.domain, result.suffix) == expected_components
+    assert (result.ipv4, result.ipv6) == expected_ips
 
 
 def test_american() -> None:

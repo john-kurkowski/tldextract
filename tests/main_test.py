@@ -67,25 +67,49 @@ def assert_extract(
 
 @pytest.mark.parametrize("parse_url", [urllib.parse.urlparse, urllib.parse.urlsplit])
 @pytest.mark.parametrize(
-    "url",
+    ("url", "expected_components", "expected_ips"),
     [
-        "https://www.example.com:8443/path",
-        "https://user:pass@www.example.com/path",
-        "https://user:pass@WWW.Example.COM:8443/path",
-        "https://WWW.Example.COM./path",
-        "http://127.0.0.1:8080/path",
-        "http://[::1]:8080/path",
-        "http://user:pass@[2001:db8::1]:8080/path",
-        "https://www.食狮.公司.cn:8443/path",
+        ("https://www.example.com:8443/path", ("www", "example", "com"), ("", "")),
+        (
+            "https://user:pass@www.example.com/path",
+            ("www", "example", "com"),
+            ("", ""),
+        ),
+        (
+            "https://user:pass@WWW.Example.COM:8443/path",
+            ("WWW", "Example", "COM"),
+            ("", ""),
+        ),
+        ("https://WWW.Example.COM./path", ("WWW", "Example", "COM"), ("", "")),
+        (
+            "http://127.0.0.1:8080/path",
+            ("", "127.0.0.1", ""),
+            ("127.0.0.1", ""),
+        ),
+        ("http://[::1]:8080/path", ("", "[::1]", ""), ("", "::1")),
+        (
+            "http://user:pass@[2001:db8::1]:8080/path",
+            ("", "[2001:db8::1]", ""),
+            ("", "2001:db8::1"),
+        ),
+        (
+            "https://www.食狮.公司.cn:8443/path",
+            ("www", "食狮", "公司.cn"),
+            ("", ""),
+        ),
     ],
 )
 def test_extract_urllib_hostname(
     parse_url: Callable[[str], urllib.parse.ParseResult | urllib.parse.SplitResult],
     url: str,
+    expected_components: tuple[str, str, str],
+    expected_ips: tuple[str, str],
 ) -> None:
-    """Parsed URLs retain the same hostname components as their string form."""
+    """Parsed URLs extract hostname components without authority decorations."""
     extractor = extract_using_fallback_to_snapshot_no_cache
-    assert extractor.extract_urllib(parse_url(url)) == extractor(url)
+    result = extractor.extract_urllib(parse_url(url))
+    assert (result.subdomain, result.domain, result.suffix) == expected_components
+    assert (result.ipv4, result.ipv6) == expected_ips
 
 
 def test_american() -> None:

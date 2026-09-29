@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 
 import tldextract
+from tldextract.suffix_list import PslMetadata, SuffixListInfo
 from tldextract.tldextract import ExtractResult
 
 FAKE_SUFFIX_LIST_URL = Path(
@@ -81,3 +82,47 @@ def test_extra_suffixes() -> None:
         netloc = "www.foo.bar.baz.quux" + "." + custom_suffix
         result = extract_using_extra_suffixes(netloc)
         assert result.suffix == custom_suffix
+
+
+def test_suffix_list_info_for_custom_file_without_official_metadata() -> None:
+    """Report the effective custom file source without PSL header metadata."""
+    assert extract_using_fake_suffix_list.suffix_list_info == SuffixListInfo(
+        loaded_from=FAKE_SUFFIX_LIST_URL,
+        psl_metadata=None,
+    )
+
+
+def test_suffix_list_info_ignores_extra_suffixes() -> None:
+    """Report list metadata independently from extra suffix configuration."""
+    assert extract_using_extra_suffixes.suffix_list_info == SuffixListInfo(
+        loaded_from=FAKE_SUFFIX_LIST_URL,
+        psl_metadata=None,
+    )
+
+
+def test_suffix_list_info_with_partial_official_metadata(tmp_path: Path) -> None:
+    """Expose VERSION even when COMMIT is omitted."""
+    suffix_list = tmp_path / "partial_metadata.dat"
+    suffix_list.write_text("// VERSION: 2025-02-03_04-05-06_UTC\ncom\n")
+    extract = tldextract.TLDExtract(
+        cache_dir=None, suffix_list_urls=[suffix_list.as_uri()]
+    )
+
+    assert extract.suffix_list_info == SuffixListInfo(
+        loaded_from=suffix_list.as_uri(),
+        psl_metadata=PslMetadata(version="2025-02-03_04-05-06_UTC", commit=None),
+    )
+
+
+def test_suffix_list_info_without_version_has_no_psl_metadata(tmp_path: Path) -> None:
+    """Ignore header-like metadata when VERSION is missing."""
+    suffix_list = tmp_path / "commit_only.dat"
+    suffix_list.write_text("// COMMIT: abc123\ncom\n")
+    extract = tldextract.TLDExtract(
+        cache_dir=None, suffix_list_urls=[suffix_list.as_uri()]
+    )
+
+    assert extract.suffix_list_info == SuffixListInfo(
+        loaded_from=suffix_list.as_uri(),
+        psl_metadata=None,
+    )

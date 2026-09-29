@@ -48,10 +48,24 @@ import idna
 import requests
 
 from .cache import DiskCache, get_cache_dir
-from .remote import lenient_netloc, looks_like_ip, looks_like_ipv6
+from .remote import (
+    _host_from_authority,
+    lenient_netloc,
+    looks_like_ip,
+    looks_like_ipv6,
+)
 from .suffix_list import get_suffix_lists
 
-CACHE_TIMEOUT = os.environ.get("TLDEXTRACT_CACHE_TIMEOUT")
+
+def _get_default_cache_fetch_timeout() -> str | None:
+    """Read the default PSL fetch timeout from the environment."""
+    return os.environ.get(
+        "TLDEXTRACT_DEFAULT_FETCH_TIMEOUT",
+        os.environ.get("TLDEXTRACT_CACHE_TIMEOUT"),
+    )
+
+
+CACHE_TIMEOUT = _get_default_cache_fetch_timeout()
 
 PUBLIC_SUFFIX_LIST_URLS = (
     "https://publicsuffix.org/list/public_suffix_list.dat",
@@ -346,29 +360,29 @@ class TLDExtract:
 
         If there is no cached version loaded and no data is found from the `suffix_list_urls`,
         the module will fall back to the included TLD set snapshot. If you do not want
-        this behavior, you may set `fallback_to_snapshot` to False, and an exception will be
+        this behavior, you may set `fallback_to_snapshot` to `False`, and an exception will be
         raised instead.
 
         The Public Suffix List includes a list of "private domains" as TLDs,
         such as blogspot.com. These do not fit `tldextract`'s definition of a
         suffix, so these domains are excluded by default. If you'd like them
-        included instead, set `include_psl_private_domains` to True.
+        included instead, set `include_psl_private_domains` to `True`.
 
         You can specify additional suffixes in the `extra_suffixes` argument.
         These will be merged into whatever public suffix definitions are
         already in use by `tldextract`, above.
 
-        cache_fetch_timeout is passed unmodified to the underlying request object
+        `cache_fetch_timeout` is passed unmodified to the underlying request object
         per the requests documentation here:
         http://docs.python-requests.org/en/master/user/advanced/#timeouts
 
-        cache_fetch_timeout can also be set to a single value with the
-        environment variable `TLDEXTRACT_CACHE_TIMEOUT`, like so:
+        `cache_fetch_timeout` can also be set to a single value with the
+        environment variable `TLDEXTRACT_DEFAULT_FETCH_TIMEOUT`, like so:
 
-        TLDEXTRACT_CACHE_TIMEOUT="1.2"
+        TLDEXTRACT_DEFAULT_FETCH_TIMEOUT="1.2"
 
         When set this way, the same timeout value will be used for both connect
-        and read timeouts
+        and read timeouts. The older `TLDEXTRACT_CACHE_TIMEOUT` is also supported.
         """
         if isinstance(suffix_list_urls, _UseEnvironmentUrls):
             suffix_list_urls = _suffix_list_urls_from_env()
@@ -476,7 +490,9 @@ class TLDExtract:
             ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
         """
         return self._extract_netloc(
-            url.netloc, include_psl_private_domains, session=session
+            _host_from_authority(url.netloc),
+            include_psl_private_domains,
+            session=session,
         )
 
     def _extract_netloc(

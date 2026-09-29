@@ -48,7 +48,7 @@ import requests
 
 from .cache import DiskCache, get_cache_dir
 from .remote import (
-    _hostname_from_authority,
+    _host_from_authority,
     lenient_netloc,
     looks_like_ip,
     looks_like_ipv6,
@@ -466,7 +466,7 @@ class TLDExtract:
             ExtractResult(subdomain='forums', domain='bbc', suffix='co.uk', is_private=False)
         """
         return self._extract_netloc(
-            _hostname_from_authority(url.netloc),
+            _host_from_authority(url.netloc),
             include_psl_private_domains,
             session=session,
         )

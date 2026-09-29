@@ -14,19 +14,19 @@ scheme_chars_set = set(scheme_chars)
 
 
 def lenient_netloc(url: str) -> str:
-    """Extract the hostname of a URL-like string.
+    """Extract the host portion of a URL-like string.
 
-    Parse more leniently than urllib.parse.{urlparse,urlsplit}, without
-    raising errors.
+    Parse more leniently than urllib.parse.{urlparse,urlsplit}, preserving
+    casing and brackets around IPv6 addresses.
     """
     authority = (
         _schemeless_url(url).partition("/")[0].partition("?")[0].partition("#")[0]
     )
-    return _hostname_from_authority(authority)
+    return _host_from_authority(authority)
 
 
-def _hostname_from_authority(authority: str) -> str:
-    """Extract a case-preserving hostname from a parsed URL's authority."""
+def _host_from_authority(authority: str) -> str:
+    """Extract a case-preserving host from a parsed URL's authority."""
     after_userinfo = authority.rpartition("@")[-1]
 
     if after_userinfo and after_userinfo[0] == "[":

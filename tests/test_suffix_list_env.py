@@ -3,6 +3,7 @@
 import os
 import subprocess
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 
 import pytest
@@ -92,6 +93,23 @@ def test_explicit_urls_take_precedence(
 
     assert extract.suffix_list_urls == (local_file.as_uri(),)
     assert extract("example.explicit").suffix == "explicit"
+
+
+@pytest.mark.parametrize("suffix_list_urls", [None, (), []])
+def test_explicit_falsy_urls_disable_http(
+    monkeypatch: pytest.MonkeyPatch,
+    mocker: pytest_mock.MockerFixture,
+    suffix_list_urls: Sequence[str] | None,
+) -> None:
+    """Explicit falsy values keep the preexisting no-fetch behavior."""
+    monkeypatch.setenv(ENV_VAR, "https://example.com/from-env.dat")
+    http_get = mocker.patch("requests.Session.get")
+
+    extract = tldextract.TLDExtract(cache_dir=None, suffix_list_urls=suffix_list_urls)
+
+    assert extract.suffix_list_urls == ()
+    assert extract("example.com").suffix == "com"
+    http_get.assert_not_called()
 
 
 def test_public_extract_reads_env_before_import(tmp_path: Path) -> None:

@@ -301,6 +301,13 @@ class ExtractResult:
         return ""
 
 
+class _UseEnvironmentUrls:
+    """Distinguish omitted URLs from an explicit falsy argument."""
+
+
+_USE_ENVIRONMENT_URLS = _UseEnvironmentUrls()
+
+
 class TLDExtract:
     """A callable for extracting, subdomain, domain, and suffix components from a URL."""
 
@@ -308,7 +315,9 @@ class TLDExtract:
     def __init__(
         self,
         cache_dir: str | None = get_cache_dir(),
-        suffix_list_urls: Sequence[str] | None = None,
+        suffix_list_urls: Sequence[str] | None | _UseEnvironmentUrls = (
+            _USE_ENVIRONMENT_URLS
+        ),
         fallback_to_snapshot: bool = True,
         include_psl_private_domains: bool = False,
         extra_suffixes: Sequence[str] = (),
@@ -363,8 +372,9 @@ class TLDExtract:
         When set this way, the same timeout value will be used for both connect
         and read timeouts
         """
-        if suffix_list_urls is None:
+        if isinstance(suffix_list_urls, _UseEnvironmentUrls):
             suffix_list_urls = _suffix_list_urls_from_env()
+        suffix_list_urls = suffix_list_urls or ()
         self.suffix_list_urls = tuple(
             url.strip() for url in suffix_list_urls if url.strip()
         )

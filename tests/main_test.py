@@ -724,6 +724,21 @@ def test_global_extract() -> None:
     )
 
 
+def test_private_suffix_metadata_at_wildcard_parent() -> None:
+    """The parent of a private wildcard retains the shorter private suffix."""
+    result = extract_using_fallback_to_snapshot_no_cache(
+        "r.appspot.com", include_psl_private_domains=True
+    )
+    assert result == ExtractResult(
+        subdomain="",
+        domain="r",
+        suffix="appspot.com",
+        is_private=True,
+        registry_suffix="com",
+    )
+    assert result.top_domain_under_registry_suffix == "appspot.com"
+
+
 def test_private_domains_depth() -> None:
     """Test private domains of various depths that may also contain other private domains.
 

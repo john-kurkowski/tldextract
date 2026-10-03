@@ -4,6 +4,8 @@ import os
 import tempfile
 from pathlib import Path
 
+import pytest
+
 import tldextract
 from tldextract.tldextract import ExtractResult
 
@@ -81,3 +83,53 @@ def test_extra_suffixes() -> None:
         netloc = "www.foo.bar.baz.quux" + "." + custom_suffix
         result = extract_using_extra_suffixes(netloc)
         assert result.suffix == custom_suffix
+
+
+@pytest.mark.parametrize("include_private", [False, True])
+@pytest.mark.parametrize(
+    ("hostname", "private_components", "public_subdomain"),
+    [
+        ("region.example.com", ("", "region", "example.com"), "region"),
+        (
+            "tenant.region.example.com",
+            ("tenant", "region", "example.com"),
+            "tenant.region",
+        ),
+        (
+            "tenant.service.region.example.com",
+            ("", "tenant", "service.region.example.com"),
+            "tenant.service.region",
+        ),
+    ],
+)
+def test_private_suffix_metadata_after_partial_match(
+    tmp_path: Path,
+    include_private: bool,
+    hostname: str,
+    private_components: tuple[str, str, str],
+    public_subdomain: str,
+) -> None:
+    """A partial match of a longer rule preserves the matching suffix's metadata."""
+    suffix_list = tmp_path / "suffixes.dat"
+    suffix_list.write_text(
+        "com\n// ===BEGIN PRIVATE DOMAINS===\nexample.com\nservice.region.example.com\n",
+        encoding="utf-8",
+    )
+    extractor = tldextract.TLDExtract(
+        cache_dir=None,
+        suffix_list_urls=[suffix_list.as_uri()],
+        fallback_to_snapshot=False,
+        include_psl_private_domains=include_private,
+    )
+    subdomain, domain, suffix = (
+        private_components if include_private else (public_subdomain, "example", "com")
+    )
+    result = extractor(hostname)
+    assert result == ExtractResult(
+        subdomain=subdomain,
+        domain=domain,
+        suffix=suffix,
+        is_private=include_private,
+        registry_suffix="com",
+    )
+    assert result.top_domain_under_registry_suffix == "example.com"

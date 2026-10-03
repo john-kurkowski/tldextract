@@ -752,7 +752,7 @@ class _PublicSuffixListTLDExtractor:
         if include_psl_private_domains is None:
             include_psl_private_domains = self.include_psl_private_domains
 
-        node = reg_node = (
+        node = reg_node = suffix_node = (
             self.tlds_incl_private_trie
             if include_psl_private_domains
             else self.tlds_excl_private_trie
@@ -765,6 +765,7 @@ class _PublicSuffixListTLDExtractor:
                 node = node.matches[decoded_label]
                 if node.end:
                     suffix_idx = label_idx
+                    suffix_node = node
                     if not node.is_private:
                         reg_node = node
                         reg_idx = label_idx
@@ -786,7 +787,7 @@ class _PublicSuffixListTLDExtractor:
         if suffix_idx == len(spl):
             return None
 
-        return ((suffix_idx, node), (reg_idx, reg_node))
+        return ((suffix_idx, suffix_node), (reg_idx, reg_node))
 
 
 def _decode_punycode(label: str) -> str:

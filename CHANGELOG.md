@@ -3,11 +3,18 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
-## Unreleased
+## 5.4.0 (2026-10-03)
 
 * Features
-  * Add the clearer `TLDEXTRACT_DEFAULT_FETCH_TIMEOUT` environment variable while retaining support for `TLDEXTRACT_CACHE_TIMEOUT` ([#159](https://github.com/john-kurkowski/tldextract/issues/159))
-  * Add `TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS` environment variable to set the default suffix list URLs ([#233](https://github.com/john-kurkowski/tldextract/issues/233))
+  * Add `TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS` environment variable to set the default suffix list URLs ([#374](https://github.com/john-kurkowski/tldextract/pull/374))
+  * Add the clearer `TLDEXTRACT_DEFAULT_FETCH_TIMEOUT` environment variable, while retaining support for `TLDEXTRACT_CACHE_TIMEOUT` ([#375](https://github.com/john-kurkowski/tldextract/pull/375))
+* Bugfixes
+  * Fix hostname extraction from already-parsed URLs with credentials, ports, or IPv6 addresses ([#379](https://github.com/john-kurkowski/tldextract/pull/379))
+  * Preserve private suffix metadata when a longer wildcard suffix does not match ([#383](https://github.com/john-kurkowski/tldextract/pull/383))
+* Docs
+  * Document added and deprecated names ([#378](https://github.com/john-kurkowski/tldextract/pull/378))
+* Misc.
+  * Require CI gate before merging ([#380](https://github.com/john-kurkowski/tldextract/pull/380))
 
 ## 5.3.2 (2026-08-08)
 

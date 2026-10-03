@@ -752,12 +752,16 @@ class _PublicSuffixListTLDExtractor:
         if include_psl_private_domains is None:
             include_psl_private_domains = self.include_psl_private_domains
 
-        node = reg_node = (
+        node = (
             self.tlds_incl_private_trie
             if include_psl_private_domains
             else self.tlds_excl_private_trie
         )
-        suffix_idx = reg_idx = label_idx = len(spl)
+        suffix_idx = label_idx = len(spl)
+        last_terminal_suffix_idx = suffix_idx
+        last_terminal_node = node
+        last_terminal_reg_idx = suffix_idx
+        last_terminal_reg_node = node
         for label in reversed(spl):
             decoded_label = _decode_punycode(label)
             if decoded_label in node.matches:
@@ -765,9 +769,11 @@ class _PublicSuffixListTLDExtractor:
                 node = node.matches[decoded_label]
                 if node.end:
                     suffix_idx = label_idx
+                    last_terminal_suffix_idx = label_idx
+                    last_terminal_node = node
                     if not node.is_private:
-                        reg_node = node
-                        reg_idx = label_idx
+                        last_terminal_reg_idx = label_idx
+                        last_terminal_reg_node = node
                 continue
 
             is_wildcard = "*" in node.matches
@@ -777,16 +783,16 @@ class _PublicSuffixListTLDExtractor:
                     label_idx if is_wildcard_exception else label_idx - 1,
                     node.matches["*"],
                 ), (
-                    reg_idx,
-                    reg_node,
+                    last_terminal_reg_idx,
+                    last_terminal_reg_node,
                 )
 
             break
 
-        if suffix_idx == len(spl):
+        if last_terminal_suffix_idx == len(spl):
             return None
 
-        return ((suffix_idx, node), (reg_idx, reg_node))
+        return ((last_terminal_suffix_idx, last_terminal_node), (last_terminal_reg_idx, last_terminal_reg_node))
 
 
 def _decode_punycode(label: str) -> str:

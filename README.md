@@ -50,9 +50,8 @@ it before importing `tldextract` to affect the module-level `extract` function:
 export TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS=""
 ```
 
-The cache key includes the configured URLs. An empty value does not reuse a
-cache entry fetched with the standard URLs; if no entry exists for the empty
-URL list, `tldextract` uses its bundled snapshot.
+With fetching disabled, `tldextract` uses its bundled snapshot if no matching
+cache entry exists. See [Caching behavior](#caching-behavior) for details.
 
 ### How to set a custom cache location
 
@@ -90,7 +89,9 @@ extract("waiterrant.blogspot.com")
 # ExtractResult(subdomain='', domain='waiterrant', suffix='blogspot.com', is_private=True)
 ```
 
-### How to use a local suffix list
+### How to use a custom suffix list
+
+#### Local suffix list
 
 ```python
 extract = tldextract.TLDExtract(
@@ -100,10 +101,7 @@ extract = tldextract.TLDExtract(
 )
 ```
 
-An existing local path in `TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS` is converted to
-a `file://` URL, like the `--suffix_list_url` command line option.
-
-### How to use a remote suffix list
+#### Remote suffix list
 
 ```python
 extract = tldextract.TLDExtract(
@@ -111,14 +109,21 @@ extract = tldextract.TLDExtract(
 )
 ```
 
-The default can also be set through a newline-delimited environment variable:
+#### Set the default suffix list sources
+
+For either local or remote lists, set the default through a newline-delimited
+environment variable:
 
 ```zsh
 export TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS="https://myserver.com/suffix-list.dat"
 ```
 
 New `TLDExtract()` instances read this value when constructed. An explicit
-`suffix_list_urls` argument takes precedence.
+`suffix_list_urls` argument takes precedence. Set the environment variable
+before importing `tldextract` to affect the module-level `extract` function.
+
+An existing local path in `TLDEXTRACT_PUBLIC_SUFFIX_LIST_URLS` is converted to
+a `file://` URL, like the `--suffix_list_url` command line option.
 
 ### How to set the suffix list fetch timeout
 
@@ -220,6 +225,10 @@ in terms of A-labels. See
 By default, `tldextract` fetches the latest Public Suffix List on first use and
 caches it indefinitely in `$HOME/.cache/python-tldextract`.
 
+The cache key includes the configured URLs. An empty URL list does not reuse a
+cache entry fetched with the standard URLs; if no entry exists for the empty
+URL list, `tldextract` uses its bundled snapshot.
+
 ### URL validation
 
 `tldextract` accepts any string and is very lenient. It prioritizes ease of use
@@ -233,8 +242,10 @@ non-URLs.
 `tldextract` doesn't maintain the suffix list. Submit changes to
 [the Public Suffix List](https://publicsuffix.org/submit/).
 
-Meanwhile, use the `extra_suffixes` parameter, or fork the PSL and pass it to
-this library with the `suffix_list_urls` parameter.
+Meanwhile, [add extra suffixes](#how-to-add-extra-suffixes) with the
+`extra_suffixes` parameter, or fork the PSL and
+[use a custom suffix list](#how-to-use-a-custom-suffix-list) with the
+`suffix_list_urls` parameter.
 
 ### My suffix is in the PSL but not extracted correctly
 

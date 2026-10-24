@@ -3,6 +3,12 @@
 After upgrading, update your cache file by deleting it or via `tldextract
 --update`.
 
+## Unreleased
+
+* Bugfixes
+  * Refresh the bundled Public Suffix List snapshot to 2026-10-22, including
+    `up.railway.app` for offline private-domain extraction ([#385](https://github.com/john-kurkowski/tldextract/issues/385)).
+
 ## 5.4.0 (2026-10-03)
 
 * Features

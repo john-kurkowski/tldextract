@@ -119,6 +119,35 @@ def test_american() -> None:
     assert_extract("http://www.google.com", ("www.google.com", "www", "google", "com"))
 
 
+@pytest.mark.parametrize(
+    ("hostname", "subdomain", "domain"),
+    [
+        ("app-one.up.railway.app", "", "app-one"),
+        ("www.app-two.up.railway.app", "www", "app-two"),
+    ],
+)
+def test_offline_snapshot_hosting_suffix(
+    hostname: str, subdomain: str, domain: str
+) -> None:
+    """Offline extraction distinguishes applications under a private suffix."""
+    extractor = tldextract.TLDExtract(cache_dir=None, suffix_list_urls=())
+
+    assert extractor(hostname, include_psl_private_domains=True) == ExtractResult(
+        subdomain=subdomain,
+        domain=domain,
+        suffix="up.railway.app",
+        is_private=True,
+        registry_suffix="app",
+    )
+    assert extractor(hostname) == ExtractResult(
+        subdomain=hostname.removesuffix(".railway.app"),
+        domain="railway",
+        suffix="app",
+        is_private=False,
+        registry_suffix="app",
+    )
+
+
 def test_british() -> None:
     """Test a British suffix."""
     assert_extract(

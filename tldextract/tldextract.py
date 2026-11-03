@@ -293,11 +293,18 @@ class ExtractResult:
         .. versionadded:: 5.3.0
         """
         top_domain_under_public_suffix = self.top_domain_under_public_suffix
-        if not top_domain_under_public_suffix or not self.is_private:
+        if not self.is_private:
             return top_domain_under_public_suffix
 
+        if top_domain_under_public_suffix:
+            labels = top_domain_under_public_suffix.split(".")
+        elif self.registry_suffix:
+            labels = self.suffix.split(".")
+        else:
+            return ""
+
         num_labels = self.registry_suffix.count(".") + 2
-        return ".".join(top_domain_under_public_suffix.split(".")[-num_labels:])
+        return ".".join(labels[-num_labels:])
 
     @property
     def top_domain_under_public_suffix(self) -> str:

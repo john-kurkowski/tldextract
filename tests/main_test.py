@@ -458,6 +458,23 @@ def test_top_domain_under_registry_suffix() -> None:
     )
 
 
+def test_top_domain_under_registry_suffix_of_private_suffix() -> None:
+    """Test property `top_domain_under_registry_suffix` when the input is only a suffix."""
+    for hostname, expected in (
+        ("com", ""),
+        ("blogspot.com", "blogspot.com"),
+        ("foo.compute.amazonaws.com.cn", "amazonaws.com.cn"),
+        ("s3.amazonaws.com", "amazonaws.com"),
+    ):
+        for include_psl_private_domains in (False, True):
+            assert (
+                extract_using_fallback_to_snapshot_no_cache(
+                    hostname, include_psl_private_domains=include_psl_private_domains
+                ).top_domain_under_registry_suffix
+                == expected
+            )
+
+
 def test_ipv4() -> None:
     """Test IPv4 addresses."""
     assert_extract(

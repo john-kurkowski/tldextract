@@ -133,3 +133,21 @@ def test_private_suffix_metadata_after_partial_match(
         registry_suffix="com",
     )
     assert result.top_domain_under_registry_suffix == "example.com"
+
+
+def test_top_domain_under_registry_suffix_without_registry_suffix(
+    tmp_path: Path,
+) -> None:
+    """A private suffix with no public suffix above it has no registry suffix."""
+    suffix_list = tmp_path / "suffixes.dat"
+    suffix_list.write_text(
+        "com\n// ===BEGIN PRIVATE DOMAINS===\nexample.test\n", encoding="utf-8"
+    )
+    result = tldextract.TLDExtract(
+        cache_dir=None,
+        suffix_list_urls=[suffix_list.as_uri()],
+        fallback_to_snapshot=False,
+        include_psl_private_domains=True,
+    )("example.test")
+    assert result.registry_suffix == ""
+    assert result.top_domain_under_registry_suffix == ""
